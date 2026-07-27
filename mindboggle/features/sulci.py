@@ -153,12 +153,13 @@ def extract_sulci(labels_file, folds_or_file, hemi, min_boundary=1,
     """
     import os
     from time import time
+
     import numpy as np
 
-    from mindboggle.mio.vtks import read_scalars, read_vtk, rewrite_scalars
     from mindboggle.guts.mesh import find_neighbors
     from mindboggle.guts.segment import extract_borders, propagate, segment_regions
     from mindboggle.mio.labels import DKTprotocol
+    from mindboggle.mio.vtks import read_scalars, read_vtk, rewrite_scalars
 
     # Load fold numbers if folds_or_file is a string:
     if isinstance(folds_or_file, str):
@@ -175,7 +176,7 @@ def extract_sulci(labels_file, folds_or_file, hemi, min_boundary=1,
     elif hemi == 'rh':
         pair_lists = dkt.right_sulcus_label_pair_lists
     else:
-        raise IOError("Warning: hemisphere not properly specified ('lh' or 'rh').")
+        raise OSError("Warning: hemisphere not properly specified ('lh' or 'rh').")
 
     # Load points, faces, and neighbors:
     points, indices, lines, faces, labels, scalar_names, npoints, \
@@ -194,7 +195,7 @@ def extract_sulci(labels_file, folds_or_file, hemi, min_boundary=1,
     fold_numbers = [int(x) for x in np.unique(folds) if x != background_value]
     n_folds = len(fold_numbers)
     if verbose:
-        print("Extract sulci from {0} folds...".format(n_folds))
+        print(f"Extract sulci from {n_folds} folds...")
     t0 = time()
     for n_fold in fold_numbers:
         fold_indices = [i for i,x in enumerate(folds) if x == n_fold]
@@ -211,13 +212,11 @@ def extract_sulci(labels_file, folds_or_file, hemi, min_boundary=1,
         if verbose and len(unique_fold_labels) < 2:
             # Ignore: sulci already initialized with -1 values:
             if not unique_fold_labels:
-                print("  Fold {0} ({1} vertices): "
-                      "NO MATCH -- fold has no labels".
-                      format(n_fold, len_fold))
+                print(f"  Fold {n_fold} ({len_fold} vertices): "
+                      "NO MATCH -- fold has no labels")
             else:
-                print("  Fold {0} ({1} vertices): "
-                  "NO MATCH -- fold has only one label ({2})".
-                  format(n_fold, len_fold, unique_fold_labels[0]))
+                print(f"  Fold {n_fold} ({len_fold} vertices): "
+                  f"NO MATCH -- fold has only one label ({unique_fold_labels[0]})")
             # Ignore: sulci already initialized with -1 values
 
         else:
@@ -238,8 +237,7 @@ def extract_sulci(labels_file, folds_or_file, hemi, min_boundary=1,
             # NO MATCH -- fold has no sulcus label pair
             # ----------------------------------------------------------------
             if verbose and not fold_pairs_in_protocol:
-                print("  Fold {0}: NO MATCH -- fold has no sulcus label pair".
-                      format(n_fold, len_fold))
+                print(f"  Fold {n_fold}: NO MATCH -- fold has no sulcus label pair")
 
             # ----------------------------------------------------------------
             # Possible matches
@@ -329,10 +327,8 @@ def extract_sulci(labels_file, folds_or_file, hemi, min_boundary=1,
                                         ps2 = sulcus_names[ID]
                                     else:
                                         ps2 = ''
-                                    print("    {0} unique to one fold pair: "
-                                          "{1} {2}".
-                                          format(ps1, ps2,
-                                                 unique_labels_in_pair))
+                                    print(f"    {ps1} unique to one fold pair: "
+                                          f"{ps2} {unique_labels_in_pair}")
 
                 # ------------------------------------------------------------
                 # Vertex labels shared by multiple label pairs
@@ -345,8 +341,7 @@ def extract_sulci(labels_file, folds_or_file, hemi, min_boundary=1,
                     for label in nonunique_labels:
                         # Print statement:
                         if verbose:
-                            print("    Propagate sulcus borders with label {0}".
-                                  format(int(label)))
+                            print(f"    Propagate sulcus borders with label {int(label)}")
 
                         # Construct seeds from label boundary vertices:
                         seeds = background_value * np.ones(npoints)
@@ -384,16 +379,13 @@ def extract_sulci(labels_file, folds_or_file, hemi, min_boundary=1,
                                                 if len(iseed2) == 1:
                                                     print("    Remove "
                                                           "assignment "
-                                                          "of ID {0} from "
-                                                          "1 vertex".
-                                                          format(seed2))
+                                                          f"of ID {seed2} from "
+                                                          "1 vertex")
                                                 else:
                                                     print("    Remove "
                                                           "assignment "
-                                                          "of ID {0} from "
-                                                          "{1} vertices".
-                                                          format(seed2,
-                                                                 len(iseed2)))
+                                                          f"of ID {seed2} from "
+                                                          f"{len(iseed2)} vertices")
                                         indices_pair = indices_pair2
 
                                     # Assign sulcus IDs to seeds:
@@ -449,12 +441,10 @@ def extract_sulci(labels_file, folds_or_file, hemi, min_boundary=1,
             folds_str = 'fold'
         else:
             folds_str = 'folds'
-        print("Extracted {0} {1} from {2} {3} ({4:.1f}s):".
-                  format(n_sulci, sulcus_str, n_folds, folds_str, time()-t0))
+        print(f"Extracted {n_sulci} {sulcus_str} from {n_folds} {folds_str} ({time()-t0:.1f}s):")
         if sulcus_names:
             for sulcus_number in sulcus_numbers:
-                print("  {0}: {1}".format(sulcus_number,
-                                          sulcus_names[sulcus_number]))
+                print(f"  {sulcus_number}: {sulcus_names[sulcus_number]}")
         elif sulcus_numbers:
             print("  " + ", ".join([str(x) for x in sulcus_numbers]))
 
@@ -463,12 +453,10 @@ def extract_sulci(labels_file, folds_or_file, hemi, min_boundary=1,
         if len(unresolved) == 1:
             print("The following sulcus is unaccounted for:")
         else:
-            print("The following {0} sulci are unaccounted for:".
-                  format(len(unresolved)))
+            print(f"The following {len(unresolved)} sulci are unaccounted for:")
         if sulcus_names:
             for sulcus_number in unresolved:
-                print("  {0}: {1}".format(sulcus_number,
-                                          sulcus_names[sulcus_number]))
+                print(f"  {sulcus_number}: {sulcus_names[sulcus_number]}")
         else:
             print("  " + ", ".join([str(x) for x in unresolved]))
 
@@ -482,7 +470,7 @@ def extract_sulci(labels_file, folds_or_file, hemi, min_boundary=1,
                     background_value)
 
     if not os.path.exists(sulci_file):
-        raise IOError(sulci_file + " not found")
+        raise OSError(sulci_file + " not found")
 
     return sulci, n_sulci, sulci_file
 

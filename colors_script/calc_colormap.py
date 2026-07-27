@@ -1,13 +1,12 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 
-import os
 import argparse
+import os
+
 import numpy as np
 
 from mindboggle.mio.colors import distinguishable_colors, label_adjacency_matrix
-
 
 if __name__ == "__main__":
 

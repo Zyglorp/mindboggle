@@ -62,11 +62,12 @@ It should be in the format of a ParaView-style xml colormap file.
 
 """
 import os
-import vtk
 import xml.etree.ElementTree
 
+import vtk
 
-class VTKViewer(object):
+
+class VTKViewer:
     def __init__(self):
         self.renWin = vtk.vtkRenderWindow()
         self.renWin.SetSize(800, 600)
@@ -235,8 +236,8 @@ class VTKViewer(object):
             polyData = VTKViewer.readDataSet(
                 file_name, vtk.vtkXMLRectilinearGridReader)
         else:
-            print('{0}: BAD FILE NAME.  Should end in VTK, VTP, PLY, OBJ, '
-                  'STL, VTU, or PDB.'.format(file_name))
+            print(f'{file_name}: BAD FILE NAME.  Should end in VTK, VTP, PLY, OBJ, '
+                  'STL, VTU, or PDB.')
             raise Exception()
         self.AddPolyData(polyData, colorMap)
         return
@@ -324,17 +325,17 @@ class VTKViewer(object):
         reader = vtk.vtkDataSetReader()
         reader.SetFileName(file_name)
         reader.Update()
-        if None != reader.GetPolyDataOutput():
+        if reader.GetPolyDataOutput() != None:
             polyData = vtk.vtkPolyData()
             polyData.ShallowCopy(reader.GetPolyDataOutput())
             return polyData
-        if None != reader.GetUnstructuredGridOutput():
+        if reader.GetUnstructuredGridOutput() != None:
             return VTKViewer.ConvertDataSetToSurface(reader.GetOutputPort())
-        if None != reader.GetStructuredPointsOutput():
+        if reader.GetStructuredPointsOutput() != None:
             return VTKViewer.ConvertDataSetToSurface(reader.GetOutputPort())
-        if None != reader.GetStructuredGridOutput():
+        if reader.GetStructuredGridOutput() != None:
             return VTKViewer.ConvertDataSetToSurface(reader.GetOutputPort())
-        if None != reader.GetRectilinearGridOutput():
+        if reader.GetRectilinearGridOutput() != None:
             return VTKViewer.ConvertDataSetToSurface(reader.GetOutputPort())
         else:
             raise Exception("unsupported: ????????\n")
@@ -413,7 +414,7 @@ if __name__ == '__main__':
         if os.path.isfile(fileName):
             vtkviewer.AddFile(fileName, colormap)
         else:
-            print("Huh?: {0}".format(fileName))
+            print(f"Huh?: {fileName}")
             import sys
             sys.exit()
 

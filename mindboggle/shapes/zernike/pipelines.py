@@ -1,14 +1,17 @@
-from __future__ import division
+
+import logging
 
 import numpy as np
 import scipy
-from scipy.special import (factorial,
-                        comb as nchoosek,
-                        )
+from scipy.special import (
+    comb as nchoosek,
+)
+from scipy.special import (
+    factorial,
+)
 
-from mindboggle.shapes.zernike.helpers import nest, autocat
+from mindboggle.shapes.zernike.helpers import autocat, nest
 
-import logging
 LOG = logging.getLogger(__name__)
 
 #import decorator
@@ -23,7 +26,7 @@ PI_CONST = np.pi
 NAN_CONST = np.NaN
 
 
-class Pipeline(object):
+class Pipeline:
 
     def geometric_moments_approx(self, points_array, faces_array, N):
         raise NotImplementedError()

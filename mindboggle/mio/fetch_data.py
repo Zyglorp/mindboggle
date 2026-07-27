@@ -8,6 +8,7 @@ Authors:
 Copyright 2016,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 
 """
+import builtins
 
 
 def cache_hashes():
@@ -351,12 +352,11 @@ def fetch_hash(data_file):
     'f36e3d5d99f7c4a9bb70e2494ed7340b'
 
     """
-    from io import open
 
     import hashlib
 
     # Compute the file's hash:
-    hash = hashlib.md5(open(data_file, 'rb').read()).hexdigest()
+    hash = hashlib.md5(builtins.open(data_file, 'rb').read()).hexdigest()
 
     return hash
 
@@ -473,13 +473,12 @@ def fetch_check_data(data_file, url, hashes, cache_directory='', append='',
         # --------------------------------------------------------------------
         if not os.path.exists(cache_directory):
             if verbose:
-                print("Create missing cache directory: {0}".
-                      format(cache_directory))
+                print(f"Create missing cache directory: {cache_directory}")
             os.mkdir(cache_directory)
         hash_dir = os.path.join(cache_directory, stored_hash)
         if not os.path.exists(hash_dir):
             if verbose:
-                print("Create missing hash directory: {0}".format(hash_dir))
+                print(f"Create missing hash directory: {hash_dir}")
             os.mkdir(os.path.join(hash_dir))
 
         # --------------------------------------------------------------------
@@ -488,7 +487,7 @@ def fetch_check_data(data_file, url, hashes, cache_directory='', append='',
         data_path = os.path.join(hash_dir, data_file)
         if os.path.exists(data_path):
             if verbose:
-                print("File already exists and matches hash: {0}".format(url))
+                print(f"File already exists and matches hash: {url}")
             return data_path
 
         # --------------------------------------------------------------------
@@ -496,7 +495,7 @@ def fetch_check_data(data_file, url, hashes, cache_directory='', append='',
         # --------------------------------------------------------------------
         else:
             if verbose:
-                print("Retrieve file from URL: {0}".format(url))
+                print(f"Retrieve file from URL: {url}")
 
             # Download file as a temporary file:
             temp_file = fetch_data(url)
@@ -510,14 +509,13 @@ def fetch_check_data(data_file, url, hashes, cache_directory='', append='',
                 if append:
                     data_path += append
                 if verbose:
-                    print("Copy file to cache: {0}".format(data_path))
+                    print(f"Copy file to cache: {data_path}")
                 shutil.copyfile(temp_file, data_path)
                 return data_path
             else:
-                raise IOError("Retrieved hash does not match stored hash.")
+                raise OSError("Retrieved hash does not match stored hash.")
     else:
-        raise IOError("Data file '{0}' not in hash table.".
-                      format(data_file))
+        raise OSError(f"Data file '{data_file}' not in hash table.")
 
 
 def fetch_ants_data(segmented_file, use_ants_transforms=True):
@@ -596,7 +594,7 @@ def fetch_ants_data(segmented_file, use_ants_transforms=True):
     # antsCorticalThickness.sh when the -k argument is used.
     for ants_file in files:
         if not os.path.exists(ants_file):
-            raise IOError('antsCorticalThickness.sh output ' + ants_file +
+            raise OSError('antsCorticalThickness.sh output ' + ants_file +
                           ' does not exist.')
 
     return mask, segments, affine_subject2template, warp_subject2template, \

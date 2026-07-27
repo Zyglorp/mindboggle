@@ -60,14 +60,15 @@ def convert2nii(input_file, reference_file, output_file='', interp='continuous')
 
     """
     import os
-    import numpy as np
+
     import nibabel as nb
-    from scipy import ndimage, linalg
+    import numpy as np
+    from scipy import linalg, ndimage
 
     if not os.path.exists(input_file):
-        raise IOError("Input file " + input_file + " not found")
+        raise OSError("Input file " + input_file + " not found")
     if not os.path.exists(reference_file):
-        raise IOError("Reference file " + reference_file + " not found.")
+        raise OSError("Reference file " + reference_file + " not found.")
     if not output_file:
         output_file = os.path.join(os.getcwd(),
                                    os.path.basename(input_file) + '.nii.gz')
@@ -151,8 +152,9 @@ def xyz2nii(input_xyz_file, output_nii_file='', origin=[], pad=10):
 
     """
     import os
-    import numpy as np
+
     import nibabel as nb
+    import numpy as np
 
     # Load coordinates and scalars:
     XYZscalars = np.loadtxt(input_xyz_file)

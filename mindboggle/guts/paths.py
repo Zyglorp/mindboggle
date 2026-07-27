@@ -122,7 +122,7 @@ def connect_points_erosion(S, neighbor_lists, outer_anchors, inner_anchors=[],
     """
     import numpy as np
 
-    from mindboggle.guts.mesh import topo_test, extract_edge, find_endpoints
+    from mindboggle.guts.mesh import extract_edge, find_endpoints, topo_test
     from mindboggle.guts.segment import segment_regions
 
     # Make sure arguments are numpy arrays:
@@ -146,8 +146,7 @@ def connect_points_erosion(S, neighbor_lists, outer_anchors, inner_anchors=[],
     # Iteratively remove simple points:
     # ------------------------------------------------------------------------
     if verbose:
-        print('  Remove up to {0} of edge vertices per iteration'.
-            format(erode_ratio))
+        print(f'  Remove up to {erode_ratio} of edge vertices per iteration')
     complex = []
     count = -1
     exist_simple = True
@@ -160,7 +159,7 @@ def connect_points_erosion(S, neighbor_lists, outer_anchors, inner_anchors=[],
         # Only consider updating vertices that are on the edge of the
         # region and are not among the indices to keep or known simple points:
         # --------------------------------------------------------------------
-        indices = np.where(S != background_value)[0].tolist()
+        indices = np.where(background_value != S)[0].tolist()
         edge = extract_edge(indices, neighbor_lists)
         if edge:
             edge = np.array(list(set(edge).difference(complex)))
@@ -179,10 +178,9 @@ def connect_points_erosion(S, neighbor_lists, outer_anchors, inner_anchors=[],
                 if verbose:
                     len_numbers = len(edge_seg_numbers)
                     if len_numbers > 1:
-                        print('    {0}: {1} edge points in {2} segments'.
-                              format(count, len_edge, len_numbers))
+                        print(f'    {count}: {len_edge} edge points in {len_numbers} segments')
                     else:
-                        print('    {0}: {1} edge points'.format(count, len_edge))
+                        print(f'    {count}: {len_edge} edge points')
                 first_seg = True
                 for edge_seg_number in edge_seg_numbers:
                     edge_seg = np.where(edge_segs == edge_seg_number)[0]
@@ -243,7 +241,7 @@ def connect_points_erosion(S, neighbor_lists, outer_anchors, inner_anchors=[],
                 # Remove branches by iteratively removing endpoints:
                 # ------------------------------------------------------------
                 if remove_endpoints:
-                    indices = np.where(S != background_value)[0].tolist()
+                    indices = np.where(background_value != S)[0].tolist()
                     endpts = True
                     while endpts:
                         endpts = find_endpoints(indices, neighbor_lists)
@@ -367,6 +365,7 @@ def connect_points_hmmf(indices_points, indices, L, neighbor_lists,
 
     """
     import numpy as np
+
     from mindboggle.guts.mesh import topo_test
     from mindboggle.guts.paths import connect_points_erosion
 
@@ -449,7 +448,7 @@ def connect_points_hmmf(indices_points, indices, L, neighbor_lists,
             costs = hmmfs * (1.1 - likelihoods) + \
                     wN * np.sum(diff, axis=0) / numbers_of_neighbors
         else:
-            raise IOError('No HMMF neighbors to compute cost.')
+            raise OSError('No HMMF neighbors to compute cost.')
 
         return costs
 
@@ -557,10 +556,8 @@ def connect_points_hmmf(indices_points, indices, L, neighbor_lists,
 
             # Display information every n_mod iterations:
             if verbose and not np.mod(count, print_interval):
-                print('      Iteration {0}: {1} crossing threshold '
-                      '(wN={2:0.3f}, grad={3:0.3f}, cost={4:0.3f})'.
-                      format(count, delta_points, wN, gradient_factor,
-                             delta_cost))
+                print(f'      Iteration {count}: {delta_points} crossing threshold '
+                      f'(wN={wN:0.3f}, grad={gradient_factor:0.3f}, cost={delta_cost:0.3f})')
 
             # Increment the gradient factor and decrement the neighborhood factor
             # so that spacing is close in early iterations and far apart later:
@@ -598,8 +595,8 @@ def connect_points_hmmf(indices_points, indices, L, neighbor_lists,
                                           verbose=verbose)
         if verbose:
             npoints_thr = len([x for x in S if x != background_value])
-            print('      Removed {0} points to create one-vertex-thin '
-                  'skeletons'.format(int(npoints_thr - len(skeleton))))
+            print(f'      Removed {int(npoints_thr - len(skeleton))} points to create one-vertex-thin '
+                  'skeletons')
     else:
         # Threshold the resulting array:
         S = np.zeros(len(L))
@@ -608,8 +605,8 @@ def connect_points_hmmf(indices_points, indices, L, neighbor_lists,
         S[S <= 0.5] = 0.0
         skeleton = [i for i,x in enumerate(S.tolist()) if x == 1]
         if verbose:
-            print('      Removed {0} points to create one-vertex-thin '
-                  'skeletons'.format(int(sum(S.tolist()) - len(skeleton))))
+            print(f'      Removed {int(sum(S.tolist()) - len(skeleton))} points to create one-vertex-thin '
+                  'skeletons')
 
     return skeleton
 
@@ -715,14 +712,14 @@ def smooth_skeletons(skeletons, bounds, vtk_file, likelihoods, wN_max=1.0,
     """
 
     import os
-    import numpy as np
     from time import time
 
-    from mindboggle.mio.vtks import rewrite_scalars
-    from mindboggle.guts.mesh import find_neighbors_from_file, find_endpoints
-    from mindboggle.guts.segment import segment_regions
-    from mindboggle.guts.mesh import dilate
+    import numpy as np
+
+    from mindboggle.guts.mesh import dilate, find_endpoints, find_neighbors_from_file
     from mindboggle.guts.paths import connect_points_hmmf
+    from mindboggle.guts.segment import segment_regions
+    from mindboggle.mio.vtks import rewrite_scalars
 
     t0 = time()
 
@@ -740,13 +737,13 @@ def smooth_skeletons(skeletons, bounds, vtk_file, likelihoods, wN_max=1.0,
     else:
         sdum = 's'
     if verbose:
-        print("Smooth {0} skeleton{1}...".format(n_skeletons, sdum))
+        print(f"Smooth {n_skeletons} skeleton{sdum}...")
     Z = background_value * np.ones(npoints)
     smoothed_skeletons = Z.copy()
     for ID in unique_IDs:
         skeleton = [i for i,x in enumerate(skeletons) if x == ID]
         if verbose:
-            print('  Skeleton {0}:'.format(int(ID)))
+            print(f'  Skeleton {int(ID)}:')
 
         # --------------------------------------------------------------------
         # Segment skeleton vertices into separate connected groups:
@@ -759,7 +756,7 @@ def smooth_skeletons(skeletons, bounds, vtk_file, likelihoods, wN_max=1.0,
                             if x != background_value]
         len_numbers = len(skel_seg_numbers)
         if verbose and len_numbers > 1:
-            print('    {0} segments'.format(len_numbers))
+            print(f'    {len_numbers} segments')
         for skel_seg_number in skel_seg_numbers:
             skel_seg = np.where(skel_segs == skel_seg_number)[0].tolist()
 
@@ -805,8 +802,7 @@ def smooth_skeletons(skeletons, bounds, vtk_file, likelihoods, wN_max=1.0,
                 # ------------------------------------------------------------
                 smoothed_skeletons[new_skeleton] = ID
     if verbose:
-        print('  ...Smoothed {0} skeleton{1} ({2:.2f} seconds)'.
-              format(n_skeletons, sdum, time() - t0))
+        print(f'  ...Smoothed {n_skeletons} skeleton{sdum} ({time() - t0:.2f} seconds)')
 
     # ------------------------------------------------------------------------
     # Return skeletons, number of skeletons, and file name:
@@ -1051,10 +1047,9 @@ def find_outer_endpoints(indices, neighbor_lists, values, values_seeding,
     """
     import numpy as np
 
-    from mindboggle.guts.segment import extract_borders
-    from mindboggle.guts.segment import segment_rings
-    from mindboggle.guts.paths import track_segments
     from mindboggle.guts.mesh import find_neighborhood
+    from mindboggle.guts.paths import track_segments
+    from mindboggle.guts.segment import extract_borders, segment_rings
 
     # ------------------------------------------------------------------------
     # Settings:
@@ -1089,16 +1084,14 @@ def find_outer_endpoints(indices, neighbor_lists, values, values_seeding,
             do_threshold = False
         else:
             if verbose:
-                print('  Initialize seeds at {0:.2f} (median of fold depth)'.
-                    format(thresholdS))
+                print(f'  Initialize seeds at {thresholdS:.2f} (median of fold depth)')
     # ------------------------------------------------------------------------
     # Or initialize seeds with vertices at the shrunken region boundary:
     # ------------------------------------------------------------------------
     if not do_threshold:
         thresholdS = remove_fraction * np.max(S[indices])
         if verbose:
-            print('  Initialize seeds at {0:.2f} of fold depth'.
-                format(1-remove_fraction))
+            print(f'  Initialize seeds at {1-remove_fraction:.2f} of fold depth')
 
     # Extract threshold boundary vertices as seeds:
     indices_high = [x for x in indices if S[x] >= thresholdS]
@@ -1116,8 +1109,8 @@ def find_outer_endpoints(indices, neighbor_lists, values, values_seeding,
 
     # Run tracks from the seeds through the segments toward the boundary:
     if verbose:
-        print('    Track through {0} concentric segments ({1} vertices) '
-            'from threshold {2:0.2f}'.format(len(segments), len(R), thresholdS))
+        print(f'    Track through {len(segments)} concentric segments ({len(R)} vertices) '
+            f'from threshold {thresholdS:0.2f}')
     for seed in seeds:
         track = track_segments(seed, segments, neighbor_lists, V, borders,
                                background_value)
@@ -1134,7 +1127,7 @@ def find_outer_endpoints(indices, neighbor_lists, values, values_seeding,
     if do_filter_tracks and T:
 
         if verbose:
-            print('    Filter {0} tracks'.format(len(T)))
+            print(f'    Filter {len(T)} tracks')
 
         # Compute median track values:
         Tvalues = [np.median(V[x]) for x in T]
@@ -1189,7 +1182,7 @@ def find_outer_endpoints(indices, neighbor_lists, values, values_seeding,
         else:
             s = 'tracks'
         if verbose:
-            print('    Retain {0} {1}'.format(len(T2), s))
+            print(f'    Retain {len(T2)} {s}')
 
     else:
         # Gather endpoint vertex indices:
@@ -1263,8 +1256,9 @@ def find_max_values(points, values, min_separation=10, thr=0.5):
     >>> plot_surfaces('find_max_values.vtk') # doctest: +SKIP
 
     """
-    import numpy as np
     from operator import itemgetter
+
+    import numpy as np
 
     # Make sure arguments are numpy arrays:
     if not isinstance(points, np.ndarray):
@@ -1292,7 +1286,7 @@ def find_max_values(points, values, min_separation=10, thr=0.5):
                 D = np.linalg.norm(points[highest[i]] - points[imax])
 
                 # If distance less than threshold, consider the point found:
-                if D < min_separation:
+                if min_separation > D:
                     found = 1
                 ## Compute directional distance between points if close:
                 #elif D < max_distance:

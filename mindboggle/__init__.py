@@ -1,5 +1,7 @@
 import os
 
+from .version import __version__
+
 #from .info import (LONG_DESCRIPTION as __doc__,
 #                  __version__)
 #__doc__ += """
@@ -21,7 +23,6 @@ else:
 INIT_MSG = "Running {packname} version {version} (latest: {latest})".format
 latest = {"version": 'Unknown'}
 try:
-    from .version import __version__
     import etelemetry
     latest = etelemetry.get_project("nipy/mindboggle")
 except Exception as e:

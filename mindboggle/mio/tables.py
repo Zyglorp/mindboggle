@@ -141,15 +141,13 @@ def write_shape_stats(labels_or_file=[], sulci=[], fundi=[],
 
     """
     import os
+
     import numpy as np
     import pandas as pd
 
-    from mindboggle.guts.compute import stats_per_label
-    from mindboggle.guts.compute import means_per_label
-    from mindboggle.guts.compute import sum_per_label
-    from mindboggle.mio.vtks import read_scalars, read_vtk
-    from mindboggle.mio.vtks import apply_affine_transforms
+    from mindboggle.guts.compute import means_per_label, stats_per_label, sum_per_label
     from mindboggle.mio.labels import DKTprotocol
+    from mindboggle.mio.vtks import apply_affine_transforms, read_scalars, read_vtk
 
     dkt = DKTprotocol()
 
@@ -166,7 +164,7 @@ def write_shape_stats(labels_or_file=[], sulci=[], fundi=[],
         fundi = [int(x) for x in fundi]
 
     if not labels and not sulci and not fundi:
-        raise IOError('No feature data to tabulate in write_shape_stats().')
+        raise OSError('No feature data to tabulate in write_shape_stats().')
 
     spectrum_start = 1  # Store all columns of spectral components (0),
                         # or start from higher frequency components (>=1)
@@ -262,8 +260,7 @@ def write_shape_stats(labels_or_file=[], sulci=[], fundi=[],
             for ishape, shape_array in enumerate(shape_arrays):
                 shape = shape_names[ishape]
                 if verbose:
-                    print('  Compute statistics on {0} {1}...'.
-                        format(feature_name, shape))
+                    print(f'  Compute statistics on {feature_name} {shape}...')
                 # ------------------------------------------------------------
                 # Append feature areas to columns:
                 # ------------------------------------------------------------
@@ -309,7 +306,7 @@ def write_shape_stats(labels_or_file=[], sulci=[], fundi=[],
             # Append mean x,y,z position per feature to columns:
             xyz_positions = np.asarray(positions)
             for ixyz, xyz in enumerate(['x','y','z']):
-                column_names.append('mean position: {0}'.format(xyz))
+                column_names.append(f'mean position: {xyz}')
                 columns.append(xyz_positions[:, ixyz].tolist())
 
             # ----------------------------------------------------------------
@@ -325,7 +322,7 @@ def write_shape_stats(labels_or_file=[], sulci=[], fundi=[],
                 xyz_std_positions = np.asarray(standard_positions)
                 for ixyz, xyz in enumerate(['x','y','z']):
                     column_names.append('mean position in standard space:'
-                                        ' {0}'.format(xyz))
+                                        f' {xyz}')
                     columns.append(xyz_std_positions[:, ixyz].tolist())
 
             # ----------------------------------------------------------------
@@ -348,7 +345,7 @@ def write_shape_stats(labels_or_file=[], sulci=[], fundi=[],
                     for ispec in range(spectrum_start, len_spectrum):
                         columns.append(spectrum_matrix[:, ispec].tolist())
                         column_names.append('Laplace-Beltrami spectrum:'
-                                            ' component {0}'.format(ispec+1))
+                                            f' component {ispec+1}')
 
             # ----------------------------------------------------------------
             # Zernike moments:
@@ -369,8 +366,7 @@ def write_shape_stats(labels_or_file=[], sulci=[], fundi=[],
                     # Append Zernike shape name and values to columns:
                     for imoment in range(0, len_moments):
                         columns.append(moments_matrix[:, imoment].tolist())
-                        column_names.append('Zernike moments: component {0}'.
-                                            format(imoment+1))
+                        column_names.append(f'Zernike moments: component {imoment+1}')
 
             # ----------------------------------------------------------------
             # Write labels/IDs and values to table:
@@ -389,7 +385,7 @@ def write_shape_stats(labels_or_file=[], sulci=[], fundi=[],
                 df.to_csv(output_table, index=False, encoding='utf-8')
 
             if not os.path.exists(output_table):
-                raise IOError(output_table + " not found")
+                raise OSError(output_table + " not found")
 
             # ----------------------------------------------------------------
             # Return correct table file name:
@@ -506,11 +502,11 @@ def write_vertex_measures(output_table, labels_or_file, sulci=[], fundi=[],
 
     """
     import os
+
     import numpy as np
     import pandas as pd
 
-    from mindboggle.mio.vtks import read_scalars, read_vtk, \
-        apply_affine_transforms
+    from mindboggle.mio.vtks import apply_affine_transforms, read_scalars, read_vtk
 
     # Make sure inputs are lists:
     if isinstance(labels_or_file, np.ndarray):
@@ -525,7 +521,7 @@ def write_vertex_measures(output_table, labels_or_file, sulci=[], fundi=[],
         fundi = [int(x) for x in fundi]
 
     if not labels and not sulci and not fundi:
-        raise IOError('No feature data to tabulate in write_vertex_measures().')
+        raise OSError('No feature data to tabulate in write_vertex_measures().')
 
     # Feature names and corresponding feature lists:
     feature_names = ['label ID', 'sulcus ID', 'fundus ID']
@@ -559,7 +555,7 @@ def write_vertex_measures(output_table, labels_or_file, sulci=[], fundi=[],
                     npoints, input_vtk = read_vtk(shape_file)
                 xyz_positions = np.asarray(points)
                 for ixyz, xyz in enumerate(['x','y','z']):
-                    column_names.append('position: {0}'.format(xyz))
+                    column_names.append(f'position: {xyz}')
                     columns.append(xyz_positions[:, ixyz].tolist())
                 first_pass = False
 
@@ -572,7 +568,7 @@ def write_vertex_measures(output_table, labels_or_file, sulci=[], fundi=[],
                     xyz_std_positions = affine_points
                     for ixyz, xyz in enumerate(['x','y','z']):
                         column_names.append('position in standard space:'
-                                            ' {0}'.format(xyz))
+                                            f' {xyz}')
                         columns.append(xyz_std_positions[:, ixyz].tolist())
             else:
                 scalars, name = read_scalars(shape_file)
@@ -588,7 +584,7 @@ def write_vertex_measures(output_table, labels_or_file, sulci=[], fundi=[],
     df.to_csv(output_table, index=False, encoding='utf-8')
 
     if not os.path.exists(output_table):
-        raise IOError(output_table + " not found")
+        raise OSError(output_table + " not found")
 
     return output_table
 
@@ -625,10 +621,11 @@ def write_face_vertex_averages(input_file, output_table='', area_file=''):
 
     """
     import os
+
     import numpy as np
     import pandas as pd
 
-    from mindboggle.mio.vtks import read_vtk, read_scalars
+    from mindboggle.mio.vtks import read_scalars, read_vtk
 
     points, indices, lines, faces, scalars, scalar_names, \
         npoints, input_vtk = read_vtk(input_file, True, True)
@@ -658,7 +655,7 @@ def write_face_vertex_averages(input_file, output_table='', area_file=''):
     df.to_csv(output_table, index=False, encoding='utf-8')
 
     if not os.path.exists(output_table):
-        raise IOError(output_table + " not found")
+        raise OSError(output_table + " not found")
 
     return output_table
 
@@ -713,11 +710,12 @@ def write_average_face_values_per_label(input_indices_vtk,
 
     """
     import os
+
     import numpy as np
     import pandas as pd
 
-    from mindboggle.mio.vtks import read_scalars, read_vtk, write_vtk
     from mindboggle.guts.mesh import keep_faces
+    from mindboggle.mio.vtks import read_scalars, read_vtk
 
     # Load VTK file:
     points, indices, lines, faces, scalars, scalar_names, npoints, \
@@ -725,14 +723,11 @@ def write_average_face_values_per_label(input_indices_vtk,
     if area_file:
         area_scalars, name = read_scalars(area_file, True, True)
     if verbose:
-        print("Explode the scalar list in {0}".
-            format(os.path.basename(input_indices_vtk)))
+        print(f"Explode the scalar list in {os.path.basename(input_indices_vtk)}")
     if input_values_vtk != input_indices_vtk:
         if verbose:
-            print("Explode the scalar list of values in {0} "
-                  "with the scalar list of indices in {1}".
-                format(os.path.basename(input_values_vtk),
-                       os.path.basename(input_indices_vtk)))
+            print(f"Explode the scalar list of values in {os.path.basename(input_values_vtk)} "
+                  f"with the scalar list of indices in {os.path.basename(input_indices_vtk)}")
 
     # Loop through unique (non-excluded) scalar values:
     unique_scalars = [int(x) for x in np.unique(scalars)
@@ -747,8 +742,7 @@ def write_average_face_values_per_label(input_indices_vtk,
         select_scalars[scalars != scalar] = background_value
         scalar_indices = [i for i,x in enumerate(select_scalars) if x==scalar]
         if verbose:
-            print("  Scalar {0}: {1} vertices".format(scalar,
-                                                      len(scalar_indices)))
+            print(f"  Scalar {scalar}: {len(scalar_indices)} vertices")
 
         # --------------------------------------------------------------------
         # For each face, average vertex values:
@@ -771,7 +765,7 @@ def write_average_face_values_per_label(input_indices_vtk,
         df = pd.DataFrame({'': columns})
         df.to_csv(output_table, index=False, encoding='utf-8')
         if not os.path.exists(output_table):
-            raise IOError(output_table + " not found")
+            raise OSError(output_table + " not found")
 
 
 def select_column_from_tables(tables, index=0, write_table=True,
@@ -830,6 +824,7 @@ def select_column_from_tables(tables, index=0, write_table=True,
 
     """
     import os
+
     import pandas as pd
 
     # ------------------------------------------------------------------------
@@ -842,7 +837,7 @@ def select_column_from_tables(tables, index=0, write_table=True,
         # Extract column from the table for each subject:
         # --------------------------------------------------------------------
         if not os.path.exists(input_table):
-            raise IOError(input_table + " not found")
+            raise OSError(input_table + " not found")
         else:
             input_columns = pd.read_csv(input_table)
             columns.append(input_columns.iloc[:, index])
@@ -858,7 +853,7 @@ def select_column_from_tables(tables, index=0, write_table=True,
             df = pd.DataFrame({'': columns})
             df.to_csv(output_table, index=False, encoding='utf-8')
         else:
-            raise IOError('Not saving table.')
+            raise OSError('Not saving table.')
 
     return tables, columns, output_table
 
@@ -998,6 +993,7 @@ def explode_table(input_table='', column_headers=[], output_path=None,
     ...                               verbose) # doctest: +SKIP
     """
     import os
+
     import numpy as np
     import pandas as pd
 
@@ -1005,11 +1001,10 @@ def explode_table(input_table='', column_headers=[], output_path=None,
         output_path = os.getcwd()
     elif not os.path.exists(output_path):
         raise(ValueError,
-              'output_path {0} does not exist.'.format(output_path))
+              f'output_path {output_path} does not exist.')
 
     if verbose:
-        print("Explode {0} by {1} values".format(input_table,
-                                                 break_column))
+        print(f"Explode {input_table} by {break_column} values")
 
     df = pd.read_csv(input_table, header=0, index_col=break_column)
 
@@ -1027,7 +1022,7 @@ def explode_table(input_table='', column_headers=[], output_path=None,
         label_table.to_csv(out_file, index=False, encoding='utf-8')
 
         if not os.path.exists(out_file):
-            raise IOError(out_file + " not found")
+            raise OSError(out_file + " not found")
         else:
             output_tables.append(out_file)
 
@@ -1067,7 +1062,7 @@ def explode_mindboggle_tables(subject_path='', output_path='.',
 
     if not os.path.exists(output_path):
         if verbose:
-            print("{0} does not exist".format(output_path))
+            print(f"{output_path} does not exist")
     else:
 
         for side in ['left', 'right']:
@@ -1075,8 +1070,7 @@ def explode_mindboggle_tables(subject_path='', output_path='.',
             output_dir = os.path.join(output_path, side + '_exploded_tables')
             if not os.path.exists(output_dir):
                 if verbose:
-                    print("Create missing output directory: {0}".
-                          format(output_dir))
+                    print(f"Create missing output directory: {output_dir}")
                 os.mkdir(output_dir)
             if os.path.exists(output_dir):
 
@@ -1084,8 +1078,7 @@ def explode_mindboggle_tables(subject_path='', output_path='.',
                                               side + '_cortical_surface',
                                               'vertices.csv')
                 if verbose:
-                    print("Explode {0} by {1} values".
-                        format(vertices_table, break_column))
+                    print(f"Explode {vertices_table} by {break_column} values")
 
                 column_headers = ['travel depth', 'geodesic depth',
                                   'mean curvature',
@@ -1097,8 +1090,7 @@ def explode_mindboggle_tables(subject_path='', output_path='.',
                                               output_dir, output_stem,
                                               break_column, verbose)
             else:
-                raise IOError('Directory {0} does not exist.'.
-                              format(output_dir))
+                raise OSError(f'Directory {output_dir} does not exist.')
 
 
 def short_name(filepath):
@@ -1164,8 +1156,9 @@ def collate_participant_tables(subject_ids, base_dir):
     Name: lcsfs-sylvian fissure-area, dtype: float64
 
     """
-    from glob import glob
     import os
+    from glob import glob
+
     import pandas as pd
 
     out = None

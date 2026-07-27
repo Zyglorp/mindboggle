@@ -26,6 +26,7 @@ Authors:
 Copyright 2015,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 
 """
+import builtins
 
 
 def extract_numbers_names_colors(FreeSurferColorLUT=''):
@@ -55,7 +56,6 @@ def extract_numbers_names_colors(FreeSurferColorLUT=''):
 
     """
     import os
-    from io import open
 
     from mindboggle.thirdparty.FreeSurferColorLUT import lut_text
 
@@ -71,7 +71,7 @@ def extract_numbers_names_colors(FreeSurferColorLUT=''):
     #              os.environ['FREESURFER_HOME'], 'FreeSurferColorLUT.txt')
 
     if FreeSurferColorLUT and os.path.exists(FreeSurferColorLUT):
-        f = open(FreeSurferColorLUT, 'r')
+        f = builtins.open(FreeSurferColorLUT)
         lines = f.readlines()
     else:
         lut = lut_text()
@@ -3924,7 +3924,7 @@ def return_numbers_names_colors():
     return numbers, names, colors
 
 
-class DKTprotocol(object):
+class DKTprotocol:
     """Variables related to the Desikan-Killiany-Tourville labeling protocol.
 
     For more information about the Desikan-Killiany-Tourville (DKT) human

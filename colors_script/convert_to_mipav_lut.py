@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+
+import argparse
 
 import numpy as np
-import argparse
+
 
 def parse_inputs():
     des = 'convert colormap to mipav lut file.'

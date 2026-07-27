@@ -9,6 +9,7 @@ Authors:
 Copyright 2016,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 
 """
+import builtins
 
 
 def volume_per_brain_region(input_file, include_labels=[], exclude_labels=[],
@@ -79,9 +80,9 @@ def volume_per_brain_region(input_file, include_labels=[], exclude_labels=[],
 
     """
     import os
-    import numpy as np
+
     import nibabel as nb
-    from io import open
+    import numpy as np
 
     from mindboggle.guts.compute import count_per_label
 
@@ -101,7 +102,7 @@ def volume_per_brain_region(input_file, include_labels=[], exclude_labels=[],
         else:
             output_table = os.path.join(os.getcwd(),
                                         'volume_for_each_label.csv')
-        fid = open(output_table, 'w', encoding='utf-8')
+        fid = builtins.open(output_table, 'w', encoding='utf-8')
         if len(label_names) == len(unique_labels):
             fid.write("name, ID, volume\n")
         else:
@@ -113,15 +114,12 @@ def volume_per_brain_region(input_file, include_labels=[], exclude_labels=[],
 
                 if len(label_names) == len(unique_labels):
                     if verbose:
-                        print('{0} ({1}) volume = {2:2.3f}mm^3\n'.format(
-                              label_names[ilabel], label, volumes[ilabel]))
-                    fid.write('{0}, {1}, {2:2.3f}\n'.format(
-                              label_names[ilabel], label, volumes[ilabel]))
+                        print(f'{label_names[ilabel]} ({label}) volume = {volumes[ilabel]:2.3f}mm^3\n')
+                    fid.write(f'{label_names[ilabel]}, {label}, {volumes[ilabel]:2.3f}\n')
                 else:
                     if verbose:
-                        print('{0} volume = {1:2.3f}mm^3\n'.format(
-                              label, volumes[ilabel]))
-                    fid.write('{0}, {1:2.3f}\n'.format(label, volumes[ilabel]))
+                        print(f'{label} volume = {volumes[ilabel]:2.3f}mm^3\n')
+                    fid.write(f'{label}, {volumes[ilabel]:2.3f}\n')
     else:
         output_table = ''
 
@@ -250,9 +248,9 @@ def thickinthehead(segmented_file, labeled_file,
 
     """
     import os
-    import numpy as np
+
     import nibabel as nb
-    from io import open
+    import numpy as np
 
     from mindboggle.guts.utilities import execute
 
@@ -278,7 +276,7 @@ def thickinthehead(segmented_file, labeled_file,
         else:
             output_table = os.path.join(os.getcwd(),
                                         'thickinthehead_for_each_label.csv')
-        fid = open(output_table, 'w', encoding='utf-8')
+        fid = builtins.open(output_table, 'w', encoding='utf-8')
         if names:
             fid.write("name, ID, thickness (thickinthehead)\n")
         else:
@@ -391,15 +389,13 @@ def thickinthehead(segmented_file, labeled_file,
             if save_table:
                 if names:
                     if verbose:
-                        print('{0} ({1}) thickinthehead thickness = '
-                              '{2:2.2f}mm'.format(name, label, thickness))
-                    fid.write('{0}, {1}, {2:2.3f}\n'.format(name, label,
-                                                            thickness))
+                        print(f'{name} ({label}) thickinthehead thickness = '
+                              f'{thickness:2.2f}mm')
+                    fid.write(f'{name}, {label}, {thickness:2.3f}\n')
                 else:
                     if verbose:
-                        print('{0} thickinthehead thickness = {1:2.2f}mm'.
-                              format(label, thickness))
-                    fid.write('{0}, {1:2.3f}\n'.format(label, thickness))
+                        print(f'{label} thickinthehead thickness = {thickness:2.2f}mm')
+                    fid.write(f'{label}, {thickness:2.3f}\n')
 
     label_volume_thickness = label_volume_thickness.transpose().tolist()
 

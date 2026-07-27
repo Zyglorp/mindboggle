@@ -110,9 +110,10 @@ def propagate(points, faces, region, seeds, labels,
 
     """
     import numpy as np
-    from mindboggle.guts.mesh import keep_faces
+
     import mindboggle.guts.kernels as kernels
     import mindboggle.guts.rebound as rebound
+    from mindboggle.guts.mesh import keep_faces
 
     # Make sure arguments are numpy arrays:
     if not isinstance(seeds, np.ndarray):
@@ -134,11 +135,10 @@ def propagate(points, faces, region, seeds, labels,
                 n_sets = len(np.unique([x for x in seeds
                                         if x != background_value]))
                 if n_sets == 1:
-                    print('Segment {0} vertices from 1 set of seed vertices'.
-                          format(len(indices_region)))
+                    print(f'Segment {len(indices_region)} vertices from 1 set of seed vertices')
                 else:
-                    print('Segment {0} vertices from {1} sets of seed '
-                          'vertices'.format(len(indices_region), n_sets))
+                    print(f'Segment {len(indices_region)} vertices from {n_sets} sets of seed '
+                          'vertices')
 
             # Remove faces whose 3 vertices are not among specified indices:
             refaces = keep_faces(faces, indices_region)
@@ -317,17 +317,14 @@ def segment_regions(vertices_to_segment, neighbor_lists, min_region_size=1,
         select_single_seed = False
         if verbose:
             if len(seed_lists) == 1:
-                print('    Segment {0} vertices from seed vertices'.
-                      format(len(vertices_to_segment)))
+                print(f'    Segment {len(vertices_to_segment)} vertices from seed vertices')
             else:
-                print('    Segment {0} vertices from {1} sets of seed vertices'.
-                      format(len(vertices_to_segment), len(seed_lists)))
+                print(f'    Segment {len(vertices_to_segment)} vertices from {len(seed_lists)} sets of seed vertices')
     else:
         select_single_seed = True
         seed_lists = [[vertices_to_segment[0]]]
         if verbose:
-            print('    Segment {0} vertices from first vertex as initial seed'.
-                  format(len(vertices_to_segment)))
+            print(f'    Segment {len(vertices_to_segment)} vertices from first vertex as initial seed')
 
     # ------------------------------------------------------------------------
     # Initialize variables, including the list of vertex indices for each region,
@@ -431,12 +428,9 @@ def segment_regions(vertices_to_segment, neighbor_lists, min_region_size=1,
                         # Display current number and size of region:
                         if verbose and size_region > 1:
                             if len(seed_lists) == 1 and vertices_to_segment:
-                                print("      {0} vertices remain".
-                                      format(len(vertices_to_segment)))
+                                print(f"      {len(vertices_to_segment)} vertices remain")
                             else:
-                                print("      Region {0}: {1} vertices ({2} remain)".
-                                      format(int(new_segment_index), size_region,
-                                             len(vertices_to_segment)))
+                                print(f"      Region {int(new_segment_index)}: {size_region} vertices ({len(vertices_to_segment)} remain)")
 
                     # If selecting a single seed, continue growing
                     # if there are more vertices to segment:
@@ -451,8 +445,7 @@ def segment_regions(vertices_to_segment, neighbor_lists, min_region_size=1,
     # ------------------------------------------------------------------------
     if keep_seeding and len(vertices_to_segment) >= min_region_size:
         if verbose:
-            print('    Keep seeding to segment {0} remaining vertices'.
-                  format(len(vertices_to_segment)))
+            print(f'    Keep seeding to segment {len(vertices_to_segment)} remaining vertices')
 
         # Select first unsegmented vertex as new seed:
         seed_list = [vertices_to_segment[0]]
@@ -495,8 +488,7 @@ def segment_regions(vertices_to_segment, neighbor_lists, min_region_size=1,
 
                     # Display current number and size of region:
                     if verbose and size_region > 1:
-                        print("      {0} vertices remain".
-                              format(len(vertices_to_segment)))
+                        print(f"      {len(vertices_to_segment)} vertices remain")
 
                 # Select first unsegmented vertex as new seed:
                 if len(vertices_to_segment) >= min_region_size:
@@ -573,6 +565,7 @@ def segment_by_region(data, regions=[], surface_file='', save_file=False,
 
     # Extract a skeleton to connect endpoints in a fold:
     import os
+
     import numpy as np
 
     from mindboggle.mio.vtks import rewrite_scalars
@@ -599,7 +592,7 @@ def segment_by_region(data, regions=[], surface_file='', save_file=False,
     else:
         sdum = 'sulcus fundi'
     if verbose:
-        print('  Segmented {0} {1}'.format(n_segments, sdum))
+        print(f'  Segmented {n_segments} {sdum}')
 
     # ------------------------------------------------------------------------
     # Return segments, number of segments, and file name:
@@ -618,7 +611,7 @@ def segment_by_region(data, regions=[], surface_file='', save_file=False,
                             segment_per_region, 'segment_per_region', [],
                             background_value)
             if not os.path.exists(segment_per_region_file):
-                raise IOError(segment_per_region_file + " not found")
+                raise OSError(segment_per_region_file + " not found")
 
     return segment_per_region, n_segments, segment_per_region_file
 
@@ -691,8 +684,8 @@ def segment_by_filling_borders(regions, neighbor_lists, background_value=-1,
 
     """
     import numpy as np
-    from mindboggle.guts.segment import extract_borders
-    from mindboggle.guts.segment import segment_regions
+
+    from mindboggle.guts.segment import extract_borders, segment_regions
 
     include_boundary = False
 
@@ -725,8 +718,7 @@ def segment_by_filling_borders(regions, neighbor_lists, background_value=-1,
     for boundary_number in unique_borders:
 
         if verbose:
-            print('  Boundary {0} of {1}:'.format(int(boundary_number),
-                                                  len(unique_borders)))
+            print(f'  Boundary {int(boundary_number)} of {len(unique_borders)}:')
         border_indices = [i for i,x in enumerate(borders)
                           if x == boundary_number]
         # Find the neighbors to either side of the boundary
@@ -1001,19 +993,19 @@ def watershed(depths, points, indices, neighbor_lists, min_size=1,
     >>> plot_surfaces('watershed.vtk') # doctest: +SKIP
 
     """
-    import numpy as np
     from time import time
-    from mindboggle.guts.segment import extract_borders
-    from mindboggle.guts.segment import segment_regions
+
+    import numpy as np
+
     from mindboggle.guts.compute import point_distance
+    from mindboggle.guts.segment import extract_borders, segment_regions
 
     # Make sure argument is a list
     if isinstance(indices, np.ndarray):
         indices = indices.tolist()
 
     if verbose:
-        print('Segment {0} vertices by a surface watershed algorithm'.
-              format(len(indices)))
+        print(f'Segment {len(indices)} vertices by a surface watershed algorithm')
         verbose2 = False
     else:
         verbose2 = False
@@ -1115,11 +1107,10 @@ def watershed(depths, points, indices, neighbor_lists, min_size=1,
 
             # Display current number and size of region:
             if verbose2:
-                print("    {0} vertices remain".format(len(indices)))
+                print(f"    {len(indices)} vertices remain")
 
     if verbose:
-        print('  ...Segmented {0} initial watershed regions ({1:.2f} seconds)'.
-              format(counter, time() - t0))
+        print(f'  ...Segmented {counter} initial watershed regions ({time() - t0:.2f} seconds)')
 
     # ------------------------------------------------------------------------
     # Regrow from (deep) watershed seeds, stopping at borders:
@@ -1180,7 +1171,7 @@ def watershed(depths, points, indices, neighbor_lists, min_size=1,
 
                     # Display current number and size of region:
                     if verbose2:
-                        print("    {0} vertices remain".format(len(indices)))
+                        print(f"    {len(indices)} vertices remain")
 
         # --------------------------------------------------------------------
         # Continue growth until there are no more vertices to segment:
@@ -1194,8 +1185,8 @@ def watershed(depths, points, indices, neighbor_lists, min_size=1,
                                    background_value, False)
 
         if verbose:
-            print('  ...Regrew {0} watershed regions from seeds '
-                  '({1:.2f} seconds)'.format(iseed+1, time() - t0))
+            print(f'  ...Regrew {iseed+1} watershed regions from seeds '
+                  f'({time() - t0:.2f} seconds)')
 
     # ------------------------------------------------------------------------
     # Merge watershed catchment basins:
@@ -1258,8 +1249,8 @@ def watershed(depths, points, indices, neighbor_lists, min_size=1,
 
         # Print statement:
         if verbose:
-            print('  ...Merged segments to form {0} watershed regions '
-                  '({1:.2f} seconds)'.format(i_segment + 1, time() - t0))
+            print(f'  ...Merged segments to form {i_segment + 1} watershed regions '
+                  f'({time() - t0:.2f} seconds)')
 
     return segments.tolist(), seed_indices
 
@@ -1352,8 +1343,7 @@ def select_largest(points, faces, exclude_labels=[-1], areas=None,
     """
     import numpy as np
 
-    from mindboggle.guts.mesh import find_neighbors, keep_faces, \
-        reindex_faces_points
+    from mindboggle.guts.mesh import find_neighbors, keep_faces, reindex_faces_points
     from mindboggle.guts.segment import segment_regions
 
     # Areas:
@@ -1369,8 +1359,8 @@ def select_largest(points, faces, exclude_labels=[-1], areas=None,
     npoints = len(points)
     if npoints < min_npoints or len(faces) < min_npoints:
         if verbose:
-            print("The input size {0} ({1} faces) should be much larger "
-                  "than {2}". format(npoints, len(faces), min_npoints))
+            print(f"The input size {npoints} ({len(faces)} faces) should be much larger "
+                  f"than {min_npoints}")
         return None
     else:
 
@@ -1410,17 +1400,11 @@ def select_largest(points, faces, exclude_labels=[-1], areas=None,
                 # Print message:
                 if verbose:
                     if use_area:
-                        print('Segment {0}: {1} vertices ({2:.2f} area)'.
-                              format(int(segment_number),
-                                     len(segment_indices),
-                                     segment_area))
+                        print(f'Segment {int(segment_number)}: {len(segment_indices)} vertices ({segment_area:.2f} area)')
                     else:
-                        print('Segment {0}: {1} vertices'.
-                              format(int(segment_number),
-                                     len(segment_indices)))
+                        print(f'Segment {int(segment_number)}: {len(segment_indices)} vertices')
             if verbose:
-                print('Largest of {0} segments: {1:.2f}'.
-                      format(len(unique_segments), max_segment_area))
+                print(f'Largest of {len(unique_segments)} segments: {max_segment_area:.2f}')
 
             # ----------------------------------------------------------------
             # Renumber faces for the selected indices:
@@ -1619,10 +1603,12 @@ def extract_borders_2nd_surface(labels_file, values_file='',
 
     """
     import os
+
     import numpy as np
-    from mindboggle.mio.vtks import read_scalars, read_vtk, rewrite_scalars
+
     from mindboggle.guts.mesh import find_neighbors
     from mindboggle.guts.segment import extract_borders
+    from mindboggle.mio.vtks import read_scalars, read_vtk, rewrite_scalars
 
     # Load labeled surface file
     points, indices, lines, faces, labels, scalar_names, npoints, \
@@ -1652,7 +1638,7 @@ def extract_borders_2nd_surface(labels_file, values_file='',
                     'label_borders_in_mask', [], background_value)
 
     if not os.path.exists(border_file):
-        raise IOError(border_file + " not found")
+        raise OSError(border_file + " not found")
 
     return border_file, border_values, indices_borders
 
@@ -1728,8 +1714,9 @@ def combine_2labels_in_2volumes(file1, file2, label1=3, label2=2,
 
     """
     import os
-    import numpy as np
+
     import nibabel as nb
+    import numpy as np
 
     # ------------------------------------------------------------------------
     # Load labeled image volume and extract data as 1-D array:
@@ -1767,7 +1754,7 @@ def combine_2labels_in_2volumes(file1, file2, label1=3, label2=2,
     img.to_filename(output_file)
 
     if not os.path.exists(output_file):
-        raise IOError(output_file + " not found")
+        raise OSError(output_file + " not found")
 
     return output_file
 
@@ -1815,8 +1802,9 @@ def split_brain(image_file, label_file, left_labels, right_labels):
 
     """
     import os
-    import numpy as np
+
     import nibabel as nb
+    import numpy as np
 
     from mindboggle.guts.relabel import keep_volume_labels
 
@@ -1857,7 +1845,7 @@ def split_brain(image_file, label_file, left_labels, right_labels):
     img2.to_filename(right_brain)
 
     if not os.path.exists(right_brain) or not os.path.exists(left_brain):
-        raise IOError(right_brain + " or " + left_brain + "not found")
+        raise OSError(right_brain + " or " + left_brain + "not found")
 
     return left_brain, right_brain
 

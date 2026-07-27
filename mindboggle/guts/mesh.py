@@ -50,8 +50,8 @@ def find_neighbors_from_file(input_vtk):
     >>> plot_surfaces('find_neighbors_from_file.vtk') # doctest: +SKIP
 
     """
-    from mindboggle.mio.vtks import read_faces_points
     from mindboggle.guts.mesh import find_neighbors
+    from mindboggle.mio.vtks import read_faces_points
 
     faces, points, npoints = read_faces_points(input_vtk)
 
@@ -327,7 +327,7 @@ def find_edges(faces):
     edges = [ ]
     for face in faces:
         for edge in [face[0:2], face[1:3], [face[0], face[2]] ]:
-            if not edge in edges: # I know that this is costly
+            if edge not in edges: # I know that this is costly
                 edges.append(edge)
 
     return edges
@@ -656,15 +656,16 @@ def reindex_faces_points(faces, points=[]):
     >>> plot_surfaces('reindex_faces_points.vtk') # doctest: +SKIP
 
     """
-    import numpy as np
     import itertools
+
+    import numpy as np
 
     if isinstance(points, list):
         pass
     elif isinstance(points, np.ndarray):
         points = points.tolist()
     else:
-        raise IOError("points should be either a list or a numpy array.")
+        raise OSError("points should be either a list or a numpy array.")
 
     # set() to remove repeated indices and list() to order them for later use:
     indices_to_keep = list(set(itertools.chain(*faces)))
@@ -808,6 +809,7 @@ def decimate(points, faces, reduction=0.75, smooth_steps=25,
 
     """
     import os
+
     import vtk
 
     # ------------------------------------------------------------------------
@@ -905,7 +907,7 @@ def decimate(points, faces, reduction=0.75, smooth_steps=25,
         exporter.SetFileName(output_vtk)
         exporter.Write()
         if not os.path.exists(output_vtk):
-            raise IOError(output_vtk + " not found")
+            raise OSError(output_vtk + " not found")
 
     # ------------------------------------------------------------------------
     # Extract decimated points, faces, and scalars:
@@ -977,8 +979,8 @@ def decimate_file(input_vtk, reduction=0.5, smooth_steps=100,
     >>> plot_surfaces('decimate.vtk') # doctest: +SKIP
 
     """
-    from mindboggle.mio.vtks import read_vtk
     from mindboggle.guts.mesh import decimate
+    from mindboggle.mio.vtks import read_vtk
 
     if not save_vtk:
         raise NotImplementedError()
@@ -1059,9 +1061,11 @@ def rescale_by_neighborhood(input_vtk, indices=[], nedges=10, p=99,
 
     """
     import os
+
     import numpy as np
+
+    from mindboggle.guts.mesh import find_neighborhood, find_neighbors_from_file
     from mindboggle.mio.vtks import read_scalars, rewrite_scalars
-    from mindboggle.guts.mesh import find_neighbors_from_file, find_neighborhood
 
     # Load scalars and vertex neighbor lists:
     scalars, name = read_scalars(input_vtk, True, True)
@@ -1098,7 +1102,7 @@ def rescale_by_neighborhood(input_vtk, indices=[], nedges=10, p=99,
                         rescaled_scalars, 'rescaled_scalars', [],
                         background_value)
         if not os.path.exists(rescaled_scalars_file):
-            raise IOError(rescaled_scalars_file + " not found")
+            raise OSError(rescaled_scalars_file + " not found")
 
     else:
         rescaled_scalars_file = None
@@ -1167,7 +1171,9 @@ def rescale_by_label(input_vtk, labels_or_file, save_file=False,
 
     """
     import os
+
     import numpy as np
+
     from mindboggle.mio.vtks import read_scalars, rewrite_scalars
 
     # Load scalars and vertex neighbor lists:
@@ -1185,8 +1191,7 @@ def rescale_by_label(input_vtk, labels_or_file, save_file=False,
     # Loop through labels:
     for label in unique_labels:
         if verbose:
-            print("  Rescaling values within label {0} of {1} labels...".
-                format(int(label), len(unique_labels)))
+            print(f"  Rescaling values within label {int(label)} of {len(unique_labels)} labels...")
         indices = [i for i,x in enumerate(labels) if x == label]
         if indices:
 
@@ -1207,7 +1212,7 @@ def rescale_by_label(input_vtk, labels_or_file, save_file=False,
                         rescaled_scalars, 'rescaled_scalars', labels,
                         background_value)
         if not os.path.exists(rescaled_scalars_file):
-            raise IOError(rescaled_scalars_file + " not found")
+            raise OSError(rescaled_scalars_file + " not found")
 
     else:
         rescaled_scalars_file = None

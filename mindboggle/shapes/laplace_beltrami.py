@@ -466,8 +466,8 @@ def fem_laplacian(points, faces, spectrum_size=10, normalization="areaindex",
     [2.69259, 8.97865, 20.44857, 32.74477, 36.739]
 
     """
-    from scipy.sparse.linalg import eigsh, lobpcg
     import numpy as np
+    from scipy.sparse.linalg import eigsh, lobpcg
 
     from mindboggle.shapes.laplace_beltrami import computeAB
 
@@ -477,8 +477,7 @@ def fem_laplacian(points, faces, spectrum_size=10, normalization="areaindex",
     A, B = computeAB(points, faces)
     if A.shape[0] <= spectrum_size:
         if verbose:
-            print("The 3D shape has too few vertices ({0} <= {1}). Skip.".
-                  format(A.shape[0], spectrum_size))
+            print(f"The 3D shape has too few vertices ({A.shape[0]} <= {spectrum_size}). Skip.")
         return None
 
     # ----------------------------------------------------------------
@@ -617,8 +616,8 @@ def spectrum_of_largest(points, faces, spectrum_size=10, exclude_labels=[-1],
 
     """
     import numpy as np
-    #from scipy.sparse.linalg import eigsh, lobpcg
 
+    #from scipy.sparse.linalg import eigsh, lobpcg
     from mindboggle.guts.segment import select_largest
     from mindboggle.shapes.laplace_beltrami import fem_laplacian
 
@@ -629,9 +628,8 @@ def spectrum_of_largest(points, faces, spectrum_size=10, exclude_labels=[-1],
     min_points_faces = spectrum_size
     npoints = len(points) 
     if npoints < min_points_faces or len(faces) < min_points_faces:
-        raise IOError("The input size {0} ({1} faces) should be much larger "
-                      "than spectrum_size ({2})".
-                      format(npoints, len(faces), spectrum_size))
+        raise OSError(f"The input size {npoints} ({len(faces)} faces) should be much larger "
+                      f"than spectrum_size ({spectrum_size})")
         return None
     else:
 
@@ -643,8 +641,7 @@ def spectrum_of_largest(points, faces, spectrum_size=10, exclude_labels=[-1],
 
         # Alert if the number of indices is small:
         if len(points) < min_points_faces:
-            raise IOError("The input size {0} is too small.".
-                          format(len(points)))
+            raise OSError(f"The input size {len(points)} is too small.")
             return None
         elif faces:
 
@@ -706,7 +703,7 @@ def spectrum_from_file(vtk_file, spectrum_size=10, exclude_labels=[-1],
     >>> [np.float("{0:.{1}f}".format(x, 5)) for x in spectrum[1::]]
     [14.12801, 14.93573, 11.75397, 12.93141, 12.69348]
     """
-    from mindboggle.mio.vtks import read_vtk, read_scalars
+    from mindboggle.mio.vtks import read_scalars, read_vtk
     from mindboggle.shapes.laplace_beltrami import spectrum_of_largest
 
     points, indices, lines, faces, scalars, scalar_names, npoints, \
@@ -782,10 +779,9 @@ def spectrum_per_label(vtk_file, spectrum_size=10, exclude_labels=[-1],
     [1029, 1005, 1011, 1021, 1008, 1025, 999, 1013, 1007, 1022]
 
     """
-    from mindboggle.mio.vtks import read_vtk, read_scalars
     from mindboggle.guts.mesh import keep_faces, reindex_faces_points
-    from mindboggle.shapes.laplace_beltrami import fem_laplacian,\
-        spectrum_of_largest
+    from mindboggle.mio.vtks import read_scalars, read_vtk
+    from mindboggle.shapes.laplace_beltrami import fem_laplacian, spectrum_of_largest
 
     # Read VTK surface mesh file:
     points, indices, lines, faces, labels, scalar_names, npoints, \
@@ -810,7 +806,7 @@ def spectrum_per_label(vtk_file, spectrum_size=10, exclude_labels=[-1],
         # Determine the indices per label:
         Ilabel = [i for i,x in enumerate(labels) if x == label]
         if verbose:
-          print('{0} vertices for label {1}'.format(len(Ilabel), label))
+          print(f'{len(Ilabel)} vertices for label {label}')
 
         # Remove background faces:
         pick_faces = keep_faces(faces, Ilabel)

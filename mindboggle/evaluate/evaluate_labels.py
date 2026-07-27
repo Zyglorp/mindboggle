@@ -182,6 +182,7 @@ def evaluate_surface_overlaps_cpp(command, labels_file1, labels_file2,
 
     """
     import os
+
     from nipype.interfaces.base import CommandLine
 
     if not output_file:
@@ -203,17 +204,19 @@ def evaluate_surface_overlaps_cpp(command, labels_file1, labels_file2,
 if __name__ == "__main__":
 
     import os
+    from math import pi
+
     import numpy as np
     import pandas as pd
-
-    from mindboggle.mio.labels import DKTprotocol
-    from mindboggle.evaluate.evaluate_labels import evaluate_volume_overlaps
-    from mindboggle.evaluate.evaluate_labels import evaluate_surface_overlaps
-
-    from math import pi
     from bokeh.models import HoverTool
-    from bokeh.plotting import ColumnDataSource, figure, show, output_file
+    from bokeh.plotting import ColumnDataSource, figure, output_file, show
+
+    from mindboggle.evaluate.evaluate_labels import (
+        evaluate_surface_overlaps,
+        evaluate_volume_overlaps,
+    )
     from mindboggle.mio.colors import viridis_colormap
+    from mindboggle.mio.labels import DKTprotocol
 
     measure_volume_overlaps = False
     measure_surface_overlaps = False
@@ -246,7 +249,7 @@ if __name__ == "__main__":
     # Subjects:
     # ------------------------------------------------------------------------
     subject_list = '/Users/arno/Data/subject_list_Mindboggle101.txt'
-    fid = open(subject_list, 'r')
+    fid = open(subject_list)
     subjects = [x.strip() for x in fid.readlines()]
 
     # ------------------------------------------------------------------------
@@ -319,8 +322,7 @@ if __name__ == "__main__":
                                          surf, 'vertices.csv')
                     print(file1)
                     print(file2)
-                    output_file = "{0}_{1}_surface_label_overlaps.csv".\
-                        format(subject, surf)
+                    output_file = f"{subject}_{surf}_surface_label_overlaps.csv"
                     evaluate_surface_overlaps(dkt.cerebrum_cortex_DKT31_numbers,
                                               index, file1, file2, output_file)
 
@@ -337,8 +339,7 @@ if __name__ == "__main__":
                 file2 = os.path.join(labels_dir, subject, 'labels', volfile)
                 print(file1)
                 print(file2)
-                output_file = "{0}_{1}_volume_label_overlaps.csv".format(
-                    subject, volstem)
+                output_file = f"{subject}_{volstem}_volume_label_overlaps.csv"
                 evaluate_volume_overlaps(dkt.label_numbers,
                                          file1, file2, output_file)
 

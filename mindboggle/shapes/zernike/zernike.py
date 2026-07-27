@@ -118,8 +118,7 @@ def zernike_moments(points, faces, order=10, scale_input=True,
     """
     import numpy as np
 
-    from mindboggle.guts.mesh import reindex_faces_0to1
-    from mindboggle.guts.mesh import decimate
+    from mindboggle.guts.mesh import decimate, reindex_faces_0to1
     from mindboggle.shapes.zernike.pipelines import DefaultPipeline as Pipeline
 
     # Convert 0-indices (Python) to 1-indices (Matlab) for all face indices:
@@ -174,7 +173,7 @@ def zernike_moments(points, faces, order=10, scale_input=True,
     descriptors = pl.feature_extraction(Z, order).tolist()
 
     if verbose:
-        print("Zernike moments: {0}".format(descriptors))
+        print(f"Zernike moments: {descriptors}")
 
     return descriptors
 
@@ -243,8 +242,9 @@ def zernike_moments_per_label(vtk_file, order=10, exclude_labels=[-1],
 
     """
     import numpy as np
-    from mindboggle.mio.vtks import read_vtk
+
     from mindboggle.guts.mesh import keep_faces
+    from mindboggle.mio.vtks import read_vtk
     from mindboggle.shapes.zernike.zernike import zernike_moments
 
     min_points_faces = 4
@@ -270,7 +270,7 @@ def zernike_moments_per_label(vtk_file, order=10, exclude_labels=[-1],
         # --------------------------------------------------------------------
         Ilabel = [i for i,x in enumerate(labels) if x == label]
         if verbose:
-          print('  {0} vertices for label {1}'.format(len(Ilabel), label))
+          print(f'  {len(Ilabel)} vertices for label {label}')
 
         if len(Ilabel) > min_points_faces:
 
