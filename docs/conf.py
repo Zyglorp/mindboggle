@@ -17,7 +17,7 @@ import sys
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath(".."))
+sys.path.insert(0, os.path.abspath("../src"))
 # sys.path.append(os.path.abspath('sphinxext'))
 
 # -- Build API docs ----------------------------------------------------------
@@ -91,7 +91,7 @@ copyright = "2016, Arno Klein"
 author = "Arno Klein"
 
 # Single-source the version from the package (no package import needed).
-exec(open("../mindboggle/version.py").read())
+exec(open("../src/mindboggle/version.py").read())
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.

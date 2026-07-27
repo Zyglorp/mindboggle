@@ -54,6 +54,8 @@ Repository = "https://github.com/childmindresearch/mindboggle"
 Documentation = "https://mindboggle.readthedocs.io/"
 
 [tool.setuptools]
+# src/ layout: the package lives under src/.
+package-dir = { "" = "src" }
 # Explicit package list (mirrors the old setup.py) so the scratch `mindboggle/x`
 # tree is not shipped.
 packages = [
@@ -72,8 +74,8 @@ packages = [
 # now. Converting them to `[project.scripts]` console entry points needs a
 # `main()` refactor that belongs with the Phase 3 pipeline rewrite.
 script-files = [
-    "mindboggle/mindboggle",
-    "mindboggle/mindboggle123",
+    "src/mindboggle/mindboggle",
+    "src/mindboggle/mindboggle123",
     "colors_script/calc_colormap.py",
     "colors_script/convert_to_mipav_lut.py",
 ]
@@ -88,7 +90,7 @@ version = { attr = "mindboggle.version.__version__" }
 target-version = "py312"
 line-length = 88
 # Scratch/dead code (Python 2 remnants live here); triaged separately (P2-4).
-extend-exclude = ["mindboggle/x"]
+extend-exclude = ["src/mindboggle/x"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "C4", "RUF"]
@@ -125,5 +127,5 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 # Entry scripts are not imported as modules.
-"mindboggle/mindboggle" = ["E402"]
-"mindboggle/mindboggle123" = ["E402"]
+"src/mindboggle/mindboggle" = ["E402"]
+"src/mindboggle/mindboggle123" = ["E402"]
