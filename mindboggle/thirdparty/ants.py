@@ -22,9 +22,10 @@ Copyright 2016,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 
 """
 
+import builtins
 
-def antsApplyTransformsToPoints(points, transform_files,
-                                inverse_booleans=[0]):
+
+def antsApplyTransformsToPoints(points, transform_files, inverse_booleans=[0]):
     """
     Run ANTs antsApplyTransformsToPoints function to transform points.
     (Creates pre- and post-transformed .csv points files for ANTs.)
@@ -69,59 +70,65 @@ def antsApplyTransformsToPoints(points, transform_files,
 
     """
     import os
-    from io import open
 
     from mindboggle.guts.utilities import execute
 
     # ------------------------------------------------------------------------
     # Write points (x,y,z,1) to a .csv file:
     # ------------------------------------------------------------------------
-    points_file = os.path.join(os.getcwd(), 'points.csv')
-    fid = open(points_file, 'w', encoding='utf-8')
-    fid.write('x,y,z,t\n')
+    points_file = os.path.join(os.getcwd(), "points.csv")
+    fid = builtins.open(points_file, "w", encoding="utf-8")
+    fid.write("x,y,z,t\n")
     fid.close()
-    fid = open(points_file, 'a', encoding='utf-8')
+    fid = builtins.open(points_file, "a", encoding="utf-8")
     for point in points:
-        string_of_zeros = (4 - len(point)) * ',0'
-        fid.write(','.join([str(x) for x in point]) + string_of_zeros + '\n')
+        string_of_zeros = (4 - len(point)) * ",0"
+        fid.write(",".join([str(x) for x in point]) + string_of_zeros + "\n")
     fid.close()
 
     # ------------------------------------------------------------------------
     # Apply transforms to points in .csv file:
     # ------------------------------------------------------------------------
-    transformed_points_file = os.path.join(os.getcwd(),
-                                           'transformed_points.csv')
-    transform_string = ''
+    transformed_points_file = os.path.join(os.getcwd(), "transformed_points.csv")
+    transform_string = ""
     for ixfm, transform_file in enumerate(transform_files):
-        transform_string += " --t [{0},{1}]".\
-            format(transform_file, str(inverse_booleans[ixfm]))
-    cmd = ['antsApplyTransformsToPoints', '-d', '3', '-i', points_file,
-           '-o', transformed_points_file, transform_string]
+        transform_string += f" --t [{transform_file},{inverse_booleans[ixfm]!s}]"
+    cmd = [
+        "antsApplyTransformsToPoints",
+        "-d",
+        "3",
+        "-i",
+        points_file,
+        "-o",
+        transformed_points_file,
+        transform_string,
+    ]
     try:
-        execute(cmd, 'os')
+        execute(cmd, "os")
     except:
         raise Exception("Cannot find antsApplyTransformsToPoints command.")
 
     if not os.path.exists(transformed_points_file):
-        raise IOError("antsApplyTransformsToPoints did not create {0}.".
-                      format(transformed_points_file))
+        raise OSError(
+            f"antsApplyTransformsToPoints did not create {transformed_points_file}."
+        )
 
     # ------------------------------------------------------------------------
     # Return transformed points:
     # ------------------------------------------------------------------------
-    fid = open(transformed_points_file, 'r')
+    fid = builtins.open(transformed_points_file)
     lines = fid.readlines()
     fid.close()
     transformed_points = []
     for iline, line in enumerate(lines):
         if iline > 0:
-            point_xyz1 = [float(x) for x in line.split(',')]
+            point_xyz1 = [float(x) for x in line.split(",")]
             transformed_points.append(point_xyz1[0:3])
 
     return transformed_points
 
 
-def ImageMath(volume1, volume2, operator='m', output_file=''):
+def ImageMath(volume1, volume2, operator="m", output_file=""):
     """
     Use the ImageMath function in ANTs to perform operation on two volumes::
 
@@ -177,21 +184,22 @@ def ImageMath(volume1, volume2, operator='m', output_file=''):
 
     """
     import os
+
     from mindboggle.guts.utilities import execute
 
     if not output_file:
-        output_file = os.path.join(os.getcwd(),
-                                   os.path.basename(volume1) + '_' +
-                                   os.path.basename(volume2))
-    cmd = ['ImageMath', '3', output_file, operator, volume1, volume2]
-    execute(cmd, 'os')
+        output_file = os.path.join(
+            os.getcwd(), os.path.basename(volume1) + "_" + os.path.basename(volume2)
+        )
+    cmd = ["ImageMath", "3", output_file, operator, volume1, volume2]
+    execute(cmd, "os")
     if not os.path.exists(output_file):
-        raise IOError("ImageMath did not create " + output_file + ".")
+        raise OSError("ImageMath did not create " + output_file + ".")
 
     return output_file
 
 
-def ThresholdImage(volume, output_file='', threshlo=1, threshhi=10000):
+def ThresholdImage(volume, output_file="", threshlo=1, threshhi=10000):
     """
     Use the ThresholdImage function in ANTs to threshold image volume.
 
@@ -235,22 +243,22 @@ def ThresholdImage(volume, output_file='', threshlo=1, threshhi=10000):
 
     """
     import os
+
     from mindboggle.guts.utilities import execute
 
     if not output_file:
-        output_file = os.path.join(os.getcwd(),
-                                   'threshold_' + os.path.basename(volume))
-    cmd = ['ThresholdImage', '3', volume, output_file,
-           str(threshlo), str(threshhi)]
-    execute(cmd, 'os')
+        output_file = os.path.join(os.getcwd(), "threshold_" + os.path.basename(volume))
+    cmd = ["ThresholdImage", "3", volume, output_file, str(threshlo), str(threshhi)]
+    execute(cmd, "os")
     if not os.path.exists(output_file):
-        raise IOError("ThresholdImage did not create " + output_file + ".")
+        raise OSError("ThresholdImage did not create " + output_file + ".")
 
     return output_file
 
 
-def PropagateLabelsThroughMask(mask, labels, mask_index=None, output_file='',
-                               binarize=True, stopvalue=''):
+def PropagateLabelsThroughMask(
+    mask, labels, mask_index=None, output_file="", binarize=True, stopvalue=""
+):
     """
     Use ANTs to fill a binary volume mask with initial labels.
 
@@ -307,50 +315,56 @@ def PropagateLabelsThroughMask(mask, labels, mask_index=None, output_file='',
 
     """
     import os
+
     from mindboggle.guts.utilities import execute
 
     if not output_file:
-        #output_file = os.path.join(os.getcwd(),
+        # output_file = os.path.join(os.getcwd(),
         #                           'PropagateLabelsThroughMask.nii.gz')
-        output_file = os.path.join(os.getcwd(),
-                                   os.path.basename(labels) + '_through_' +
-                                   os.path.basename(mask))
+        output_file = os.path.join(
+            os.getcwd(), os.path.basename(labels) + "_through_" + os.path.basename(mask)
+        )
 
-    print('mask: {0}, labels: {1}'.format(mask, labels))
+    print(f"mask: {mask}, labels: {labels}")
 
     # Binarize image volume:
     if binarize:
-        temp_file = os.path.join(os.getcwd(),
-                                 'PropagateLabelsThroughMask.nii.gz')
-        cmd = ['ThresholdImage', '3', mask, temp_file, '0 1 0 1']
-        execute(cmd, 'os')
+        temp_file = os.path.join(os.getcwd(), "PropagateLabelsThroughMask.nii.gz")
+        cmd = ["ThresholdImage", "3", mask, temp_file, "0 1 0 1"]
+        execute(cmd, "os")
         mask = temp_file
 
     # Mask with just voxels having mask_index value:
     if mask_index:
-        mask2 = os.path.join(os.getcwd(), 'temp.nii.gz')
+        mask2 = os.path.join(os.getcwd(), "temp.nii.gz")
 
-        cmd = ['ThresholdImage', '3', mask, mask2,
-               str(mask_index), str(mask_index)]
-        execute(cmd, 'os')
+        cmd = ["ThresholdImage", "3", mask, mask2, str(mask_index), str(mask_index)]
+        execute(cmd, "os")
     else:
         mask2 = mask
 
     # Propagate labels:
 
-    cmd = ['ImageMath', '3', output_file, 'PropagateLabelsThroughMask',
-           mask2, labels]
+    cmd = ["ImageMath", "3", output_file, "PropagateLabelsThroughMask", mask2, labels]
     if stopvalue:
         cmd.extend(str(stopvalue))
-    execute(cmd, 'os')
+    execute(cmd, "os")
     if not os.path.exists(output_file):
-        raise IOError("ImageMath did not create " + output_file + ".")
+        raise OSError("ImageMath did not create " + output_file + ".")
 
     return output_file
 
 
-def ResampleImageBySpacing(volume, output_file='', outxspc=1, outyspc=1,
-                           outzspc=1, dosmooth=0, addvox=0, nninterp=1):
+def ResampleImageBySpacing(
+    volume,
+    output_file="",
+    outxspc=1,
+    outyspc=1,
+    outzspc=1,
+    dosmooth=0,
+    addvox=0,
+    nninterp=1,
+):
     """
     Use the ResampleImageBySpacing function in ANTs to resample image volume.
 
@@ -408,17 +422,23 @@ def ResampleImageBySpacing(volume, output_file='', outxspc=1, outyspc=1,
 
     """
     import os
+
     from mindboggle.guts.utilities import execute
 
     if not output_file:
-        output_file = os.path.join(os.getcwd(),
-                                   'resampled_' + os.path.basename(volume))
-    cmd = ['ResampleImageBySpacing', '3', volume, output_file,
-           str(outxspc), str(outyspc), str(outzspc)]
-    execute(cmd, 'os')
+        output_file = os.path.join(os.getcwd(), "resampled_" + os.path.basename(volume))
+    cmd = [
+        "ResampleImageBySpacing",
+        "3",
+        volume,
+        output_file,
+        str(outxspc),
+        str(outyspc),
+        str(outzspc),
+    ]
+    execute(cmd, "os")
     if not os.path.exists(output_file):
-        raise IOError("ResampleImageBySpacing did not create {0).".
-                      format(output_file))
+        raise OSError("ResampleImageBySpacing did not create {0).".format(output_file))
 
     return output_file
 
@@ -730,4 +750,5 @@ def ResampleImageBySpacing(volume, output_file='', outxspc=1, outyspc=1,
 # ============================================================================
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod(verbose=True)  # py.test --doctest-modules

@@ -9,6 +9,7 @@ Copyright 2017,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 
 """
 
+
 def fetch_file_path(file_name):
     """
     Return the path to files in the data directory in Mindboggle.

@@ -11,17 +11,32 @@ Copyright 2016,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 """
 
 
-def write_shape_stats(labels_or_file=[], sulci=[], fundi=[],
-        affine_transform_files=[], inverse_booleans=[], transform_format='itk',
-        area_file='', normalize_by_area=False, mean_curvature_file='',
-        travel_depth_file='', geodesic_depth_file='',
-        freesurfer_thickness_file='', freesurfer_curvature_file='',
-        freesurfer_sulc_file='',
-        labels_spectra=[], labels_spectra_IDs=[],
-        sulci_spectra=[], sulci_spectra_IDs=[],
-        labels_zernike=[], labels_zernike_IDs=[],
-        sulci_zernike=[], sulci_zernike_IDs=[],
-        exclude_labels=[-1], verbose=False):
+def write_shape_stats(
+    labels_or_file=[],
+    sulci=[],
+    fundi=[],
+    affine_transform_files=[],
+    inverse_booleans=[],
+    transform_format="itk",
+    area_file="",
+    normalize_by_area=False,
+    mean_curvature_file="",
+    travel_depth_file="",
+    geodesic_depth_file="",
+    freesurfer_thickness_file="",
+    freesurfer_curvature_file="",
+    freesurfer_sulc_file="",
+    labels_spectra=[],
+    labels_spectra_IDs=[],
+    sulci_spectra=[],
+    sulci_spectra_IDs=[],
+    labels_zernike=[],
+    labels_zernike_IDs=[],
+    sulci_zernike=[],
+    sulci_zernike_IDs=[],
+    exclude_labels=[-1],
+    verbose=False,
+):
     """
     Make tables of shape statistics per label, sulcus, and/or fundus.
 
@@ -141,15 +156,13 @@ def write_shape_stats(labels_or_file=[], sulci=[], fundi=[],
 
     """
     import os
+
     import numpy as np
     import pandas as pd
 
-    from mindboggle.guts.compute import stats_per_label
-    from mindboggle.guts.compute import means_per_label
-    from mindboggle.guts.compute import sum_per_label
-    from mindboggle.mio.vtks import read_scalars, read_vtk
-    from mindboggle.mio.vtks import apply_affine_transforms
+    from mindboggle.guts.compute import means_per_label, stats_per_label, sum_per_label
     from mindboggle.mio.labels import DKTprotocol
+    from mindboggle.mio.vtks import apply_affine_transforms, read_scalars, read_vtk
 
     dkt = DKTprotocol()
 
@@ -166,33 +179,44 @@ def write_shape_stats(labels_or_file=[], sulci=[], fundi=[],
         fundi = [int(x) for x in fundi]
 
     if not labels and not sulci and not fundi:
-        raise IOError('No feature data to tabulate in write_shape_stats().')
+        raise OSError("No feature data to tabulate in write_shape_stats().")
 
     spectrum_start = 1  # Store all columns of spectral components (0),
-                        # or start from higher frequency components (>=1)
+    # or start from higher frequency components (>=1)
 
     # ------------------------------------------------------------------------
     # Feature lists, shape names, and shape files:
     # ------------------------------------------------------------------------
     # Feature lists:
     feature_lists = [labels, sulci, fundi]
-    feature_names = ['label', 'sulcus', 'fundus']
+    feature_names = ["label", "sulcus", "fundus"]
     spectra_lists = [labels_spectra, sulci_spectra]
     spectra_ID_lists = [labels_spectra_IDs, sulci_spectra_IDs]
     zernike_lists = [labels_zernike, sulci_zernike]
     zernike_ID_lists = [labels_zernike_IDs, sulci_zernike_IDs]
-    table_names = ['label_shapes.csv', 'sulcus_shapes.csv',
-                   'fundus_shapes.csv']
+    table_names = ["label_shapes.csv", "sulcus_shapes.csv", "fundus_shapes.csv"]
 
     # Shape names corresponding to shape files below:
-    shape_names = ['area', 'travel depth', 'geodesic depth',
-                   'mean curvature', 'freesurfer curvature',
-                   'freesurfer thickness', 'freesurfer convexity (sulc)']
+    shape_names = [
+        "area",
+        "travel depth",
+        "geodesic depth",
+        "mean curvature",
+        "freesurfer curvature",
+        "freesurfer thickness",
+        "freesurfer convexity (sulc)",
+    ]
 
     # Load shape files as a list of numpy arrays of per-vertex shape values:
-    shape_files = [area_file, travel_depth_file, geodesic_depth_file,
-                   mean_curvature_file, freesurfer_curvature_file,
-                   freesurfer_thickness_file, freesurfer_sulc_file]
+    shape_files = [
+        area_file,
+        travel_depth_file,
+        geodesic_depth_file,
+        mean_curvature_file,
+        freesurfer_curvature_file,
+        freesurfer_thickness_file,
+        freesurfer_sulc_file,
+    ]
     shape_arrays = []
     first_pass = True
     area_array = []
@@ -200,15 +224,26 @@ def write_shape_stats(labels_or_file=[], sulci=[], fundi=[],
     for ishape, shape_file in enumerate(shape_files):
         if os.path.exists(shape_file):
             if first_pass:
-                points, indices, lines, faces, scalars_array, scalar_names, \
-                    npoints, input_vtk = read_vtk(shape_file, True, True)
+                (
+                    points,
+                    indices,
+                    lines,
+                    faces,
+                    scalars_array,
+                    scalar_names,
+                    npoints,
+                    input_vtk,
+                ) = read_vtk(shape_file, True, True)
                 points = np.array(points)
                 first_pass = False
                 if affine_transform_files and transform_format:
-                    affine_points, \
-                        foo1 = apply_affine_transforms(affine_transform_files,
-                                    inverse_booleans, transform_format,
-                                    points, vtk_file_stem='')
+                    affine_points, foo1 = apply_affine_transforms(
+                        affine_transform_files,
+                        inverse_booleans,
+                        transform_format,
+                        points,
+                        vtk_file_stem="",
+                    )
             else:
                 scalars_array, name = read_scalars(shape_file, True, True)
             if scalars_array.size:
@@ -224,9 +259,9 @@ def write_shape_stats(labels_or_file=[], sulci=[], fundi=[],
         use_area = []
 
     # Initialize table file names:
-    label_table = ''
-    sulcus_table = ''
-    fundus_table = ''
+    label_table = ""
+    sulcus_table = ""
+    fundus_table = ""
 
     # Loop through features / tables:
     for itable, feature_list in enumerate(feature_lists):
@@ -235,7 +270,7 @@ def write_shape_stats(labels_or_file=[], sulci=[], fundi=[],
         # ----------------------------------------------------------------
         # Label names:
         # ----------------------------------------------------------------
-        label_title = 'name'
+        label_title = "name"
         if itable == 0:
             label_numbers = dkt.cerebrum_cortex_DKT31_numbers
             label_names = dkt.cerebrum_cortex_DKT31_names
@@ -262,34 +297,47 @@ def write_shape_stats(labels_or_file=[], sulci=[], fundi=[],
             for ishape, shape_array in enumerate(shape_arrays):
                 shape = shape_names[ishape]
                 if verbose:
-                    print('  Compute statistics on {0} {1}...'.
-                        format(feature_name, shape))
+                    print(f"  Compute statistics on {feature_name} {shape}...")
                 # ------------------------------------------------------------
                 # Append feature areas to columns:
                 # ------------------------------------------------------------
                 if ishape == 0 and np.size(area_array):
-                    sums, label_list = sum_per_label(shape_array,
-                        feature_list, include_labels, exclude_labels)
+                    sums, label_list = sum_per_label(
+                        shape_array, feature_list, include_labels, exclude_labels
+                    )
                     column_names.append(shape)
                     columns.append(sums)
                 # ------------------------------------------------------------
                 # Append feature shape statistics to columns:
                 # ------------------------------------------------------------
                 else:
-                    medians, mads, means, sdevs, skews, kurts, \
-                    lower_quarts, upper_quarts, \
-                    label_list = stats_per_label(shape_array, feature_list,
-                                        include_labels, exclude_labels,
-                                        area_array, precision=1)
+                    (
+                        medians,
+                        mads,
+                        means,
+                        sdevs,
+                        skews,
+                        kurts,
+                        lower_quarts,
+                        upper_quarts,
+                        label_list,
+                    ) = stats_per_label(
+                        shape_array,
+                        feature_list,
+                        include_labels,
+                        exclude_labels,
+                        area_array,
+                        precision=1,
+                    )
 
-                    column_names.append(shape + ': median')
-                    column_names.append(shape + ': MAD')
-                    column_names.append(shape + ': mean')
-                    column_names.append(shape + ': SD')
-                    column_names.append(shape + ': skew')
-                    column_names.append(shape + ': kurtosis')
-                    column_names.append(shape + ': 25%')
-                    column_names.append(shape + ': 75%')
+                    column_names.append(shape + ": median")
+                    column_names.append(shape + ": MAD")
+                    column_names.append(shape + ": mean")
+                    column_names.append(shape + ": SD")
+                    column_names.append(shape + ": skew")
+                    column_names.append(shape + ": kurtosis")
+                    column_names.append(shape + ": 25%")
+                    column_names.append(shape + ": 75%")
                     columns.append(medians)
                     columns.append(mads)
                     columns.append(means)
@@ -303,13 +351,14 @@ def write_shape_stats(labels_or_file=[], sulci=[], fundi=[],
             # Mean positions in the original space:
             # ----------------------------------------------------------------
             # Compute mean position per feature:
-            positions, sdevs, label_list, foo = means_per_label(points,
-                feature_list, include_labels, exclude_labels, use_area)
+            positions, sdevs, label_list, foo = means_per_label(
+                points, feature_list, include_labels, exclude_labels, use_area
+            )
 
             # Append mean x,y,z position per feature to columns:
             xyz_positions = np.asarray(positions)
-            for ixyz, xyz in enumerate(['x','y','z']):
-                column_names.append('mean position: {0}'.format(xyz))
+            for ixyz, xyz in enumerate(["x", "y", "z"]):
+                column_names.append(f"mean position: {xyz}")
                 columns.append(xyz_positions[:, ixyz].tolist())
 
             # ----------------------------------------------------------------
@@ -317,15 +366,18 @@ def write_shape_stats(labels_or_file=[], sulci=[], fundi=[],
             # ----------------------------------------------------------------
             if affine_transform_files and transform_format:
                 # Compute standard space mean position per feature:
-                standard_positions, sdevs, label_list, \
-                foo = means_per_label(affine_points,
-                    feature_list, include_labels, exclude_labels, use_area)
+                standard_positions, sdevs, label_list, foo = means_per_label(
+                    affine_points,
+                    feature_list,
+                    include_labels,
+                    exclude_labels,
+                    use_area,
+                )
 
                 # Append standard space x,y,z position per feature to columns:
                 xyz_std_positions = np.asarray(standard_positions)
-                for ixyz, xyz in enumerate(['x','y','z']):
-                    column_names.append('mean position in standard space:'
-                                        ' {0}'.format(xyz))
+                for ixyz, xyz in enumerate(["x", "y", "z"]):
+                    column_names.append(f"mean position in standard space: {xyz}")
                     columns.append(xyz_std_positions[:, ixyz].tolist())
 
             # ----------------------------------------------------------------
@@ -347,8 +399,9 @@ def write_shape_stats(labels_or_file=[], sulci=[], fundi=[],
                     # Append spectral shape name and values to columns:
                     for ispec in range(spectrum_start, len_spectrum):
                         columns.append(spectrum_matrix[:, ispec].tolist())
-                        column_names.append('Laplace-Beltrami spectrum:'
-                                            ' component {0}'.format(ispec+1))
+                        column_names.append(
+                            f"Laplace-Beltrami spectrum: component {ispec + 1}"
+                        )
 
             # ----------------------------------------------------------------
             # Zernike moments:
@@ -369,8 +422,7 @@ def write_shape_stats(labels_or_file=[], sulci=[], fundi=[],
                     # Append Zernike shape name and values to columns:
                     for imoment in range(0, len_moments):
                         columns.append(moments_matrix[:, imoment].tolist())
-                        column_names.append('Zernike moments: component {0}'.
-                                            format(imoment+1))
+                        column_names.append(f"Zernike moments: component {imoment + 1}")
 
             # ----------------------------------------------------------------
             # Write labels/IDs and values to table:
@@ -379,17 +431,16 @@ def write_shape_stats(labels_or_file=[], sulci=[], fundi=[],
             output_table = os.path.join(os.getcwd(), table_names[itable])
 
             if columns:
-                df1 = pd.DataFrame({'ID': label_numbers})
-                df2 = pd.DataFrame(np.transpose(columns),
-                                   columns=column_names)
+                df1 = pd.DataFrame({"ID": label_numbers})
+                df2 = pd.DataFrame(np.transpose(columns), columns=column_names)
                 df = pd.concat([df1, df2], axis=1)
                 if label_names:
-                    df0 = pd.DataFrame({'name': label_names})
+                    df0 = pd.DataFrame({"name": label_names})
                     df = pd.concat([df0, df], axis=1)
-                df.to_csv(output_table, index=False, encoding='utf-8')
+                df.to_csv(output_table, index=False, encoding="utf-8")
 
             if not os.path.exists(output_table):
-                raise IOError(output_table + " not found")
+                raise OSError(output_table + " not found")
 
             # ----------------------------------------------------------------
             # Return correct table file name:
@@ -404,12 +455,22 @@ def write_shape_stats(labels_or_file=[], sulci=[], fundi=[],
     return label_table, sulcus_table, fundus_table
 
 
-def write_vertex_measures(output_table, labels_or_file, sulci=[], fundi=[],
-        affine_transform_files=[], inverse_booleans=[],
-        transform_format='itk', area_file='', mean_curvature_file='',
-        travel_depth_file='', geodesic_depth_file='',
-        freesurfer_thickness_file='', freesurfer_curvature_file='',
-        freesurfer_sulc_file=''):
+def write_vertex_measures(
+    output_table,
+    labels_or_file,
+    sulci=[],
+    fundi=[],
+    affine_transform_files=[],
+    inverse_booleans=[],
+    transform_format="itk",
+    area_file="",
+    mean_curvature_file="",
+    travel_depth_file="",
+    geodesic_depth_file="",
+    freesurfer_thickness_file="",
+    freesurfer_curvature_file="",
+    freesurfer_sulc_file="",
+):
     """
     Make a table of shape values per vertex.
 
@@ -506,11 +567,11 @@ def write_vertex_measures(output_table, labels_or_file, sulci=[], fundi=[],
 
     """
     import os
+
     import numpy as np
     import pandas as pd
 
-    from mindboggle.mio.vtks import read_scalars, read_vtk, \
-        apply_affine_transforms
+    from mindboggle.mio.vtks import apply_affine_transforms, read_scalars, read_vtk
 
     # Make sure inputs are lists:
     if isinstance(labels_or_file, np.ndarray):
@@ -525,21 +586,33 @@ def write_vertex_measures(output_table, labels_or_file, sulci=[], fundi=[],
         fundi = [int(x) for x in fundi]
 
     if not labels and not sulci and not fundi:
-        raise IOError('No feature data to tabulate in write_vertex_measures().')
+        raise OSError("No feature data to tabulate in write_vertex_measures().")
 
     # Feature names and corresponding feature lists:
-    feature_names = ['label ID', 'sulcus ID', 'fundus ID']
+    feature_names = ["label ID", "sulcus ID", "fundus ID"]
     feature_lists = [labels, sulci, fundi]
 
     # Shape names corresponding to shape files below:
-    shape_names = ['area', 'travel depth', 'geodesic depth',
-                   'mean curvature', 'freesurfer curvature',
-                   'freesurfer thickness', 'freesurfer convexity (sulc)']
+    shape_names = [
+        "area",
+        "travel depth",
+        "geodesic depth",
+        "mean curvature",
+        "freesurfer curvature",
+        "freesurfer thickness",
+        "freesurfer convexity (sulc)",
+    ]
 
     # Load shape files as a list of numpy arrays of per-vertex shape values:
-    shape_files = [area_file, travel_depth_file, geodesic_depth_file,
-                   mean_curvature_file, freesurfer_curvature_file,
-                   freesurfer_thickness_file, freesurfer_sulc_file]
+    shape_files = [
+        area_file,
+        travel_depth_file,
+        geodesic_depth_file,
+        mean_curvature_file,
+        freesurfer_curvature_file,
+        freesurfer_thickness_file,
+        freesurfer_sulc_file,
+    ]
 
     # Append columns of per-vertex scalar values:
     columns = []
@@ -553,26 +626,35 @@ def write_vertex_measures(output_table, labels_or_file, sulci=[], fundi=[],
     for ishape, shape_file in enumerate(shape_files):
         if os.path.exists(shape_file):
             if first_pass:
-
                 # Append x,y,z position per vertex to columns:
-                points, indices, lines, faces, scalars, scalar_names, \
-                    npoints, input_vtk = read_vtk(shape_file)
+                (
+                    points,
+                    indices,
+                    lines,
+                    faces,
+                    scalars,
+                    scalar_names,
+                    npoints,
+                    input_vtk,
+                ) = read_vtk(shape_file)
                 xyz_positions = np.asarray(points)
-                for ixyz, xyz in enumerate(['x','y','z']):
-                    column_names.append('position: {0}'.format(xyz))
+                for ixyz, xyz in enumerate(["x", "y", "z"]):
+                    column_names.append(f"position: {xyz}")
                     columns.append(xyz_positions[:, ixyz].tolist())
                 first_pass = False
 
                 # Append standard space x,y,z position to columns:
                 if affine_transform_files and transform_format:
-                    affine_points, \
-                        foo1 = apply_affine_transforms(affine_transform_files,
-                                    inverse_booleans, transform_format,
-                                    points, vtk_file_stem='')
+                    affine_points, foo1 = apply_affine_transforms(
+                        affine_transform_files,
+                        inverse_booleans,
+                        transform_format,
+                        points,
+                        vtk_file_stem="",
+                    )
                     xyz_std_positions = affine_points
-                    for ixyz, xyz in enumerate(['x','y','z']):
-                        column_names.append('position in standard space:'
-                                            ' {0}'.format(xyz))
+                    for ixyz, xyz in enumerate(["x", "y", "z"]):
+                        column_names.append(f"position in standard space: {xyz}")
                         columns.append(xyz_std_positions[:, ixyz].tolist())
             else:
                 scalars, name = read_scalars(shape_file)
@@ -582,18 +664,18 @@ def write_vertex_measures(output_table, labels_or_file, sulci=[], fundi=[],
 
     # Prepend with column of indices and write table
     if not output_table:
-        output_table = os.path.join(os.getcwd(), 'vertices.csv')
+        output_table = os.path.join(os.getcwd(), "vertices.csv")
 
-    df = pd.DataFrame(np.transpose(columns), columns = column_names)
-    df.to_csv(output_table, index=False, encoding='utf-8')
+    df = pd.DataFrame(np.transpose(columns), columns=column_names)
+    df.to_csv(output_table, index=False, encoding="utf-8")
 
     if not os.path.exists(output_table):
-        raise IOError(output_table + " not found")
+        raise OSError(output_table + " not found")
 
     return output_table
 
 
-def write_face_vertex_averages(input_file, output_table='', area_file=''):
+def write_face_vertex_averages(input_file, output_table="", area_file=""):
     """
     Make table of average vertex values per face
     (divided by face area if area_file provided).
@@ -625,13 +707,15 @@ def write_face_vertex_averages(input_file, output_table='', area_file=''):
 
     """
     import os
+
     import numpy as np
     import pandas as pd
 
-    from mindboggle.mio.vtks import read_vtk, read_scalars
+    from mindboggle.mio.vtks import read_scalars, read_vtk
 
-    points, indices, lines, faces, scalars, scalar_names, \
-        npoints, input_vtk = read_vtk(input_file, True, True)
+    points, indices, lines, faces, scalars, scalar_names, npoints, input_vtk = read_vtk(
+        input_file, True, True
+    )
     if area_file:
         area_scalars, name = read_scalars(area_file, True, True)
 
@@ -652,20 +736,26 @@ def write_face_vertex_averages(input_file, output_table='', area_file=''):
     # Write to table:
     # ----------------------------------------------------------------
     if not output_table:
-        output_table = os.path.join(os.getcwd(), 'average_face_values.csv')
+        output_table = os.path.join(os.getcwd(), "average_face_values.csv")
 
-    df = pd.DataFrame({'': columns})
-    df.to_csv(output_table, index=False, encoding='utf-8')
+    df = pd.DataFrame({"": columns})
+    df.to_csv(output_table, index=False, encoding="utf-8")
 
     if not os.path.exists(output_table):
-        raise IOError(output_table + " not found")
+        raise OSError(output_table + " not found")
 
     return output_table
 
 
-def write_average_face_values_per_label(input_indices_vtk,
-        input_values_vtk='', area_file='', output_stem='',
-        exclude_values=[-1], background_value=-1, verbose=False):
+def write_average_face_values_per_label(
+    input_indices_vtk,
+    input_values_vtk="",
+    area_file="",
+    output_stem="",
+    exclude_values=[-1],
+    background_value=-1,
+    verbose=False,
+):
     """
     Write out a separate csv table file for each integer
     in (the first) scalar list of an input VTK file.
@@ -713,48 +803,45 @@ def write_average_face_values_per_label(input_indices_vtk,
 
     """
     import os
+
     import numpy as np
     import pandas as pd
 
-    from mindboggle.mio.vtks import read_scalars, read_vtk, write_vtk
     from mindboggle.guts.mesh import keep_faces
+    from mindboggle.mio.vtks import read_scalars, read_vtk
 
     # Load VTK file:
-    points, indices, lines, faces, scalars, scalar_names, npoints, \
-        input_vtk = read_vtk(input_indices_vtk, True, True)
+    points, indices, lines, faces, scalars, scalar_names, npoints, input_vtk = read_vtk(
+        input_indices_vtk, True, True
+    )
     if area_file:
         area_scalars, name = read_scalars(area_file, True, True)
     if verbose:
-        print("Explode the scalar list in {0}".
-            format(os.path.basename(input_indices_vtk)))
+        print(f"Explode the scalar list in {os.path.basename(input_indices_vtk)}")
     if input_values_vtk != input_indices_vtk:
         if verbose:
-            print("Explode the scalar list of values in {0} "
-                  "with the scalar list of indices in {1}".
-                format(os.path.basename(input_values_vtk),
-                       os.path.basename(input_indices_vtk)))
+            print(
+                f"Explode the scalar list of values in {os.path.basename(input_values_vtk)} "
+                f"with the scalar list of indices in {os.path.basename(input_indices_vtk)}"
+            )
 
     # Loop through unique (non-excluded) scalar values:
-    unique_scalars = [int(x) for x in np.unique(scalars)
-                      if x not in exclude_values]
+    unique_scalars = [int(x) for x in np.unique(scalars) if x not in exclude_values]
     for scalar in unique_scalars:
-
         keep_indices = [x for sublst in faces for x in sublst]
         new_faces = keep_faces(faces, keep_indices)
 
         # Create array and indices for scalar value:
         select_scalars = np.copy(scalars)
         select_scalars[scalars != scalar] = background_value
-        scalar_indices = [i for i,x in enumerate(select_scalars) if x==scalar]
+        scalar_indices = [i for i, x in enumerate(select_scalars) if x == scalar]
         if verbose:
-            print("  Scalar {0}: {1} vertices".format(scalar,
-                                                      len(scalar_indices)))
+            print(f"  Scalar {scalar}: {len(scalar_indices)} vertices")
 
         # --------------------------------------------------------------------
         # For each face, average vertex values:
         # --------------------------------------------------------------------
-        output_table = os.path.join(os.getcwd(),
-                                    output_stem+str(scalar)+'.csv')
+        output_table = os.path.join(os.getcwd(), output_stem + str(scalar) + ".csv")
         columns = []
         for face in new_faces:
             values = []
@@ -768,14 +855,13 @@ def write_average_face_values_per_label(input_indices_vtk,
         # ----------------------------------------------------------------
         # Write to table:
         # ----------------------------------------------------------------
-        df = pd.DataFrame({'': columns})
-        df.to_csv(output_table, index=False, encoding='utf-8')
+        df = pd.DataFrame({"": columns})
+        df.to_csv(output_table, index=False, encoding="utf-8")
         if not os.path.exists(output_table):
-            raise IOError(output_table + " not found")
+            raise OSError(output_table + " not found")
 
 
-def select_column_from_tables(tables, index=0, write_table=True,
-                              output_table=''):
+def select_column_from_tables(tables, index=0, write_table=True, output_table=""):
     """
     Select column from list of tables, make a new table.
 
@@ -830,6 +916,7 @@ def select_column_from_tables(tables, index=0, write_table=True,
 
     """
     import os
+
     import pandas as pd
 
     # ------------------------------------------------------------------------
@@ -837,12 +924,11 @@ def select_column_from_tables(tables, index=0, write_table=True,
     # ------------------------------------------------------------------------
     columns = []
     for input_table in tables:
-
         # --------------------------------------------------------------------
         # Extract column from the table for each subject:
         # --------------------------------------------------------------------
         if not os.path.exists(input_table):
-            raise IOError(input_table + " not found")
+            raise OSError(input_table + " not found")
         else:
             input_columns = pd.read_csv(input_table)
             columns.append(input_columns.iloc[:, index])
@@ -853,18 +939,27 @@ def select_column_from_tables(tables, index=0, write_table=True,
     if write_table and columns:
         if all([len(x) == len(columns[0]) for x in columns]):
             if not output_table:
-                output_table = os.path.join(os.getcwd(),
-                                            'select_column_from_tables.csv')
-            df = pd.DataFrame({'': columns})
-            df.to_csv(output_table, index=False, encoding='utf-8')
+                output_table = os.path.join(
+                    os.getcwd(), "select_column_from_tables.csv"
+                )
+            df = pd.DataFrame({"": columns})
+            df.to_csv(output_table, index=False, encoding="utf-8")
         else:
-            raise IOError('Not saving table.')
+            raise OSError("Not saving table.")
 
     return tables, columns, output_table
 
 
-def select_column_from_mindboggle_tables(subjects, hemi, index, tables_dir,
-        table_name, is_surface_table=True, write_table=True, output_table=''):
+def select_column_from_mindboggle_tables(
+    subjects,
+    hemi,
+    index,
+    tables_dir,
+    table_name,
+    is_surface_table=True,
+    write_table=True,
+    output_table="",
+):
     """
     Select column from Mindboggle shape tables and make a new table.
 
@@ -939,23 +1034,31 @@ def select_column_from_mindboggle_tables(subjects, hemi, index, tables_dir,
     tables = []
     for subject in subjects:
         if is_surface_table:
-            table = os.path.join(tables_dir, subject, 'tables',
-                                 hemi+'_cortical_surface', table_name)
+            table = os.path.join(
+                tables_dir, subject, "tables", hemi + "_cortical_surface", table_name
+            )
         else:
-            table = os.path.join(tables_dir, subject, 'tables', table_name)
+            table = os.path.join(tables_dir, subject, "tables", table_name)
         tables.append(table)
 
     # ------------------------------------------------------------------------
     # Extract columns and construct new table:
     # ------------------------------------------------------------------------
-    tables, columns, output_table = select_column_from_tables(tables, index,
-        write_table, output_table)
+    tables, columns, output_table = select_column_from_tables(
+        tables, index, write_table, output_table
+    )
 
     return tables, columns, output_table
 
 
-def explode_table(input_table='', column_headers=[], output_path=None,
-                  output_stem='', break_column='label ID', verbose=False):
+def explode_table(
+    input_table="",
+    column_headers=[],
+    output_path=None,
+    output_stem="",
+    break_column="label ID",
+    verbose=False,
+):
     """
     Break up a table into separate tables,
     one for each index value for a given column.
@@ -998,18 +1101,17 @@ def explode_table(input_table='', column_headers=[], output_path=None,
     ...                               verbose) # doctest: +SKIP
     """
     import os
+
     import numpy as np
     import pandas as pd
 
     if output_path is None:
         output_path = os.getcwd()
     elif not os.path.exists(output_path):
-        raise(ValueError,
-              'output_path {0} does not exist.'.format(output_path))
+        raise (ValueError, f"output_path {output_path} does not exist.")
 
     if verbose:
-        print("Explode {0} by {1} values".format(input_table,
-                                                 break_column))
+        print(f"Explode {input_table} by {break_column} values")
 
     df = pd.read_csv(input_table, header=0, index_col=break_column)
 
@@ -1022,20 +1124,20 @@ def explode_table(input_table='', column_headers=[], output_path=None,
     for label in unique_labels:
         label_table = df1.loc[label]
 
-        out_file = os.path.join(output_path,
-                                output_stem + str(label) + '.csv')
-        label_table.to_csv(out_file, index=False, encoding='utf-8')
+        out_file = os.path.join(output_path, output_stem + str(label) + ".csv")
+        label_table.to_csv(out_file, index=False, encoding="utf-8")
 
         if not os.path.exists(out_file):
-            raise IOError(out_file + " not found")
+            raise OSError(out_file + " not found")
         else:
             output_tables.append(out_file)
 
     return output_tables
 
 
-def explode_mindboggle_tables(subject_path='', output_path='.',
-                              break_column='label ID', verbose=False):
+def explode_mindboggle_tables(
+    subject_path="", output_path=".", break_column="label ID", verbose=False
+):
     """
     Given the path to a subject's Mindboggle output data,
     break up each surface's shape table into separate tables,
@@ -1067,38 +1169,40 @@ def explode_mindboggle_tables(subject_path='', output_path='.',
 
     if not os.path.exists(output_path):
         if verbose:
-            print("{0} does not exist".format(output_path))
+            print(f"{output_path} does not exist")
     else:
-
-        for side in ['left', 'right']:
-
-            output_dir = os.path.join(output_path, side + '_exploded_tables')
+        for side in ["left", "right"]:
+            output_dir = os.path.join(output_path, side + "_exploded_tables")
             if not os.path.exists(output_dir):
                 if verbose:
-                    print("Create missing output directory: {0}".
-                          format(output_dir))
+                    print(f"Create missing output directory: {output_dir}")
                 os.mkdir(output_dir)
             if os.path.exists(output_dir):
-
-                vertices_table = os.path.join(subject_path, 'tables',
-                                              side + '_cortical_surface',
-                                              'vertices.csv')
+                vertices_table = os.path.join(
+                    subject_path, "tables", side + "_cortical_surface", "vertices.csv"
+                )
                 if verbose:
-                    print("Explode {0} by {1} values".
-                        format(vertices_table, break_column))
+                    print(f"Explode {vertices_table} by {break_column} values")
 
-                column_headers = ['travel depth', 'geodesic depth',
-                                  'mean curvature',
-                                  'freesurfer curvature',
-                                  'freesurfer thickness',
-                                  'freesurfer convexity (sulc)']
-                output_stem = ''.join(break_column.split(' '))
-                output_tables = explode_table(vertices_table, column_headers,
-                                              output_dir, output_stem,
-                                              break_column, verbose)
+                column_headers = [
+                    "travel depth",
+                    "geodesic depth",
+                    "mean curvature",
+                    "freesurfer curvature",
+                    "freesurfer thickness",
+                    "freesurfer convexity (sulc)",
+                ]
+                output_stem = "".join(break_column.split(" "))
+                output_tables = explode_table(
+                    vertices_table,
+                    column_headers,
+                    output_dir,
+                    output_stem,
+                    break_column,
+                    verbose,
+                )
             else:
-                raise IOError('Directory {0} does not exist.'.
-                              format(output_dir))
+                raise OSError(f"Directory {output_dir} does not exist.")
 
 
 def short_name(filepath):
@@ -1110,8 +1214,9 @@ def short_name(filepath):
     filepath: str
         a path to a mindboggle output file
     """
-    return ''.join([v[0] for v in
-                    filepath.split('/tables/')[-1].replace('/','_').split('_')])
+    return "".join(
+        [v[0] for v in filepath.split("/tables/")[-1].replace("/", "_").split("_")]
+    )
 
 
 def fname2df(fname):
@@ -1128,11 +1233,13 @@ def fname2df(fname):
 
     df = pd.read_csv(fname, na_values=[0.0]).dropna(axis=0)
     sn = short_name(fname)
-    outerproduct = [[sn+'-'+x+'-'+y.lstrip() for x in df.name] for y in
-                    df.keys()[2:]]
+    outerproduct = [
+        [sn + "-" + x + "-" + y.lstrip() for x in df.name] for y in df.keys()[2:]
+    ]
     outerproduct = np.array(outerproduct).flatten().tolist()
-    df_row = pd.DataFrame(data=df.iloc[:, 2:].values.flatten()[None, :],
-                          columns=outerproduct, index=[0])
+    df_row = pd.DataFrame(
+        data=df.iloc[:, 2:].values.flatten()[None, :], columns=outerproduct, index=[0]
+    )
     return df_row
 
 
@@ -1164,17 +1271,20 @@ def collate_participant_tables(subject_ids, base_dir):
     Name: lcsfs-sylvian fissure-area, dtype: float64
 
     """
-    from glob import glob
     import os
+    from glob import glob
+
     import pandas as pd
 
     out = None
     for id in subject_ids:
-        fl = glob(os.path.join(base_dir, id, 'tables', '*.csv')) + \
-             glob(os.path.join(base_dir, id, 'tables', '*', '*.csv'))
+        fl = glob(os.path.join(base_dir, id, "tables", "*.csv")) + glob(
+            os.path.join(base_dir, id, "tables", "*", "*.csv")
+        )
         # skip vertices outputs
-        dft = pd.concat([fname2df(val) for val in sorted(fl)
-                         if 'vertices' not in val], axis=1)
+        dft = pd.concat(
+            [fname2df(val) for val in sorted(fl) if "vertices" not in val], axis=1
+        )
         dft.index = [id]
         out = dft if out is None else pd.concat((out, dft), axis=0)
     return out
@@ -1185,4 +1295,5 @@ def collate_participant_tables(subject_ids, base_dir):
 # ============================================================================
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod(verbose=True)  # py.test --doctest-modules

@@ -61,12 +61,14 @@ Set the COLORMAP environment variable to change the scalar color map.
 It should be in the format of a ParaView-style xml colormap file.
 
 """
+
 import os
-import vtk
 import xml.etree.ElementTree
 
+import vtk
 
-class VTKViewer(object):
+
+class VTKViewer:
     def __init__(self):
         self.renWin = vtk.vtkRenderWindow()
         self.renWin.SetSize(800, 600)
@@ -78,12 +80,11 @@ class VTKViewer(object):
         interactorStyle = self.iren.GetInteractorStyle()
         interactorStyle.SetCurrentStyleToTrackballCamera()
         if "STEREO_TYPE" in os.environ:
-            vtkStereoType = VTKViewer.GetVTKStereoType(
-                os.environ["STEREO_TYPE"])
+            vtkStereoType = VTKViewer.GetVTKStereoType(os.environ["STEREO_TYPE"])
             if vtkStereoType is not None:
                 self.renWin.SetStereoType(vtkStereoType)
             else:
-                print('vtkStereoType is None') #.format(stereoType)
+                print("vtkStereoType is None")  # .format(stereoType)
 
     def Start(self):
         self.renWin.Render()
@@ -116,7 +117,7 @@ class VTKViewer(object):
         colorMap = vtk.vtkColorTransferFunction()
         root = xml.etree.ElementTree.parse(file_name).getroot()
         if root.tag != "ColorMap":
-            raise Exception('Wrong Kind of XML File')
+            raise Exception("Wrong Kind of XML File")
             return None
         if "space" in root.attrib:
             space = root.attrib["space"]
@@ -138,35 +139,35 @@ class VTKViewer(object):
             if point.tag == "Point":
                 point_found = True
                 a, r, g, b, h, s, v = 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
-                if 'x' not in point.attrib:
+                if "x" not in point.attrib:
                     continue
-                x = float(point.attrib['x'])
-                if 'o' in point.attrib:
-                    a = float(point.attrib['o'])
-                if 'r' in point.attrib:
-                    if 'g' not in point.attrib or 'b' not in point.attrib:
+                x = float(point.attrib["x"])
+                if "o" in point.attrib:
+                    a = float(point.attrib["o"])
+                if "r" in point.attrib:
+                    if "g" not in point.attrib or "b" not in point.attrib:
                         continue
-                    r = float(point.attrib['r'])
-                    g = float(point.attrib['g'])
-                    b = float(point.attrib['b'])
+                    r = float(point.attrib["r"])
+                    g = float(point.attrib["g"])
+                    b = float(point.attrib["b"])
                     colorMap.AddRGBPoint(x, r, g, b)
-                elif 'h' in point.attrib:
-                    if 's' not in point.attrib or 'v' not in point.attrib:
+                elif "h" in point.attrib:
+                    if "s" not in point.attrib or "v" not in point.attrib:
                         continue
-                    h = float(point.attrib['h'])
-                    s = float(point.attrib['s'])
-                    v = float(point.attrib['v'])
+                    h = float(point.attrib["h"])
+                    s = float(point.attrib["s"])
+                    v = float(point.attrib["v"])
                     colorMap.AddHSVPoint(x, h, s, v)
-                else: ## 'r' or 'h' required
+                else:  ## 'r' or 'h' required
                     continue
             elif point.tag == "NaN":
                 r, g, b = 0.25, 0.0, 0.0
-                if 'r' in point.attrib:
-                    r = float(point.attrib['r'])
-                if 'g' in point.attrib:
-                    g = float(point.attrib['g'])
-                if 'b' in point.attrib:
-                    b = float(point.attrib['b'])
+                if "r" in point.attrib:
+                    r = float(point.attrib["r"])
+                if "g" in point.attrib:
+                    g = float(point.attrib["g"])
+                if "b" in point.attrib:
+                    b = float(point.attrib["b"])
                 colorMap.SetNanColor(r, g, b)
             ## NAN doesn't support HSV.  Why not?
         if not point_found:
@@ -206,37 +207,33 @@ class VTKViewer(object):
 
     def AddFile(self, file_name, colorMap=None):
         file_name_lower = file_name.lower()
-        if file_name_lower.endswith('.vtk'):
+        if file_name_lower.endswith(".vtk"):
             polyData = VTKViewer.ReadLegacyVTK(file_name)
         elif file_name_lower.endswith(".vtp"):
-            polyData = VTKViewer.readPolyData(
-                file_name, vtk.vtkXMLPolyDataReader)
+            polyData = VTKViewer.readPolyData(file_name, vtk.vtkXMLPolyDataReader)
         elif file_name_lower.endswith(".ply"):
-            polyData = VTKViewer.readPolyData(
-                file_name, vtk.vtkPLYReader)
+            polyData = VTKViewer.readPolyData(file_name, vtk.vtkPLYReader)
         elif file_name_lower.endswith(".obj"):
-            polyData = VTKViewer.readPolyData(
-                file_name, vtk.vtkOBJReader)
+            polyData = VTKViewer.readPolyData(file_name, vtk.vtkOBJReader)
         elif file_name_lower.endswith(".stl"):
-            polyData = VTKViewer.readPolyData(
-                file_name, vtk.vtkSTLReader)
+            polyData = VTKViewer.readPolyData(file_name, vtk.vtkSTLReader)
         elif file_name_lower.endswith(".vtu"):
             polyData = VTKViewer.readDataSet(
-                file_name, vtk.vtkXMLUnstructuredGridReader)
+                file_name, vtk.vtkXMLUnstructuredGridReader
+            )
         elif file_name_lower.endswith(".pdb"):
             polyData = VTKViewer.ReadPDB(file_name)
         elif file_name_lower.endswith(".vti"):
-            polyData = VTKViewer.readDataSet(
-                file_name, vtk.vtkXMLImageDataReader)
+            polyData = VTKViewer.readDataSet(file_name, vtk.vtkXMLImageDataReader)
         elif file_name_lower.endswith(".vts"):
-            polyData = VTKViewer.readDataSet(
-                file_name, vtk.vtkXMLStructuredGridReader)
+            polyData = VTKViewer.readDataSet(file_name, vtk.vtkXMLStructuredGridReader)
         elif file_name_lower.endswith(".vtr"):
-            polyData = VTKViewer.readDataSet(
-                file_name, vtk.vtkXMLRectilinearGridReader)
+            polyData = VTKViewer.readDataSet(file_name, vtk.vtkXMLRectilinearGridReader)
         else:
-            print('{0}: BAD FILE NAME.  Should end in VTK, VTP, PLY, OBJ, '
-                  'STL, VTU, or PDB.'.format(file_name))
+            print(
+                f"{file_name}: BAD FILE NAME.  Should end in VTK, VTP, PLY, OBJ, "
+                "STL, VTU, or PDB."
+            )
             raise Exception()
         self.AddPolyData(polyData, colorMap)
         return
@@ -259,7 +256,7 @@ class VTKViewer(object):
         glyph.SetOrient(1)
         glyph.SetColorMode(1)
         glyph.SetScaleMode(2)
-        glyph.SetScaleFactor(.25)
+        glyph.SetScaleFactor(0.25)
         glyph.Update()
 
         tube = vtk.vtkTubeFilter()
@@ -316,66 +313,71 @@ class VTKViewer(object):
         reader = readerType()
         reader.SetFileName(file_name)
         reader.Update()
-        return VTKViewer.ConvertDataSetToSurface(
-            reader.GetOutputPort())
+        return VTKViewer.ConvertDataSetToSurface(reader.GetOutputPort())
 
     @staticmethod
     def ReadLegacyVTK(file_name):
         reader = vtk.vtkDataSetReader()
         reader.SetFileName(file_name)
         reader.Update()
-        if None != reader.GetPolyDataOutput():
+        if reader.GetPolyDataOutput() != None:
             polyData = vtk.vtkPolyData()
             polyData.ShallowCopy(reader.GetPolyDataOutput())
             return polyData
-        if None != reader.GetUnstructuredGridOutput():
+        if reader.GetUnstructuredGridOutput() != None:
             return VTKViewer.ConvertDataSetToSurface(reader.GetOutputPort())
-        if None != reader.GetStructuredPointsOutput():
+        if reader.GetStructuredPointsOutput() != None:
             return VTKViewer.ConvertDataSetToSurface(reader.GetOutputPort())
-        if None != reader.GetStructuredGridOutput():
+        if reader.GetStructuredGridOutput() != None:
             return VTKViewer.ConvertDataSetToSurface(reader.GetOutputPort())
-        if None != reader.GetRectilinearGridOutput():
+        if reader.GetRectilinearGridOutput() != None:
             return VTKViewer.ConvertDataSetToSurface(reader.GetOutputPort())
         else:
             raise Exception("unsupported: ????????\n")
 
     @staticmethod
     def GetVTKStereoType(stereoType):
-        if (stereoType == "CRYSTAL_EYES"):
-            return (vtk.VTK_STEREO_CRYSTAL_EYES)
-        elif (stereoType == "RED_BLUE"):
-            return (vtk.VTK_STEREO_RED_BLUE)
-        elif (stereoType == "INTERLACED"):
-            return (vtk.VTK_STEREO_INTERLACED)
-        elif (stereoType == "LEFT"):
-            return (vtk.VTK_STEREO_LEFT)
-        elif (stereoType == "RIGHT"):
-            return (vtk.VTK_STEREO_RIGHT)
-        elif (stereoType == "DRESDEN"):
-            return (vtk.VTK_STEREO_DRESDEN)
-        elif (stereoType == "ANAGLYPH"):
-            return (vtk.VTK_STEREO_ANAGLYPH)
-        elif (stereoType == "CHECKERBOARD"):
-            return (vtk.VTK_STEREO_CHECKERBOARD)
-        elif (stereoType == "SPLITVIEWPORT_HORIZONTAL"):
-            return (vtk.VTK_STEREO_SPLITVIEWPORT_HORIZONTAL)
+        if stereoType == "CRYSTAL_EYES":
+            return vtk.VTK_STEREO_CRYSTAL_EYES
+        elif stereoType == "RED_BLUE":
+            return vtk.VTK_STEREO_RED_BLUE
+        elif stereoType == "INTERLACED":
+            return vtk.VTK_STEREO_INTERLACED
+        elif stereoType == "LEFT":
+            return vtk.VTK_STEREO_LEFT
+        elif stereoType == "RIGHT":
+            return vtk.VTK_STEREO_RIGHT
+        elif stereoType == "DRESDEN":
+            return vtk.VTK_STEREO_DRESDEN
+        elif stereoType == "ANAGLYPH":
+            return vtk.VTK_STEREO_ANAGLYPH
+        elif stereoType == "CHECKERBOARD":
+            return vtk.VTK_STEREO_CHECKERBOARD
+        elif stereoType == "SPLITVIEWPORT_HORIZONTAL":
+            return vtk.VTK_STEREO_SPLITVIEWPORT_HORIZONTAL
         else:
             return None
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("FILES",
-                        help=('Example: "%(prog)s FILE1 FILE2 FILE3" -- '
-                              '"FILE1",... are the names of VTK files.'),
-                        nargs='+') #, metavar='')
-    parser.add_argument("--use_colormap", action='store_true',
-                        help="Use the Paraview-style xml colormap file "
-                             "whose location is set by "
-                             "the environment variable $COLORMAP.")
+    parser.add_argument(
+        "FILES",
+        help=(
+            'Example: "%(prog)s FILE1 FILE2 FILE3" -- '
+            '"FILE1",... are the names of VTK files.'
+        ),
+        nargs="+",
+    )  # , metavar='')
+    parser.add_argument(
+        "--use_colormap",
+        action="store_true",
+        help="Use the Paraview-style xml colormap file "
+        "whose location is set by "
+        "the environment variable $COLORMAP.",
+    )
     args = parser.parse_args()
     fileNames = args.FILES
     use_colormap = args.use_colormap
@@ -413,8 +415,9 @@ if __name__ == '__main__':
         if os.path.isfile(fileName):
             vtkviewer.AddFile(fileName, colormap)
         else:
-            print("Huh?: {0}".format(fileName))
+            print(f"Huh?: {fileName}")
             import sys
+
             sys.exit()
 
     vtkviewer.Start()

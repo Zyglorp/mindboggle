@@ -10,7 +10,7 @@ Copyright 2016,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 """
 
 
-def execute(cmd, type='os'):
+def execute(cmd, type="os"):
     """
     Execute command by either subprocess.call or os.system.
 
@@ -43,36 +43,35 @@ def execute(cmd, type='os'):
         if isinstance(cmd, str):
             print(cmd)
         else:
-            print(' '.join(cmd))
+            print(" ".join(cmd))
 
     # Use subprocess.call:
-    if type == 'subprocess':
+    if type == "subprocess":
         try:
             retcode = call(cmd)
             if retcode < 0:
-                raise IOError("Child terminated by signal: retcode {0}".
-                              format(retcode))
+                raise OSError(f"Child terminated by signal: retcode {retcode}")
         except OSError as e:
-            raise OSError("Execution failed: {0}".format(e))
+            raise OSError(f"Execution failed: {e}")
 
     # Use os.system:
-    elif type == 'os':
+    elif type == "os":
         from os import system
 
         if isinstance(cmd, str):
             pass
         else:
-            cmd = ' '.join(cmd)
+            cmd = " ".join(cmd)
         try:
             system(cmd)
         except OSError as e:
-            raise OSError("Execution failed: {0}".format(e))
+            raise OSError(f"Execution failed: {e}")
 
     else:
-        raise IOError('Select either "subprocess" or "os" for execution type.')
+        raise OSError('Select either "subprocess" or "os" for execution type.')
 
 
-def list_strings(string1='', string2='', string3='', string4=''):
+def list_strings(string1="", string2="", string3="", string4=""):
     """
     Put strings in a list.
 
@@ -118,4 +117,5 @@ def list_strings(string1='', string2='', string3='', string4=''):
 # ============================================================================
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod(verbose=True)  # py.test --doctest-modules

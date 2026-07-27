@@ -11,7 +11,7 @@ Copyright 2016,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 """
 
 
-def relabel_volume(input_file, old_labels, new_labels, output_file=''):
+def relabel_volume(input_file, old_labels, new_labels, output_file=""):
     """
     Relabel volume labels.
 
@@ -56,8 +56,9 @@ def relabel_volume(input_file, old_labels, new_labels, output_file=''):
 
     """
     import os
-    import numpy as np
+
     import nibabel as nb
+    import numpy as np
 
     # Load labeled image volume and extract data as 1-D array
     vol = nb.load(input_file)
@@ -74,7 +75,7 @@ def relabel_volume(input_file, old_labels, new_labels, output_file=''):
 
         # Relabel
         if new_label != label:
-            new_data[np.where(data==label)[0]] = new_label
+            new_data[np.where(data == label)[0]] = new_label
 
     # Reshape to original dimensions
     new_data = np.reshape(new_data, vol.shape)
@@ -86,13 +87,12 @@ def relabel_volume(input_file, old_labels, new_labels, output_file=''):
     img.to_filename(output_file)
 
     if not os.path.exists(output_file):
-        raise IOError("relabel_volume() did not create " + output_file + ".")
+        raise OSError("relabel_volume() did not create " + output_file + ".")
 
     return output_file
 
 
-def remove_volume_labels(input_file, labels_to_remove, output_file='',
-                         second_file=''):
+def remove_volume_labels(input_file, labels_to_remove, output_file="", second_file=""):
     """
     Remove labels from an image volume
     (or corresponding voxels in a 2nd volume).
@@ -139,8 +139,9 @@ def remove_volume_labels(input_file, labels_to_remove, output_file='',
 
     """
     import os
-    import numpy as np
+
     import nibabel as nb
+    import numpy as np
 
     # ------------------------------------------------------------------------
     # Load labeled image volume and extract data as 1-D array:
@@ -159,16 +160,14 @@ def remove_volume_labels(input_file, labels_to_remove, output_file='',
         xfm = vol.get_affine()
         new_data = vol.get_data().ravel()
         if not output_file:
-            output_file = os.path.join(os.getcwd(),
-                                       os.path.basename(second_file))
+            output_file = os.path.join(os.getcwd(), os.path.basename(second_file))
     # ------------------------------------------------------------------------
     # If second file not specified, remove labels in labels_to_remove:
     # ------------------------------------------------------------------------
     else:
         new_data = data.copy()
         if not output_file:
-            output_file = os.path.join(os.getcwd(),
-                                       os.path.basename(input_file))
+            output_file = os.path.join(os.getcwd(), os.path.basename(input_file))
 
     # ------------------------------------------------------------------------
     # Erase voxels as specified above:
@@ -191,14 +190,12 @@ def remove_volume_labels(input_file, labels_to_remove, output_file='',
     img.to_filename(output_file)
 
     if not os.path.exists(output_file):
-        raise IOError("remove_volume_labels() did not create " + output_file
-                      + ".")
+        raise OSError("remove_volume_labels() did not create " + output_file + ".")
 
     return output_file
 
 
-def keep_volume_labels(input_file, labels_to_keep, output_file='',
-                       second_file=''):
+def keep_volume_labels(input_file, labels_to_keep, output_file="", second_file=""):
     """
     Keep only given labels in an image volume (or use to mask second volume).
 
@@ -240,8 +237,9 @@ def keep_volume_labels(input_file, labels_to_keep, output_file='',
 
     """
     import os
-    import numpy as np
+
     import nibabel as nb
+    import numpy as np
 
     # ------------------------------------------------------------------------
     # Load labeled image volume and extract data as 1-D array:
@@ -260,16 +258,14 @@ def keep_volume_labels(input_file, labels_to_keep, output_file='',
         xfm = vol.get_affine()
         new_data = vol.get_data().ravel()
         if not output_file:
-            output_file = os.path.join(os.getcwd(),
-                                       os.path.basename(second_file))
+            output_file = os.path.join(os.getcwd(), os.path.basename(second_file))
     # ------------------------------------------------------------------------
     # If second file not specified, remove labels not in labels_to_keep:
     # ------------------------------------------------------------------------
     else:
         new_data = data.copy()
         if not output_file:
-            output_file = os.path.join(os.getcwd(),
-                                       os.path.basename(input_file))
+            output_file = os.path.join(os.getcwd(), os.path.basename(input_file))
 
     # ------------------------------------------------------------------------
     # Erase voxels as specified above:
@@ -292,14 +288,21 @@ def keep_volume_labels(input_file, labels_to_keep, output_file='',
     img.to_filename(output_file)
 
     if not os.path.exists(output_file):
-        raise IOError("keep_volume_labels() did not create " + output_file + ".")
+        raise OSError("keep_volume_labels() did not create " + output_file + ".")
 
     return output_file
 
 
-def relabel_surface(vtk_file, hemi='', old_labels=[], new_labels=[],
-                    erase_remaining=True, erase_labels=[], erase_value=-1,
-                    output_file=''):
+def relabel_surface(
+    vtk_file,
+    hemi="",
+    old_labels=[],
+    new_labels=[],
+    erase_remaining=True,
+    erase_labels=[],
+    erase_value=-1,
+    output_file="",
+):
     """
     Relabel surface in a VTK file.
 
@@ -358,20 +361,25 @@ def relabel_surface(vtk_file, hemi='', old_labels=[], new_labels=[],
 
     """
     import os
+
     import numpy as np
+
     from mindboggle.mio.vtks import read_vtk, write_vtk
 
     # Load labeled vtk surfaces:
-    points, indices, lines, faces, scalars, scalar_names, npoints, \
-        input_vtk = read_vtk(vtk_file, return_first=True, return_array=True)
+    points, indices, lines, faces, scalars, scalar_names, npoints, input_vtk = read_vtk(
+        vtk_file, return_first=True, return_array=True
+    )
     new_scalars = scalars[:]
 
     # Raise an error if inputs set incorrectly:
-    if (new_labels and not old_labels) or \
-       (hemi and hemi not in ['lh','rh']) or \
-       (new_labels and len(old_labels) != len(new_labels)) or \
-       (erase_remaining and not old_labels):
-        raise IOError("Please check inputs for relabel_surface().")
+    if (
+        (new_labels and not old_labels)
+        or (hemi and hemi not in ["lh", "rh"])
+        or (new_labels and len(old_labels) != len(new_labels))
+        or (erase_remaining and not old_labels)
+    ):
+        raise OSError("Please check inputs for relabel_surface().")
 
     # Loop through unique labels in scalars:
     ulabels = np.unique(scalars)
@@ -386,18 +394,18 @@ def relabel_surface(vtk_file, hemi='', old_labels=[], new_labels=[],
         # and if hemi set, add 1000 or 2000 to the new label:
         elif label in old_labels and (len(old_labels) == len(new_labels)):
             new_label = new_labels[old_labels.index(label)]
-            if hemi == 'lh':
+            if hemi == "lh":
                 new_scalars[I] = 1000 + new_label
-            elif hemi == 'rh':
+            elif hemi == "rh":
                 new_scalars[I] = 2000 + new_label
             else:
                 new_scalars[I] = new_label
 
         # If labels not set then optionally add hemi value:
         elif hemi and not new_labels:
-            if hemi == 'lh':
+            if hemi == "lh":
                 new_scalars[I] = 1000 + label
-            elif hemi == 'rh':
+            elif hemi == "rh":
                 new_scalars[I] = 2000 + label
 
         # If label unaccounted for and erase_remaining, set to erase_value:
@@ -409,18 +417,33 @@ def relabel_surface(vtk_file, hemi='', old_labels=[], new_labels=[],
 
     # Write output VTK file:
     if not output_file:
-        output_file = os.path.join(os.getcwd(),
-                                   'relabeled_' + os.path.basename(vtk_file))
-    write_vtk(output_file, points, indices, lines, faces,
-              [new_scalars], ['Labels'], scalar_type='int')
+        output_file = os.path.join(
+            os.getcwd(), "relabeled_" + os.path.basename(vtk_file)
+        )
+    write_vtk(
+        output_file,
+        points,
+        indices,
+        lines,
+        faces,
+        [new_scalars],
+        ["Labels"],
+        scalar_type="int",
+    )
     if not os.path.exists(output_file):
-        raise IOError("relabel_surface() did not create " + output_file + ".")
+        raise OSError("relabel_surface() did not create " + output_file + ".")
 
     return output_file
 
 
-def overwrite_volume_labels(source, target, output_file='', ignore_labels=[0],
-                            erase_labels=True, background_value=-1):
+def overwrite_volume_labels(
+    source,
+    target,
+    output_file="",
+    ignore_labels=[0],
+    erase_labels=True,
+    background_value=-1,
+):
     """
     For every label in a source image, optionally erase all voxels in the
     target image with this label (if erase_labels is True), and
@@ -472,18 +495,19 @@ def overwrite_volume_labels(source, target, output_file='', ignore_labels=[0],
 
     """
     import os
-    import numpy as np
+
     import nibabel as nb
+    import numpy as np
 
     if not output_file:
-        output_file = os.path.join(os.getcwd(), os.path.basename(source) +
-                                   '_to_' + os.path.basename(target))
+        output_file = os.path.join(
+            os.getcwd(), os.path.basename(source) + "_to_" + os.path.basename(target)
+        )
     # Load labeled image volumes:
     vol_source = nb.load(source)
     vol_target = nb.load(target)
     if vol_source.shape != vol_target.shape:
-        raise IOError('{0} and {1} need to be the same shape.'.
-                      format(source, target))
+        raise OSError(f"{source} and {target} need to be the same shape.")
     xfm = vol_target.get_affine()
     data_source = vol_source.get_data().ravel()
     data_target = vol_target.get_data().ravel()
@@ -492,14 +516,14 @@ def overwrite_volume_labels(source, target, output_file='', ignore_labels=[0],
     new_data = data_target.copy()
 
     # Find indices with labels in source:
-    IX = [(i,x) for i,x in enumerate(data_source) if x not in ignore_labels]
+    IX = [(i, x) for i, x in enumerate(data_source) if x not in ignore_labels]
     I = [x[0] for x in IX]
     X = [x[1] for x in IX]
 
     # Erase target labels (that are in source) before overwriting:
     if erase_labels:
         rm_labels = np.unique(X)
-        Irm = [i for i,x in enumerate(data_target) if x in rm_labels]
+        Irm = [i for i, x in enumerate(data_target) if x in rm_labels]
         new_data[Irm] = background_value
 
     # Overwrite target labels with source labels:
@@ -513,8 +537,7 @@ def overwrite_volume_labels(source, target, output_file='', ignore_labels=[0],
     img.to_filename(output_file)
 
     if not os.path.exists(output_file):
-        raise IOError("overwrite_volume_labels() did not create {0}."
-                      .format(output_file))
+        raise OSError(f"overwrite_volume_labels() did not create {output_file}.")
 
     return output_file
 
@@ -524,4 +547,5 @@ def overwrite_volume_labels(source, target, output_file='', ignore_labels=[0],
 # ============================================================================
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod(verbose=True)  # py.test --doctest-modules

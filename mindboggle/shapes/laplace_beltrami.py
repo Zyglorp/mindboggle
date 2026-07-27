@@ -109,26 +109,20 @@ def computeAB(points, faces):
     nfaces = faces.shape[0]
 
     # Linear local matrices on unit triangle:
-    tB = (np.ones((3,3)) + np.eye(3)) / 24.0
+    tB = (np.ones((3, 3)) + np.eye(3)) / 24.0
 
-    tA00 = np.array([[ 0.5,-0.5, 0.0],
-                     [-0.5, 0.5, 0.0],
-                     [ 0.0, 0.0, 0.0]])
+    tA00 = np.array([[0.5, -0.5, 0.0], [-0.5, 0.5, 0.0], [0.0, 0.0, 0.0]])
 
-    tA11 = np.array([[ 0.5, 0.0,-0.5],
-                     [ 0.0, 0.0, 0.0],
-                     [-0.5, 0.0, 0.5]])
+    tA11 = np.array([[0.5, 0.0, -0.5], [0.0, 0.0, 0.0], [-0.5, 0.0, 0.5]])
 
-    tA0110 = np.array([[ 1.0,-0.5,-0.5],
-                       [-0.5, 0.0, 0.5],
-                       [-0.5, 0.5, 0.0]])
+    tA0110 = np.array([[1.0, -0.5, -0.5], [-0.5, 0.0, 0.5], [-0.5, 0.5, 0.0]])
 
     # Replicate into third dimension for each triangle
     # (for tB, 1st index is the 3rd index in MATLAB):
     tB = np.array([np.tile(tB, (1, 1)) for i in range(nfaces)])
     tA00 = np.array([np.tile(tA00, (1, 1)) for i in range(nfaces)])
     tA11 = np.array([np.tile(tA11, (1, 1)) for i in range(nfaces)])
-    tA0110 = np.array([np.tile(tA0110,(1, 1)) for i in range(nfaces)])
+    tA0110 = np.array([np.tile(tA0110, (1, 1)) for i in range(nfaces)])
 
     # Compute vertex coordinates and a difference vector for each triangle:
     v1 = points[faces[:, 0], :]
@@ -148,7 +142,7 @@ def computeAB(points, faces):
         is the 1st index in MATLAB.  Fortunately, nfaces is the size of A.
 
         """
-        return np.array([np.ones((3,3))*x for x in A])
+        return np.array([np.ones((3, 3)) * x for x in A])
 
     # Compute length^2 of v3mv1 for each triangle:
     a0 = np.sum(v3mv1 * v3mv1, axis=1)
@@ -163,22 +157,22 @@ def computeAB(points, faces):
     a0110 = reshape_and_repeat(a0110)
 
     # Compute cross product and 2*vol for each triangle:
-    cr  = np.cross(v2mv1,v3mv1)
-    vol = np.sqrt(np.sum(cr*cr, axis=1))
+    cr = np.cross(v2mv1, v3mv1)
+    vol = np.sqrt(np.sum(cr * cr, axis=1))
     # zero vol will cause division by zero below, so set to small value:
-    vol_mean = 0.001*np.mean(vol)
+    vol_mean = 0.001 * np.mean(vol)
     vol = [vol_mean if x == 0 else x for x in vol]
     vol = reshape_and_repeat(vol)
 
     # Construct all local A and B matrices (guess: for each triangle):
     localB = vol * tB
-    localA = (1.0/vol) * (a0*tA00 + a1*tA11 - a0110*tA0110)
+    localA = (1.0 / vol) * (a0 * tA00 + a1 * tA11 - a0110 * tA0110)
 
     # Construct row and col indices.
     # (Note: J in numpy is I in MATLAB after flattening,
     #  because numpy is row-major while MATLAB is column-major.)
-    J = np.array([np.tile(x, (3,1)) for x in faces])
-    I = np.array([np.transpose(np.tile(x, (3,1))) for x in faces])
+    J = np.array([np.tile(x, (3, 1)) for x in faces])
+    I = np.array([np.transpose(np.tile(x, (3, 1))) for x in faces])
 
     # Flatten arrays and swap I and J:
     J_new = I.flatten()
@@ -235,7 +229,7 @@ def area_normalize(points, faces, spectrum):
     area = area_of_faces(points, faces)
     total_area = sum(area)
 
-    new_spectrum = [x*total_area for x in spectrum]
+    new_spectrum = [x * total_area for x in spectrum]
 
     return new_spectrum
 
@@ -277,13 +271,13 @@ def index_normalize(spectrum):
     """
 
     # define index list of floats
-    idx = [float(i) for i in range(1,len(spectrum) + 1)]
+    idx = [float(i) for i in range(1, len(spectrum) + 1)]
     # if first entry is zero, shift index
-    if (abs(spectrum[0]<1e-09)):
-        idx = [i-1 for i in idx]
+    if abs(spectrum[0] < 1e-09):
+        idx = [i - 1 for i in idx]
         idx[0] = 1.0
     # divide each element by its index
-    new_spectrum = [x/i for x, i in zip(spectrum, idx)]
+    new_spectrum = [x / i for x, i in zip(spectrum, idx)]
 
     return new_spectrum
 
@@ -323,32 +317,40 @@ def wesd(EVAL1, EVAL2, Vol1, Vol2, show_error=False, N=3):
     Vol = np.amax((Vol1, Vol2))
     mu = np.amax(EVAL1[1], EVAL2[1])
 
-    C = ((d+2)/(d*4*np.pi**2)*(Ball*Vol)**(2/d) - 1/mu)**p + \
-        ((d+2)/(d*4*np.pi**2)*(Ball*Vol/2)**(2/d) - 1/mu*(d/(d+4)))**p
+    C = ((d + 2) / (d * 4 * np.pi**2) * (Ball * Vol) ** (2 / d) - 1 / mu) ** p + (
+        (d + 2) / (d * 4 * np.pi**2) * (Ball * Vol / 2) ** (2 / d)
+        - 1 / mu * (d / (d + 4))
+    ) ** p
 
-    K = ((d+2)/(d*4*np.pi**2)*(Ball*Vol)**(2/d) - (1/mu)*(d/(d+2.64)))**p
+    K = (
+        (d + 2) / (d * 4 * np.pi**2) * (Ball * Vol) ** (2 / d)
+        - (1 / mu) * (d / (d + 2.64))
+    ) ** p
 
     # the right-hand side of Eq.(8) or the equation right after Eq.(4):
-    W = (C + K*(zeta(2*p/d,1) - 1 - .5**(2*p/d)))**(1/p)
+    W = (C + K * (zeta(2 * p / d, 1) - 1 - 0.5 ** (2 * p / d))) ** (1 / p)
 
     holder = 0
-    for i in range(1, np.amin((len(EVAL1), len(EVAL2) )) ):
-        holder += (np.abs(EVAL1[i] - EVAL2[i])/(EVAL1[i]*EVAL2[i]))**p
-    WESD = holder ** (1/p)
+    for i in range(1, np.amin((len(EVAL1), len(EVAL2)))):
+        holder += (np.abs(EVAL1[i] - EVAL2[i]) / (EVAL1[i] * EVAL2[i])) ** p
+    WESD = holder ** (1 / p)
 
-    #nWESD = WESD/W
+    # nWESD = WESD/W
 
     if show_error:
-        WN = (C + K * (sum([n**(-1*2*p/d) for n in range(3,N+1)])))**(1/p)
+        WN = (C + K * (sum([n ** (-1 * 2 * p / d) for n in range(3, N + 1)]))) ** (
+            1 / p
+        )
         # the second term on the right-hand side of Eq.(9)
-        #print("Truncation error of WESD is: {0}".format(W - WN))
-        #print("Truncation error of nWESD is: {1}".format(1 -  WN/W))
+        # print("Truncation error of WESD is: {0}".format(W - WN))
+        # print("Truncation error of nWESD is: {1}".format(1 -  WN/W))
 
     return WESD
 
 
-def fem_laplacian(points, faces, spectrum_size=10, normalization="areaindex",
-                  verbose=False):
+def fem_laplacian(
+    points, faces, spectrum_size=10, normalization="areaindex", verbose=False
+):
     """
     Compute linear finite-element method Laplace-Beltrami spectrum
     after Martin Reuter's MATLAB code.
@@ -466,8 +468,8 @@ def fem_laplacian(points, faces, spectrum_size=10, normalization="areaindex",
     [2.69259, 8.97865, 20.44857, 32.74477, 36.739]
 
     """
-    from scipy.sparse.linalg import eigsh, lobpcg
     import numpy as np
+    from scipy.sparse.linalg import eigsh, lobpcg
 
     from mindboggle.shapes.laplace_beltrami import computeAB
 
@@ -477,40 +479,41 @@ def fem_laplacian(points, faces, spectrum_size=10, normalization="areaindex",
     A, B = computeAB(points, faces)
     if A.shape[0] <= spectrum_size:
         if verbose:
-            print("The 3D shape has too few vertices ({0} <= {1}). Skip.".
-                  format(A.shape[0], spectrum_size))
+            print(
+                f"The 3D shape has too few vertices ({A.shape[0]} <= {spectrum_size}). Skip."
+            )
         return None
 
     # ----------------------------------------------------------------
     # Use the eigsh eigensolver:
     # ----------------------------------------------------------------
-    try :
-
+    try:
         # eigs is for nonsymmetric matrices while
         # eigsh is for real-symmetric or complex-Hermitian matrices:
         # Martin Reuter: "small sigma shift helps prevent numerical
         #   instabilities with zero eigenvalue"
-        eigenvalues, eigenvectors = eigsh(A, k=spectrum_size, M=B,
-                                          sigma=-0.01)
+        eigenvalues, eigenvectors = eigsh(A, k=spectrum_size, M=B, sigma=-0.01)
         spectrum = eigenvalues.tolist()
 
     # ----------------------------------------------------------------
     # Use the lobpcg eigensolver:
     # ----------------------------------------------------------------
-    except RuntimeError:     
-           
+    except RuntimeError:
         if verbose:
             print("eigsh() failed. Now try lobpcg.")
-            print("Warning: lobpcg can produce different results from "
-                  "Reuter (2006) shapeDNA-tria software.")
+            print(
+                "Warning: lobpcg can produce different results from "
+                "Reuter (2006) shapeDNA-tria software."
+            )
         # Initial eigenvector values:
         init_eigenvecs = np.random.random((A.shape[0], spectrum_size))
 
         # maxiter = 40 forces lobpcg to use 20 iterations.
         # Strangely, largest=false finds largest eigenvalues
         # and largest=True gives the smallest eigenvalues:
-        eigenvalues, eigenvectors = lobpcg(A, init_eigenvecs, B=B,
-                                           largest=True, maxiter=40)
+        eigenvalues, eigenvectors = lobpcg(
+            A, init_eigenvecs, B=B, largest=True, maxiter=40
+        )
         # Extract the real parts:
         spectrum = [value.real for value in eigenvalues]
 
@@ -523,19 +526,18 @@ def fem_laplacian(points, faces, spectrum_size=10, normalization="areaindex",
     if normalization == "area":
         spectrum = area_normalize(points, faces, spectrum)
         if verbose:
-            print("Compute area-normalized linear FEM Laplace-Beltrami "
-                  "spectrum")
+            print("Compute area-normalized linear FEM Laplace-Beltrami spectrum")
     elif normalization == "index":
         spectrum = index_normalize(spectrum)
         if verbose:
-            print("Compute index-normalized linear FEM Laplace-Beltrami"
-                  " spectrum")
+            print("Compute index-normalized linear FEM Laplace-Beltrami spectrum")
     elif normalization == "areaindex":
         spectrum = index_normalize(spectrum)
-        spectrum = area_normalize(points,faces,spectrum)
+        spectrum = area_normalize(points, faces, spectrum)
         if verbose:
-            print("Compute area and index-normalized linear FEM "
-                  "Laplace-Beltrami spectrum")
+            print(
+                "Compute area and index-normalized linear FEM Laplace-Beltrami spectrum"
+            )
     else:
         if verbose:
             print("Compute linear FEM Laplace-Beltrami spectrum")
@@ -543,8 +545,15 @@ def fem_laplacian(points, faces, spectrum_size=10, normalization="areaindex",
     return spectrum
 
 
-def spectrum_of_largest(points, faces, spectrum_size=10, exclude_labels=[-1],
-                        normalization="areaindex", areas=None, verbose=False):
+def spectrum_of_largest(
+    points,
+    faces,
+    spectrum_size=10,
+    exclude_labels=[-1],
+    normalization="areaindex",
+    areas=None,
+    verbose=False,
+):
     """
     Compute Laplace-Beltrami spectrum on largest connected segment.
 
@@ -617,8 +626,8 @@ def spectrum_of_largest(points, faces, spectrum_size=10, exclude_labels=[-1],
 
     """
     import numpy as np
-    #from scipy.sparse.linalg import eigsh, lobpcg
 
+    # from scipy.sparse.linalg import eigsh, lobpcg
     from mindboggle.guts.segment import select_largest
     from mindboggle.shapes.laplace_beltrami import fem_laplacian
 
@@ -627,39 +636,45 @@ def spectrum_of_largest(points, faces, spectrum_size=10, exclude_labels=[-1],
 
     # Check to see if there are enough points:
     min_points_faces = spectrum_size
-    npoints = len(points) 
+    npoints = len(points)
     if npoints < min_points_faces or len(faces) < min_points_faces:
-        raise IOError("The input size {0} ({1} faces) should be much larger "
-                      "than spectrum_size ({2})".
-                      format(npoints, len(faces), spectrum_size))
+        raise OSError(
+            f"The input size {npoints} ({len(faces)} faces) should be much larger "
+            f"than spectrum_size ({spectrum_size})"
+        )
         return None
     else:
-
         # --------------------------------------------------------------------
         # Select the largest segment (connected set of indices):
         # --------------------------------------------------------------------
-        points, faces = select_largest(points, faces, exclude_labels, areas,
-                                       reindex=True)
+        points, faces = select_largest(
+            points, faces, exclude_labels, areas, reindex=True
+        )
 
         # Alert if the number of indices is small:
         if len(points) < min_points_faces:
-            raise IOError("The input size {0} is too small.".
-                          format(len(points)))
+            raise OSError(f"The input size {len(points)} is too small.")
             return None
         elif faces:
-
             # ----------------------------------------------------------------
             # Compute spectrum:
             # ----------------------------------------------------------------
-            spectrum = fem_laplacian(points, faces, spectrum_size,
-                                     normalization, verbose)
+            spectrum = fem_laplacian(
+                points, faces, spectrum_size, normalization, verbose
+            )
             return spectrum
         else:
             return None
 
 
-def spectrum_from_file(vtk_file, spectrum_size=10, exclude_labels=[-1],
-                       normalization="areaindex", area_file='', verbose=False):
+def spectrum_from_file(
+    vtk_file,
+    spectrum_size=10,
+    exclude_labels=[-1],
+    normalization="areaindex",
+    area_file="",
+    verbose=False,
+):
     """
     Compute Laplace-Beltrami spectrum of a 3D shape in a VTK file.
 
@@ -706,11 +721,12 @@ def spectrum_from_file(vtk_file, spectrum_size=10, exclude_labels=[-1],
     >>> [np.float("{0:.{1}f}".format(x, 5)) for x in spectrum[1::]]
     [14.12801, 14.93573, 11.75397, 12.93141, 12.69348]
     """
-    from mindboggle.mio.vtks import read_vtk, read_scalars
+    from mindboggle.mio.vtks import read_scalars, read_vtk
     from mindboggle.shapes.laplace_beltrami import spectrum_of_largest
 
-    points, indices, lines, faces, scalars, scalar_names, npoints, \
-            input_vtk = read_vtk(vtk_file)
+    points, indices, lines, faces, scalars, scalar_names, npoints, input_vtk = read_vtk(
+        vtk_file
+    )
 
     # Area file:
     if area_file:
@@ -718,16 +734,22 @@ def spectrum_from_file(vtk_file, spectrum_size=10, exclude_labels=[-1],
     else:
         areas = None
 
-    spectrum = spectrum_of_largest(points, faces, spectrum_size,
-                                   exclude_labels, normalization, areas,
-                                   verbose)
+    spectrum = spectrum_of_largest(
+        points, faces, spectrum_size, exclude_labels, normalization, areas, verbose
+    )
 
     return spectrum
 
 
-def spectrum_per_label(vtk_file, spectrum_size=10, exclude_labels=[-1],
-                       normalization='areaindex', area_file='',
-                       largest_segment=True, verbose=False):
+def spectrum_per_label(
+    vtk_file,
+    spectrum_size=10,
+    exclude_labels=[-1],
+    normalization="areaindex",
+    area_file="",
+    largest_segment=True,
+    verbose=False,
+):
     """
     Compute Laplace-Beltrami spectrum per labeled region in a file.
 
@@ -782,14 +804,14 @@ def spectrum_per_label(vtk_file, spectrum_size=10, exclude_labels=[-1],
     [1029, 1005, 1011, 1021, 1008, 1025, 999, 1013, 1007, 1022]
 
     """
-    from mindboggle.mio.vtks import read_vtk, read_scalars
     from mindboggle.guts.mesh import keep_faces, reindex_faces_points
-    from mindboggle.shapes.laplace_beltrami import fem_laplacian,\
-        spectrum_of_largest
+    from mindboggle.mio.vtks import read_scalars, read_vtk
+    from mindboggle.shapes.laplace_beltrami import fem_laplacian, spectrum_of_largest
 
     # Read VTK surface mesh file:
-    points, indices, lines, faces, labels, scalar_names, npoints, \
-        input_vtk = read_vtk(vtk_file)
+    points, indices, lines, faces, labels, scalar_names, npoints, input_vtk = read_vtk(
+        vtk_file
+    )
 
     # Area file:
     if area_file:
@@ -799,18 +821,22 @@ def spectrum_per_label(vtk_file, spectrum_size=10, exclude_labels=[-1],
 
     # Loop through labeled regions:
     ulabels = []
-    [ulabels.append(int(x)) for x in labels if x not in ulabels
-     if x not in exclude_labels]
+    [
+        ulabels.append(int(x))
+        for x in labels
+        if x not in ulabels
+        if x not in exclude_labels
+    ]
     label_list = []
     spectrum_lists = []
     for label in ulabels:
-      #if label == 22:
-      #  print("DEBUG: COMPUTE FOR ONLY ONE LABEL")
+        # if label == 22:
+        #  print("DEBUG: COMPUTE FOR ONLY ONE LABEL")
 
         # Determine the indices per label:
-        Ilabel = [i for i,x in enumerate(labels) if x == label]
+        Ilabel = [i for i, x in enumerate(labels) if x == label]
         if verbose:
-          print('{0} vertices for label {1}'.format(len(Ilabel), label))
+            print(f"{len(Ilabel)} vertices for label {label}")
 
         # Remove background faces:
         pick_faces = keep_faces(faces, Ilabel)
@@ -819,13 +845,19 @@ def spectrum_per_label(vtk_file, spectrum_size=10, exclude_labels=[-1],
         # Compute Laplace-Beltrami spectrum for the label:
         if largest_segment:
             exclude_labels_inner = [-1]
-            spectrum = spectrum_of_largest(pick_points, pick_faces,
-                                           spectrum_size,
-                                           exclude_labels_inner,
-                                           normalization, areas, verbose)
+            spectrum = spectrum_of_largest(
+                pick_points,
+                pick_faces,
+                spectrum_size,
+                exclude_labels_inner,
+                normalization,
+                areas,
+                verbose,
+            )
         else:
-            spectrum = fem_laplacian(pick_points, pick_faces, spectrum_size,
-                                     normalization, verbose)
+            spectrum = fem_laplacian(
+                pick_points, pick_faces, spectrum_size, normalization, verbose
+            )
 
         # Append to a list of lists of spectra:
         spectrum_lists.append(spectrum)
@@ -839,20 +871,21 @@ def spectrum_per_label(vtk_file, spectrum_size=10, exclude_labels=[-1],
 # ============================================================================
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod(verbose=True)  # py.test --doctest-modules
 
 
-#if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    # import numpy as np
-    # # You should get different outputs if you change the coordinates of points.
-    # # If you do NOT see changes, you may be computing the graph Laplacian.
-    #
-    # # Define a cube:
-    # points = [[0,0,0], [1,0,0], [0,0,1], [0,1,1],
-    #           [1,0,1], [0,1,0], [1,1,1], [1,1,0]]
-    # # Pick some faces:
-    # faces = [[0,2,4], [0,1,4], [2,3,4], [3,4,5], [3,5,6], [0,1,7]]
-    #
-    # print("Linear FEM Laplace-Beltrami spectrum\n\t{0}\n".format(
-    #     fem_laplacian(points, faces, spectrum_size=5)))
+# import numpy as np
+# # You should get different outputs if you change the coordinates of points.
+# # If you do NOT see changes, you may be computing the graph Laplacian.
+#
+# # Define a cube:
+# points = [[0,0,0], [1,0,0], [0,0,1], [0,1,1],
+#           [1,0,1], [0,1,0], [1,1,1], [1,1,0]]
+# # Pick some faces:
+# faces = [[0,2,4], [0,1,4], [2,3,4], [3,4,5], [3,5,6], [0,1,7]]
+#
+# print("Linear FEM Laplace-Beltrami spectrum\n\t{0}\n".format(
+#     fem_laplacian(points, faces, spectrum_size=5)))

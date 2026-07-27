@@ -38,9 +38,17 @@ Copyright 2016,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 
 """
 
+import builtins
 
-def compute_likelihood(trained_file, depth_file, curvature_file, folds,
-                       save_file=False, background_value=-1):
+
+def compute_likelihood(
+    trained_file,
+    depth_file,
+    curvature_file,
+    folds,
+    save_file=False,
+    background_value=-1,
+):
     """
     Compute likelihoods based on input values, folds, estimated parameters.
 
@@ -102,10 +110,10 @@ def compute_likelihood(trained_file, depth_file, curvature_file, folds,
 
     """
     import os
-    import numpy as np
-    from math import pi
     import pickle
-    from io import open
+    from math import pi
+
+    import numpy as np
 
     from mindboggle.mio.vtks import read_scalars, rewrite_scalars
 
@@ -116,8 +124,9 @@ def compute_likelihood(trained_file, depth_file, curvature_file, folds,
     probs_nonborder = np.zeros(len(folds))
 
     # Load estimated depth and curvature distribution parameters:
-    depth_border, curv_border, depth_nonborder, \
-        curv_nonborder = pickle.load(open(trained_file, "rb"))
+    depth_border, curv_border, depth_nonborder, curv_nonborder = pickle.load(
+        builtins.open(trained_file, "rb")
+    )
 
     # Load depths, curvatures:
     depths, name = read_scalars(depth_file, True, True)
@@ -125,36 +134,42 @@ def compute_likelihood(trained_file, depth_file, curvature_file, folds,
 
     # Prep for below:
     n = 2
-    twopiexp = (2*pi)**(n/2)
-    border_sigmas = depth_border['sigmas'] * curv_border['sigmas']
-    nonborder_sigmas = depth_nonborder['sigmas'] * curv_nonborder['sigmas']
+    twopiexp = (2 * pi) ** (n / 2)
+    border_sigmas = depth_border["sigmas"] * curv_border["sigmas"]
+    nonborder_sigmas = depth_nonborder["sigmas"] * curv_nonborder["sigmas"]
     norm_border = 1 / (twopiexp * border_sigmas + tiny)
     norm_nonborder = 1 / (twopiexp * nonborder_sigmas + tiny)
-    I = [i for i,x in enumerate(folds) if x != background_value]
+    I = [i for i, x in enumerate(folds) if x != background_value]
 
-    N = depth_border['sigmas'].shape[0]
+    N = depth_border["sigmas"].shape[0]
     for j in range(N):
-
         # Border:
-        expB = depth_border['weights'][j] * \
-            ((depths[I]-depth_border['means'][j])**2) / \
-            depth_border['sigmas'][j]**2
-        expB += curv_border['weights'][j] * \
-            ((curvatures[I]-curv_border['means'][j])**2) / \
-            curv_border['sigmas'][j]**2
+        expB = (
+            depth_border["weights"][j]
+            * ((depths[I] - depth_border["means"][j]) ** 2)
+            / depth_border["sigmas"][j] ** 2
+        )
+        expB += (
+            curv_border["weights"][j]
+            * ((curvatures[I] - curv_border["means"][j]) ** 2)
+            / curv_border["sigmas"][j] ** 2
+        )
         expB = -expB / 2
         probs_border[I] = probs_border[I] + norm_border[j] * np.exp(expB)
 
         # Non-border:
-        expNB = depth_nonborder['weights'][j] * \
-            ((depths[I]-depth_nonborder['means'][j])**2) / \
-            depth_nonborder['sigmas'][j]**2
-        expNB += curv_nonborder['weights'][j] * \
-            ((curvatures[I]-curv_nonborder['means'][j])**2) / \
-            curv_nonborder['sigmas'][j]**2
+        expNB = (
+            depth_nonborder["weights"][j]
+            * ((depths[I] - depth_nonborder["means"][j]) ** 2)
+            / depth_nonborder["sigmas"][j] ** 2
+        )
+        expNB += (
+            curv_nonborder["weights"][j]
+            * ((curvatures[I] - curv_nonborder["means"][j]) ** 2)
+            / curv_nonborder["sigmas"][j] ** 2
+        )
         expNB = -expNB / 2
-        probs_nonborder[I] = probs_nonborder[I] + \
-                             norm_nonborder[j] * np.exp(expNB)
+        probs_nonborder[I] = probs_nonborder[I] + norm_nonborder[j] * np.exp(expNB)
 
     likelihoods = probs_border / (probs_nonborder + probs_border + tiny)
     likelihoods = likelihoods.tolist()
@@ -163,12 +178,17 @@ def compute_likelihood(trained_file, depth_file, curvature_file, folds,
     # Return likelihoods and output file name
     # ------------------------------------------------------------------------
     if save_file:
-
-        likelihoods_file = os.path.join(os.getcwd(), 'likelihoods.vtk')
-        rewrite_scalars(depth_file, likelihoods_file, likelihoods,
-                        'likelihoods', likelihoods, background_value)
+        likelihoods_file = os.path.join(os.getcwd(), "likelihoods.vtk")
+        rewrite_scalars(
+            depth_file,
+            likelihoods_file,
+            likelihoods,
+            "likelihoods",
+            likelihoods,
+            background_value,
+        )
         if not os.path.exists(likelihoods_file):
-            raise IOError(likelihoods_file + " not found")
+            raise OSError(likelihoods_file + " not found")
 
     else:
         likelihoods_file = None
@@ -176,8 +196,14 @@ def compute_likelihood(trained_file, depth_file, curvature_file, folds,
     return likelihoods, likelihoods_file
 
 
-def estimate_distribution(scalar_files, scalar_range, fold_files, label_files,
-                          background_value=-1, verbose=False):
+def estimate_distribution(
+    scalar_files,
+    scalar_range,
+    fold_files,
+    label_files,
+    background_value=-1,
+    verbose=False,
+):
     """
     Estimate sulcus label border scalar distributions from VTK files.
 
@@ -276,41 +302,45 @@ def estimate_distribution(scalar_files, scalar_range, fold_files, label_files,
     ...     open("depth_curv_border_nonborder_parameters.pkl", "wb"))
 
     """
-    from mindboggle.shapes.likelihood import concatenate_sulcus_scalars, \
-        fit_normals_to_histogram
+    from mindboggle.shapes.likelihood import (
+        concatenate_sulcus_scalars,
+        fit_normals_to_histogram,
+    )
 
     if not scalar_files or not fold_files or not label_files:
-        raise IOError("Input file lists cannot be empty.")
+        raise OSError("Input file lists cannot be empty.")
 
     # Concatenate scalars across multiple training files:
-    border_scalars, nonborder_scalars = concatenate_sulcus_scalars(scalar_files,
-        fold_files, label_files, background_value)
+    border_scalars, nonborder_scalars = concatenate_sulcus_scalars(
+        scalar_files, fold_files, label_files, background_value
+    )
 
     # Estimate distribution parameters:
-    border_means, border_sigmas, \
-        border_weights = fit_normals_to_histogram(border_scalars,
-                                                  scalar_range, verbose)
-    nonborder_means, nonborder_sigmas, \
-        nonborder_weights = fit_normals_to_histogram(nonborder_scalars,
-                                                     scalar_range, verbose)
+    border_means, border_sigmas, border_weights = fit_normals_to_histogram(
+        border_scalars, scalar_range, verbose
+    )
+    nonborder_means, nonborder_sigmas, nonborder_weights = fit_normals_to_histogram(
+        nonborder_scalars, scalar_range, verbose
+    )
 
     # Store outputs in dictionaries:
     border_parameters = {
-        'means': border_means,
-        'sigmas': border_sigmas,
-        'weights': border_weights
+        "means": border_means,
+        "sigmas": border_sigmas,
+        "weights": border_weights,
     }
     nonborder_parameters = {
-        'means': nonborder_means,
-        'sigmas': nonborder_sigmas,
-        'weights': nonborder_weights
+        "means": nonborder_means,
+        "sigmas": nonborder_sigmas,
+        "weights": nonborder_weights,
     }
 
     return border_parameters, nonborder_parameters
 
 
-def concatenate_sulcus_scalars(scalar_files, fold_files, label_files,
-                               background_value=-1):
+def concatenate_sulcus_scalars(
+    scalar_files, fold_files, label_files, background_value=-1
+):
     """
     Prepare data for estimating scalar distributions along and outside fundi.
 
@@ -360,23 +390,22 @@ def concatenate_sulcus_scalars(scalar_files, fold_files, label_files,
     """
     import numpy as np
 
-    from mindboggle.mio.vtks import read_scalars
     from mindboggle.guts.mesh import find_neighbors_from_file
     from mindboggle.guts.segment import extract_borders
     from mindboggle.mio.labels import DKTprotocol
+    from mindboggle.mio.vtks import read_scalars
 
     dkt = DKTprotocol()
 
     # Prepare (non-unique) list of sulcus label pairs:
-    protocol_label_pairs = [x for lst in dkt.sulcus_label_pair_lists
-                            for x in lst]
+    protocol_label_pairs = [x for lst in dkt.sulcus_label_pair_lists for x in lst]
 
     border_scalars = []
     nonborder_scalars = []
 
     # Loop through files with the scalar values:
     for ifile, scalar_file in enumerate(scalar_files):
-        #print(scalar_file)
+        # print(scalar_file)
 
         # Load scalars, folds, and labels:
         folds_file = fold_files[ifile]
@@ -385,22 +414,27 @@ def concatenate_sulcus_scalars(scalar_files, fold_files, label_files,
         if scalars.shape:
             folds, name = read_scalars(folds_file)
             labels, name = read_scalars(labels_file)
-            indices_folds = [i for i,x in enumerate(folds)
-                             if x != background_value]
+            indices_folds = [i for i, x in enumerate(folds) if x != background_value]
             neighbor_lists = find_neighbors_from_file(labels_file)
 
             # Find all label border pairs within the folds:
             indices_label_pairs, label_pairs, unique_pairs = extract_borders(
-                indices_folds, labels, neighbor_lists, ignore_values=[-1],
-                return_label_pairs=True)
+                indices_folds,
+                labels,
+                neighbor_lists,
+                ignore_values=[-1],
+                return_label_pairs=True,
+            )
             indices_label_pairs = np.array(indices_label_pairs)
 
             # Find vertices with label pairs in the sulcus labeling protocol:
-            Ipairs_in_protocol = [i for i,x in enumerate(label_pairs)
-                                  if x in protocol_label_pairs]
+            Ipairs_in_protocol = [
+                i for i, x in enumerate(label_pairs) if x in protocol_label_pairs
+            ]
             indices_label_pairs = indices_label_pairs[Ipairs_in_protocol]
-            indices_outside_pairs = list(frozenset(indices_folds).difference(
-                indices_label_pairs))
+            indices_outside_pairs = list(
+                frozenset(indices_folds).difference(indices_label_pairs)
+            )
 
             # Store scalar values in folds along label border pairs:
             border_scalars.extend(scalars[indices_label_pairs].tolist())
@@ -454,8 +488,9 @@ def fit_normals_to_histogram(data, x, verbose=False):
     [0.43959, 0.39286, 0.16755]
 
     """
-    import numpy as np
     from math import pi
+
+    import numpy as np
 
     # Initialize variables:
     k = 3
@@ -469,11 +504,11 @@ def fit_normals_to_histogram(data, x, verbose=False):
     # Initialize distribution means and sigmas:
     rangex = max(x) - min(x)
     for i in range(1, k + 1):
-        means[i-1] = max(x) - rangex/2 - 0.2 * rangex * (i - k/2)
-        sigmas[i-1] = 0.2
+        means[i - 1] = max(x) - rangex / 2 - 0.2 * rangex * (i - k / 2)
+        sigmas[i - 1] = 0.2
 
     if verbose:
-        print('Fitting normals to histograms...')
+        print("Fitting normals to histograms...")
 
     # Iteratively compute probabilities, weights, means and sigmas:
     iter = 0
@@ -481,27 +516,27 @@ def fit_normals_to_histogram(data, x, verbose=False):
         iter += 1
 
         for i in range(k):
-            m1 = 1 / (sigmas[i] * np.sqrt(2*pi) + tiny)
-            m2 = -((data-means[i])**2) / (2 *(sigmas[i]**2) + tiny)
-            probs[:,i] = m1 * np.exp(m2)
+            m1 = 1 / (sigmas[i] * np.sqrt(2 * pi) + tiny)
+            m2 = -((data - means[i]) ** 2) / (2 * (sigmas[i] ** 2) + tiny)
+            probs[:, i] = m1 * np.exp(m2)
 
         for i in range(k):
-            W[:,i] = probs[:,i] / (np.sum(probs, axis=1) + tiny)
+            W[:, i] = probs[:, i] / (np.sum(probs, axis=1) + tiny)
 
         for i in range(k):
-            n1 = sum(W[:,i] * (data - means[i])**2)
-            d1 = sum(W[:,i]) + tiny
-            sigmas[i] =  np.sqrt(n1 / d1)
-            means[i] = sum(W[:,i] * data) / d1
+            n1 = sum(W[:, i] * (data - means[i]) ** 2)
+            d1 = sum(W[:, i]) + tiny
+            sigmas[i] = np.sqrt(n1 / d1)
+            means[i] = sum(W[:, i] * data) / d1
 
         if verbose:
-            print('    means: {0}; sigmas: {1}'.format(means, sigmas))
+            print(f"    means: {means}; sigmas: {sigmas}")
 
     for i in range(k):
-        weights[i] = sum(W[:,i]) / (np.sum(W) + tiny)
+        weights[i] = sum(W[:, i]) / (np.sum(W) + tiny)
 
     if verbose:
-        print('    weights: {0}'.format(weights))
+        print(f"    weights: {weights}")
 
     return means, sigmas, weights
 
@@ -511,4 +546,5 @@ def fit_normals_to_histogram(data, x, verbose=False):
 # ============================================================================
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod(verbose=True)  # py.test --doctest-modules

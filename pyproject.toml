@@ -44,6 +44,10 @@ dependencies = [
 # Single-sourced from mindboggle/version.py (read statically, no package import).
 dynamic = ["version"]
 
+[dependency-groups]
+# Pinned so local runs match CI (which uses `uvx ruff@0.16.0`).
+dev = ["ruff==0.16.0"]
+
 [project.urls]
 Homepage = "https://mindboggle.info/"
 Repository = "https://github.com/childmindresearch/mindboggle"
@@ -87,10 +91,37 @@ line-length = 88
 extend-exclude = ["mindboggle/x"]
 
 [tool.ruff.lint]
-# Starting ruleset. Enforcement is rolled out via a ratchet (backlog: P0-2) —
-# the bulk of current violations are auto-fixable modernizations, with a small
-# tail of genuine bug-smells (F821/F632/F521) worth fixing by hand first.
 select = ["E", "F", "I", "UP", "B", "SIM", "C4", "RUF"]
+# Ratchet ledger: rules with pre-existing violations, grandfathered so CI is
+# green today. Interns re-enable them one family at a time by fixing the sites
+# and deleting the code here (see MIGRATION_2026.md / the 2026 backlog). New
+# code is still checked against every rule NOT listed here.
+ignore = [
+    # --- Likely-real bug smells: investigate before "fixing" (some may be
+    #     false positives from the dynamic style, some may be actual bugs) ---
+    "F821",   # undefined-name
+    "F841",   # unused-variable
+    "F521",   # string-dot-format-invalid-format
+    "B006",   # mutable-argument-default
+    "B008",   # function-call-in-default-argument
+    "B020",   # loop-variable-overrides-iterator
+    "B023",   # function-uses-loop-variable
+    "B904",   # raise-without-from-inside-except
+    "E711",   # none-comparison (== None)
+    "E722",   # bare-except
+    "E402",   # module-import-not-at-top-of-file
+    "RUF012", # mutable-class-default
+    "RUF059", # unused-unpacked-variable
+    # --- Mechanical cleanups: safe, deferred to keep changes reviewable ---
+    "UP030", "UP031",
+    "C402", "C404", "C408", "C410", "C414", "C416", "C419",
+    "SIM101", "SIM102", "SIM105", "SIM108", "SIM113", "SIM115", "SIM116",
+    "RUF002", "RUF005", "RUF015", "RUF017",
+    "B007", "B018", "B905",
+    "E702", "E731", "E741",
+    # --- Line length: handled by the one-shot `ruff format` pass (P2-1) ---
+    "E501",
+]
 
 [tool.ruff.lint.per-file-ignores]
 # Entry scripts are not imported as modules.

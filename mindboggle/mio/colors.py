@@ -11,9 +11,15 @@ Copyright 2016,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 
 import os
 
-def distinguishable_colors(ncolors, backgrounds=[[0,0,0],[1,1,1]],
-                           save_csv=True, plot_colormap=True, verbose=True,
-                           out_dir='.'):
+
+def distinguishable_colors(
+    ncolors,
+    backgrounds=[[0, 0, 0], [1, 1, 1]],
+    save_csv=True,
+    plot_colormap=True,
+    verbose=True,
+    out_dir=".",
+):
     """
     Create a colormap of perceptually distinguishable colors.
 
@@ -70,13 +76,13 @@ def distinguishable_colors(ncolors, backgrounds=[[0,0,0],[1,1,1]],
     True
 
     """
-    import numpy as np
     import matplotlib.pyplot as plt
-    from colormath.color_objects import LabColor, AdobeRGBColor
+    import numpy as np
     from colormath.color_conversions import convert_color
     from colormath.color_diff import delta_e_cie2000
+    from colormath.color_objects import AdobeRGBColor, LabColor
 
-    filename = "colormap_of_{0}_distinguishable_colors".format(ncolors)
+    filename = f"colormap_of_{ncolors}_distinguishable_colors"
     filename = os.path.join(out_dir, filename)
 
     # ------------------------------------------------------------------------
@@ -89,10 +95,12 @@ def distinguishable_colors(ncolors, backgrounds=[[0,0,0],[1,1,1]],
     R, G, B = np.meshgrid(x, x, x)
     ncolors_total = np.size(R)
     RGB = np.vstack([np.ravel(R), np.ravel(G), np.ravel(B)])
-    RGB = [[RGB[0][icolor], RGB[1][icolor], RGB[2][icolor]]
-           for icolor in range(ncolors_total)]
+    RGB = [
+        [RGB[0][icolor], RGB[1][icolor], RGB[2][icolor]]
+        for icolor in range(ncolors_total)
+    ]
     if ncolors > ncolors_total:
-        raise IOError("You can't readily distinguish that many colors")
+        raise OSError("You can't readily distinguish that many colors")
 
     # ------------------------------------------------------------------------
     # Convert to Lab color space which better represents human perception:
@@ -100,16 +108,12 @@ def distinguishable_colors(ncolors, backgrounds=[[0,0,0],[1,1,1]],
     # https://python-colormath.readthedocs.io/en/latest/illuminants.html
     lab_colors = []
     for rgb in RGB:
-        lab = convert_color(AdobeRGBColor(rgb[0],
-                                          rgb[1],
-                                          rgb[2]), LabColor)
+        lab = convert_color(AdobeRGBColor(rgb[0], rgb[1], rgb[2]), LabColor)
         lab_colors.append(lab)
 
     bg_lab_colors = []
     for bg_rgb in backgrounds:
-        bg_lab = convert_color(AdobeRGBColor(bg_rgb[0],
-                                             bg_rgb[1],
-                                             bg_rgb[2]), LabColor)
+        bg_lab = convert_color(AdobeRGBColor(bg_rgb[0], bg_rgb[1], bg_rgb[2]), LabColor)
         bg_lab_colors.append(bg_lab)
 
     # ------------------------------------------------------------------------
@@ -132,7 +136,6 @@ def distinguishable_colors(ncolors, backgrounds=[[0,0,0],[1,1,1]],
     last_lab_color = bg_lab_colors[-1]
     colors = np.zeros((ncolors, 3))
     for icolor in range(ncolors):
-
         # Find the difference of the last color from all colors on the list:
         for icolor_total, lab_color in enumerate(lab_colors):
             dx = delta_e_cie2000(lab_color, last_lab_color)
@@ -158,7 +161,7 @@ def distinguishable_colors(ncolors, backgrounds=[[0,0,0],[1,1,1]],
             ax = plt.subplot(ncolors, 1, icolor + 1)
             plt.axis("off")
             rgb = colors[icolor]
-            #rgb = [[rgb.rgb_r, rgb.rgb_g, rgb.rgb_b]]
+            # rgb = [[rgb.rgb_r, rgb.rgb_g, rgb.rgb_b]]
             if verbose:
                 print(rgb)
             plt.barh(0, 50, 1, 0, color=rgb)
@@ -170,17 +173,29 @@ def distinguishable_colors(ncolors, backgrounds=[[0,0,0],[1,1,1]],
     # Save the colormap as a csv file:
     # ------------------------------------------------------------------------
     if save_csv:
-        np.savetxt(filename + ".csv", colors, fmt='%.18e', delimiter=',',
-                   newline='\n', header='')
+        np.savetxt(
+            filename + ".csv",
+            colors,
+            fmt="%.18e",
+            delimiter=",",
+            newline="\n",
+            header="",
+        )
         if verbose:
             print("Colormap saved to {0}".format(filename + ".csv"))
 
     return colors
 
 
-def label_adjacency_matrix(label_file, ignore_values=[-1, 999], add_value=0,
-                           save_table=True, output_format='csv',
-                           verbose=True, out_dir='.'):
+def label_adjacency_matrix(
+    label_file,
+    ignore_values=[-1, 999],
+    add_value=0,
+    save_table=True,
+    output_format="csv",
+    verbose=True,
+    out_dir=".",
+):
     """
     Extract surface or volume label boundaries, find unique label pairs,
     and write adjacency matrix (useful for constructing a colormap).
@@ -252,48 +267,49 @@ def label_adjacency_matrix(label_file, ignore_values=[-1, 999], add_value=0,
     from mindboggle.mio.vtks import read_vtk
 
     # Use Mindboggle's extract_borders() function for surface VTK files:
-    if label_file.endswith('.vtk'):
-        f1,f2,f3, faces, labels, f4, npoints, f5 = read_vtk(label_file,
-                                                            True, True)
+    if label_file.endswith(".vtk"):
+        f1, f2, f3, faces, labels, f4, npoints, f5 = read_vtk(label_file, True, True)
         neighbor_lists = find_neighbors(faces, npoints)
         return_label_pairs = True
-        indices_borders, label_pairs, f1 = extract_borders(list(range(npoints)),
-            labels, neighbor_lists, ignore_values, return_label_pairs)
+        indices_borders, label_pairs, f1 = extract_borders(
+            list(range(npoints)),
+            labels,
+            neighbor_lists,
+            ignore_values,
+            return_label_pairs,
+        )
 
-        output_table = 'adjacent_surface_labels.' + output_format
+        output_table = "adjacent_surface_labels." + output_format
 
     # Use scipy to dilate volume files to find neighboring labels:
-    elif label_file.endswith('.nii.gz'):
-
+    elif label_file.endswith(".nii.gz"):
         L = load(label_file).get_data()
         unique_volume_labels = np.unique(L)
 
         label_pairs = []
         for label in unique_volume_labels:
-
             if label not in ignore_values:
-
-                B = L * np.logical_xor(ndimage.binary_dilation(L==int(label)),
-                                       (L==int(label)))
+                B = L * np.logical_xor(
+                    ndimage.binary_dilation(int(label) == L), (int(label) == L)
+                )
                 neighbor_labels = np.unique(np.ravel(B))
 
                 for neigh in neighbor_labels:
                     if neigh > 0 and neigh in unique_volume_labels:
-                    #        and neigh%2==(int(label)%2):
+                        #        and neigh%2==(int(label)%2):
                         label_pairs.append([int(label), int(neigh)])
 
-        output_table = 'adjacent_volume_labels.' + output_format
+        output_table = "adjacent_volume_labels." + output_format
 
     else:
-        raise IOError("Use appropriate input file type.")
+        raise OSError("Use appropriate input file type.")
 
     output_table = os.path.join(out_dir, output_table)
 
     # Find unique pairs (or first two of each list):
     pairs = []
     for pair in label_pairs:
-        new_pair = [int(pair[0]) + add_value,
-                    int(pair[1]) + add_value]
+        new_pair = [int(pair[0]) + add_value, int(pair[1]) + add_value]
         if new_pair not in pairs:
             pairs.append(new_pair)
 
@@ -306,18 +322,18 @@ def label_adjacency_matrix(label_file, ignore_values=[-1, 999], add_value=0,
         index2 = [i for i, x in enumerate(unique_labels) if x == pair[1]]
         matrix[index1, index2] = 1
 
-    df1 = pd.DataFrame({'ID': unique_labels}, index=None)
+    df1 = pd.DataFrame({"ID": unique_labels}, index=None)
     df2 = pd.DataFrame(matrix, index=None)
     df2.columns = unique_labels
     matrix = pd.concat([df1, df2], axis=1)
 
     if save_table:
-        if output_format == 'csv':
-            matrix.to_csv(output_table, index=False, encoding='utf-8')
+        if output_format == "csv":
+            matrix.to_csv(output_table, index=False, encoding="utf-8")
             if verbose:
-                print("Adjacency matrix saved to {0}".format(output_table))
+                print(f"Adjacency matrix saved to {output_table}")
         else:
-            raise IOError("Set appropriate output file format.")
+            raise OSError("Set appropriate output file format.")
     else:
         output_table = None
 
@@ -326,10 +342,20 @@ def label_adjacency_matrix(label_file, ignore_values=[-1, 999], add_value=0,
     return labels, matrix, output_table
 
 
-def group_colors(colormap, colormap_name, description='', adjacency_matrix=[],
-                 IDs=[], names=[], groups=[],
-                 save_text_files=True, plot_colors=True,
-                 plot_graphs=True, out_dir='.', verbose=True):
+def group_colors(
+    colormap,
+    colormap_name,
+    description="",
+    adjacency_matrix=[],
+    IDs=[],
+    names=[],
+    groups=[],
+    save_text_files=True,
+    plot_colors=True,
+    plot_graphs=True,
+    out_dir=".",
+    verbose=True,
+):
     """
     This greedy algoritm reorders a colormap so that labels assigned to
     the same group have more similar colors, but within a group (usually
@@ -460,15 +486,16 @@ def group_colors(colormap, colormap_name, description='', adjacency_matrix=[],
     True
 
     """
+    import itertools
     import os
-    import pandas as pd
-    import numpy as np
+
     import matplotlib.pyplot as plt
     import networkx as nx
-    from colormath.color_diff import delta_e_cie2000
-    from colormath.color_objects import LabColor, AdobeRGBColor
+    import numpy as np
+    import pandas as pd
     from colormath.color_conversions import convert_color
-    import itertools
+    from colormath.color_diff import delta_e_cie2000
+    from colormath.color_objects import AdobeRGBColor, LabColor
 
     from mindboggle.mio.colors import write_json_colormap, write_xml_colormap
 
@@ -488,12 +515,12 @@ def group_colors(colormap, colormap_name, description='', adjacency_matrix=[],
         subgraph_image_file_post = ".png"
 
     if plot_colors:
-        colormap_image_file = os.path.join(out_dir, 'label_colormap.png')
+        colormap_image_file = os.path.join(out_dir, "label_colormap.png")
 
     if save_text_files:
-        colormap_csv_file = os.path.join(out_dir, 'label_colormap.csv')
-        colormap_json_file = os.path.join(out_dir, 'label_colormap.json')
-        colormap_xml_file = os.path.join(out_dir, 'label_colormap.xml')
+        colormap_csv_file = os.path.join(out_dir, "label_colormap.csv")
+        colormap_json_file = os.path.join(out_dir, "label_colormap.json")
+        colormap_xml_file = os.path.join(out_dir, "label_colormap.xml")
 
     run_permutations = False
 
@@ -505,10 +532,10 @@ def group_colors(colormap, colormap_name, description='', adjacency_matrix=[],
     if isinstance(colormap, np.ndarray):
         colors = colormap
     elif isinstance(colormap, str):
-        colors = pd.read_csv(colormap, sep=',', header=None)
+        colors = pd.read_csv(colormap, sep=",", header=None)
         colors = colors.values
     else:
-        raise IOError("Please use correct format for colormap.")
+        raise OSError("Please use correct format for colormap.")
     nlabels = np.shape(colors)[0]
     new_colors = np.copy(colors)
 
@@ -525,8 +552,9 @@ def group_colors(colormap, colormap_name, description='', adjacency_matrix=[],
     # https://python-colormath.readthedocs.io/en/latest/illuminants.html
     lab_colors = []
     for rgb in colors:
-        lab_colors.append(convert_color(AdobeRGBColor(rgb[0], rgb[1], rgb[2]),
-                                        LabColor))
+        lab_colors.append(
+            convert_color(AdobeRGBColor(rgb[0], rgb[1], rgb[2]), LabColor)
+        )
 
     # ------------------------------------------------------------------------
     # Load label adjacency matrix:
@@ -542,17 +570,19 @@ def group_colors(colormap, colormap_name, description='', adjacency_matrix=[],
         #    column 2 = "group" number (each label is assigned to a group)
         #    columns 3... = label adjacency matrix
         elif isinstance(adjacency_matrix, str):
-            matrix = pd.read_csv(adjacency_matrix, sep=',', header=None)
+            matrix = pd.read_csv(adjacency_matrix, sep=",", header=None)
             matrix = matrix.values
             IDs = matrix.ID
             names = matrix.name
             groups = matrix.group
             adjacency_values = matrix[[str(x) for x in IDs]].values
         else:
-            raise IOError("Please use correct format for adjacency matrix.")
+            raise OSError("Please use correct format for adjacency matrix.")
         if np.shape(adjacency_values)[0] != nlabels:
-            raise IOError("The colormap and label adjacency matrix don't "
-                          "have the same number of labels.")
+            raise OSError(
+                "The colormap and label adjacency matrix don't "
+                "have the same number of labels."
+            )
 
         # Normalize adjacency values:
         adjacency_values = adjacency_values / np.max(adjacency_values)
@@ -563,7 +593,7 @@ def group_colors(colormap, colormap_name, description='', adjacency_matrix=[],
     # Sort labels by decreasing number of adjacent labels (adjacency sum):
     # ------------------------------------------------------------------------
     if np.size(adjacency_matrix):
-        adjacency_sums = np.sum(adjacency_values, axis = 1)  # sum rows
+        adjacency_sums = np.sum(adjacency_values, axis=1)  # sum rows
         isort_labels = np.argsort(adjacency_sums)[::-1]
     else:
         isort_labels = range(nlabels)
@@ -575,7 +605,7 @@ def group_colors(colormap, colormap_name, description='', adjacency_matrix=[],
     if np.size(adjacency_matrix):
         max_adjacency_sums = []
         for label_group in label_groups:
-            igroup = [i for i,x in enumerate(groups) if x == label_group]
+            igroup = [i for i, x in enumerate(groups) if x == label_group]
             max_adjacency_sums.append(max(adjacency_sums[igroup]))
         label_groups = label_groups[np.argsort(max_adjacency_sums)[::-1]]
 
@@ -585,9 +615,9 @@ def group_colors(colormap, colormap_name, description='', adjacency_matrix=[],
     if plot_graphs:
         adjacency_graph = nx.from_numpy_matrix(adjacency_values)
         for inode in range(nlabels):
-            adjacency_graph.node[inode]['ID'] = IDs[inode]
-            adjacency_graph.node[inode]['label'] = names[inode]
-            adjacency_graph.node[inode]['group'] = groups[inode]
+            adjacency_graph.node[inode]["ID"] = IDs[inode]
+            adjacency_graph.node[inode]["label"] = names[inode]
+            adjacency_graph.node[inode]["group"] = groups[inode]
 
     # ------------------------------------------------------------------------
     # Create a similarity matrix for pairs of colors:
@@ -597,20 +627,21 @@ def group_colors(colormap, colormap_name, description='', adjacency_matrix=[],
     dx_matrix = np.zeros((nlabels, nlabels))
     for icolor1 in range(nlabels):
         for icolor2 in range(nlabels):
-            dx_matrix[icolor1,icolor2] = delta_e_cie2000(lab_colors[icolor1],
-                                                         lab_colors[icolor2])
+            dx_matrix[icolor1, icolor2] = delta_e_cie2000(
+                lab_colors[icolor1], lab_colors[icolor2]
+            )
     # ------------------------------------------------------------------------
     # Sort colors by decreasing perceptual difference from all other colors:
     # ------------------------------------------------------------------------
-    icolors_to_pick = list(np.argsort(np.sum(dx_matrix, axis = 1))[::-1])
+    icolors_to_pick = list(np.argsort(np.sum(dx_matrix, axis=1))[::-1])
 
     # ------------------------------------------------------------------------
     # Loop through label groups:
     # ------------------------------------------------------------------------
     for label_group in label_groups:
         if verbose:
-            print("Labels in group {0}...".format(label_group))
-        igroup = [i for i,x in enumerate(groups) if x == label_group]
+            print(f"Labels in group {label_group}...")
+        igroup = [i for i, x in enumerate(groups) if x == label_group]
         N = len(igroup)
 
         # --------------------------------------------------------------------
@@ -618,13 +649,11 @@ def group_colors(colormap, colormap_name, description='', adjacency_matrix=[],
         # unpicked color (unpicked colors were sorted above by decreasing
         # perceptual difference from all other colors):
         # --------------------------------------------------------------------
-        isimilar = np.argsort(dx_matrix[icolors_to_pick[0],
-                                        icolors_to_pick])[0:N]
+        isimilar = np.argsort(dx_matrix[icolors_to_pick[0], icolors_to_pick])[0:N]
         icolors_to_pick_copy = icolors_to_pick.copy()
         group_colors = [list(colors[icolors_to_pick[i]]) for i in isimilar]
         if run_permutations:
-            group_lab_colors = [lab_colors[icolors_to_pick[i]]
-                                for i in isimilar]
+            group_lab_colors = [lab_colors[icolors_to_pick[i]] for i in isimilar]
         for iremove in isimilar:
             icolors_to_pick.remove(icolors_to_pick_copy[iremove])
 
@@ -652,27 +681,29 @@ def group_colors(colormap, colormap_name, description='', adjacency_matrix=[],
             # Permute colors and color pair differences:
             # ----------------------------------------------------------------
             DEmax = 0
-            permutations = [np.array(s) for s
-                            in itertools.permutations(range(0, N), N)]
+            permutations = [np.array(s) for s in itertools.permutations(range(0, N), N)]
             if verbose:
-                print(" ".join([str(N),'labels,',
-                                str(len(permutations)),
-                                'permutations:']))
+                print(
+                    " ".join(
+                        [str(N), "labels,", str(len(permutations)), "permutations:"]
+                    )
+                )
             for permutation in permutations:
                 delta_matrix = NxN_matrix.copy()
                 for i1 in range(N):
-                  for i2 in range(N):
-                    if (i2 > i1) and (neighbor_matrix[i1, i2] > 0):
-                      delta_matrix[i1,i2] = delta_e_cie2000(group_lab_colors[i1],
-                                                            group_lab_colors[i2])
+                    for i2 in range(N):
+                        if (i2 > i1) and (neighbor_matrix[i1, i2] > 0):
+                            delta_matrix[i1, i2] = delta_e_cie2000(
+                                group_lab_colors[i1], group_lab_colors[i2]
+                            )
                 if weights:
-                    DE = np.sum((delta_matrix * neighbor_matrix))
+                    DE = np.sum(delta_matrix * neighbor_matrix)
                 else:
                     DE = np.sum(delta_matrix)
                 # ------------------------------------------------------------
                 # Store color permutation with maximum adjacency cost:
                 # ------------------------------------------------------------
-                if DE > DEmax:
+                if DEmax < DE:
                     DEmax = DE
                     permutation_max = permutation
                 # ------------------------------------------------------------
@@ -695,35 +726,52 @@ def group_colors(colormap, colormap_name, description='', adjacency_matrix=[],
             subgraph = adjacency_graph.subgraph(igroup)
 
             # Layout:
-            pos = nx.nx_pydot.graphviz_layout(subgraph,
-                                              prog="neato")
-            nx.draw(subgraph, pos, node_size=subgraph_node_size,
-                    width=subgraph_edge_width, alpha=0.5,
-                    with_labels=False)
+            pos = nx.nx_pydot.graphviz_layout(subgraph, prog="neato")
+            nx.draw(
+                subgraph,
+                pos,
+                node_size=subgraph_node_size,
+                width=subgraph_edge_width,
+                alpha=0.5,
+                with_labels=False,
+            )
 
             # Labels:
-            labels={}
+            labels = {}
             for iN in range(N):
-                labels[subgraph.nodes()[iN]] = \
-                    subgraph.node[subgraph.nodes()[iN]]['label']
-            nx.draw_networkx_labels(subgraph, pos, labels,
-                                    font_size=subgraph_font_size,
-                                    font_color='black')
+                labels[subgraph.nodes()[iN]] = subgraph.node[subgraph.nodes()[iN]][
+                    "label"
+                ]
+            nx.draw_networkx_labels(
+                subgraph, pos, labels, font_size=subgraph_font_size, font_color="black"
+            )
             # Nodes:
             nodelist = list(subgraph.node.keys())
             for iN in range(N):
-                nx.draw_networkx_nodes(subgraph, pos,
+                nx.draw_networkx_nodes(
+                    subgraph,
+                    pos,
                     node_size=subgraph_node_size,
                     nodelist=[nodelist[iN]],
-                    node_color=group_colors[iN])
+                    node_color=group_colors[iN],
+                )
 
             # Figure:
             ax = plt.gca().axis()
-            plt.gca().axis([ax[0]-axis_buffer, ax[1]+axis_buffer,
-                            ax[2]-axis_buffer, ax[3]+axis_buffer])
-            plt.savefig(subgraph_image_file_pre + str(int(label_group)) +
-                        subgraph_image_file_post)
-            #plt.show()
+            plt.gca().axis(
+                [
+                    ax[0] - axis_buffer,
+                    ax[1] + axis_buffer,
+                    ax[2] - axis_buffer,
+                    ax[3] + axis_buffer,
+                ]
+            )
+            plt.savefig(
+                subgraph_image_file_pre
+                + str(int(label_group))
+                + subgraph_image_file_post
+            )
+            # plt.show()
 
     # ------------------------------------------------------------------------
     # Plot the entire graph (without colors):
@@ -733,19 +781,22 @@ def group_colors(colormap, colormap_name, description='', adjacency_matrix=[],
 
         # Graph:
         pos = nx.nx_pydot.graphviz_layout(adjacency_graph, prog="neato")
-        nx.draw(adjacency_graph, pos,
-                node_color='yellow',
-                node_size=graph_node_size,
-                width=graph_edge_width,
-                with_labels=False)
+        nx.draw(
+            adjacency_graph,
+            pos,
+            node_color="yellow",
+            node_size=graph_node_size,
+            width=graph_edge_width,
+            with_labels=False,
+        )
 
         # Labels:
-        labels={}
+        labels = {}
         for ilabel in range(nlabels):
-            labels[ilabel] = adjacency_graph.node[ilabel]['label']
-        nx.draw_networkx_labels(adjacency_graph, pos, labels,
-                                font_size=graph_font_size,
-                                font_color='black')
+            labels[ilabel] = adjacency_graph.node[ilabel]["label"]
+        nx.draw_networkx_labels(
+            adjacency_graph, pos, labels, font_size=graph_font_size, font_color="black"
+        )
         # # Nodes:
         # nodelist = list(adjacency_graph.node.keys())
         # for icolor, new_color in enumerate(new_colors):
@@ -782,28 +833,39 @@ def group_colors(colormap, colormap_name, description='', adjacency_matrix=[],
     # Save new colormap as text files:
     # ------------------------------------------------------------------------
     if save_text_files:
-
         # ------------------------------------------------------------------------
         # Save new colormap as a csv file:
         # ------------------------------------------------------------------------
-        np.savetxt(colormap_csv_file, new_colors, fmt='%.18e', delimiter=',',
-                   newline='\n', header='')
+        np.savetxt(
+            colormap_csv_file,
+            new_colors,
+            fmt="%.18e",
+            delimiter=",",
+            newline="\n",
+            header="",
+        )
 
         # ------------------------------------------------------------------------
         # Save new colormap as a json file:
         # ------------------------------------------------------------------------
-        write_json_colormap(colormap=new_colors, label_numbers=IDs,
-                            label_names=names,
-                            colormap_file=colormap_json_file,
-                            colormap_name=colormap_name,
-                            description=description)
+        write_json_colormap(
+            colormap=new_colors,
+            label_numbers=IDs,
+            label_names=names,
+            colormap_file=colormap_json_file,
+            colormap_name=colormap_name,
+            description=description,
+        )
 
         # ------------------------------------------------------------------------
         # Save new colormap as an xml file:
         # ------------------------------------------------------------------------
-        write_xml_colormap(colormap=new_colors, label_numbers=IDs,
-                           colormap_file=colormap_xml_file,
-                           colormap_name=colormap_name)
+        write_xml_colormap(
+            colormap=new_colors,
+            label_numbers=IDs,
+            colormap_file=colormap_xml_file,
+            colormap_name=colormap_name,
+        )
 
     # ------------------------------------------------------------------------
     # Return new colors:
@@ -813,8 +875,14 @@ def group_colors(colormap, colormap_name, description='', adjacency_matrix=[],
     return colors
 
 
-def write_json_colormap(colormap, label_numbers, label_names=[],
-                        colormap_file='', colormap_name='', description=''):
+def write_json_colormap(
+    colormap,
+    label_numbers,
+    label_names=[],
+    colormap_file="",
+    colormap_name="",
+    description="",
+):
     """
     Write colormap to json format.
 
@@ -853,34 +921,40 @@ def write_json_colormap(colormap, label_numbers, label_names=[],
     """
 
     if not colormap_file:
-        colormap_file = 'label_colormap.json'
+        colormap_file = "label_colormap.json"
     if not colormap_name:
-        colormap_name = 'Colormap'
+        colormap_name = "Colormap"
 
-    f = open(colormap_file, 'w', encoding='utf-8')
+    f = open(colormap_file, "w", encoding="utf-8")
     f.write("{\n")
-    f.write('    "name": "{0}",\n'.format(colormap_name))
-    f.write('    "description": "{0}",\n'.format(description))
+    f.write(f'    "name": "{colormap_name}",\n')
+    f.write(f'    "description": "{description}",\n')
     f.write('    "colormap": [\n')
 
-
     for icolor, color in enumerate(colormap):
-
         if icolor == len(colormap) - 1:
-            end_comma = ''
+            end_comma = ""
         else:
-            end_comma = ','
+            end_comma = ","
 
-        f.write('    {0}"ID": "{1}", "name": "{2}", '
-                '"red": "{3}", "green": "{4}", "blue": "{5}"{6}{7}\n'.
-                format("{", label_numbers[icolor], label_names[icolor],
-                       color[0], color[1], color[2], "}", end_comma))
-    f.write(']}')
+        f.write(
+            '    {0}"ID": "{1}", "name": "{2}", '
+            '"red": "{3}", "green": "{4}", "blue": "{5}"{6}{7}\n'.format(
+                "{",
+                label_numbers[icolor],
+                label_names[icolor],
+                color[0],
+                color[1],
+                color[2],
+                "}",
+                end_comma,
+            )
+        )
+    f.write("]}")
     f.close()
 
 
-def write_xml_colormap(colormap, label_numbers, colormap_file='',
-                       colormap_name=''):
+def write_xml_colormap(colormap, label_numbers, colormap_file="", colormap_name=""):
     """
     Write colormap to xml format.
 
@@ -913,25 +987,26 @@ def write_xml_colormap(colormap, label_numbers, colormap_file='',
     """
 
     if not colormap_file:
-        colormap_file = 'label_colormap.xml'
+        colormap_file = "label_colormap.xml"
     if not colormap_name:
-        colormap_name = 'Colormap'
+        colormap_name = "Colormap"
 
-    f = open(colormap_file, 'w', encoding='utf-8')
-    f.write('''
-<ColorMap name="{0}" space="RGB">
+    f = open(colormap_file, "w", encoding="utf-8")
+    f.write(f'''
+<ColorMap name="{colormap_name}" space="RGB">
     <NaN r="0" g="0" b="0"/>
     <Point x="-1" o="0"  r="0" g="0" b="0"/>
-'''.format(colormap_name))
+''')
 
     for icolor, color in enumerate(colormap):
-        f.write('''    <Point x="{0}" o="1" r="{1}" g="{2}" b="{3}"/>
-        '''.format(label_numbers[icolor], color[0], color[1], color[2]))
+        f.write(f'''    <Point x="{label_numbers[icolor]}" o="1" r="{color[0]}" g="{color[1]}" b="{color[2]}"/>
+        ''')
 
-    f.write('''
+    f.write("""
 </ColorMap>
-''')
+""")
     f.close()
+
 
 def viridis_colormap():
     """
@@ -943,7 +1018,8 @@ def viridis_colormap():
         viridis colormap
 
     """
-    viridis = [[0.267004, 0.004874, 0.329415],
+    viridis = [
+        [0.267004, 0.004874, 0.329415],
         [0.268510, 0.009605, 0.335427],
         [0.269944, 0.014625, 0.341379],
         [0.271305, 0.019942, 0.347269],
@@ -1198,6 +1274,7 @@ def viridis_colormap():
         [0.964894, 0.902323, 0.123941],
         [0.974417, 0.903590, 0.130215],
         [0.983868, 0.904867, 0.136897],
-        [0.993248, 0.906157, 0.143936]]
+        [0.993248, 0.906157, 0.143936],
+    ]
 
     return viridis
