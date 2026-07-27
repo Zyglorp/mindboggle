@@ -1,10 +1,13 @@
-from . import zernike
-#from .test.multiproc import MultiprocPipeline
-from mindboggle.mio.vtks import read_vtk
-import numpy as np
-
 import argparse
 import logging
+
+import numpy as np
+
+#from .test.multiproc import MultiprocPipeline
+from mindboggle.mio.vtks import read_vtk
+
+from . import zernike
+
 #import profilehooks
 
 def example1():
@@ -56,7 +59,7 @@ def main():
     if ns.vtk_file is not None:
         points, indices, lines, faces, depths, scalar_names, npoints, \
             input_vtk = read_vtk(ns.vtk_file)
-        print('{0} {1}'.format(len(faces), len(points)))
+        print(f'{len(faces)} {len(points)}')
         X = zernike_fn(points, faces, order=ns.order, scale_input=True)
         if ns.validate:
             Y = zernike_fn(points, faces, order=ns.order, scale_input=True, pl_cls=MultiprocPipeline)

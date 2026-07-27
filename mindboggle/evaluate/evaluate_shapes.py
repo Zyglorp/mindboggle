@@ -45,8 +45,9 @@ if __name__ == "__main__":
     def compare_surface_shape_measures_by_vertex():
 
         import os
-        import pandas as pd
+
         import numpy as np
+        import pandas as pd
 
         from mindboggle.guts.compute import distcorr
         from mindboggle.mio.labels import DKTprotocol
@@ -59,7 +60,7 @@ if __name__ == "__main__":
         label_names_bilateral = dkt.DKT31_names
 
         subject_list = '/Users/arno/Data/subject_list_Mindboggle101.txt'
-        fid = open(subject_list, 'r')
+        fid = open(subject_list)
         subjects = [x.strip() for x in fid.readlines()]
 
         table_dir = '/Users/arno/Data/manual_tables'
@@ -140,8 +141,9 @@ if __name__ == "__main__":
     def compare_thickness_measures():
 
         import os
-        import pandas as pd
+
         import numpy as np
+        import pandas as pd
 
         from mindboggle.guts.compute import distcorr
         from mindboggle.mio.labels import DKTprotocol
@@ -150,7 +152,7 @@ if __name__ == "__main__":
         label_names = dkt.cerebrum_cortex_DKT31_names
 
         subject_list = '/Users/arno/Data/subject_list_Mindboggle101.txt'
-        fid = open(subject_list, 'r')
+        fid = open(subject_list)
         subjects = [x.strip() for x in fid.readlines()]
 
         table_dir = '/Users/arno/Data/manual_tables'
@@ -216,13 +218,15 @@ if __name__ == "__main__":
     # ------------------------------------------------------------------------
     def compare_shapes_between_scans():
         import os
-        import numpy as np
-        import pandas as pd
 
         # For plotting:
         from math import pi
+
+        import numpy as np
+        import pandas as pd
         from bokeh.models import HoverTool
-        from bokeh.plotting import ColumnDataSource, figure, show, save, output_file
+        from bokeh.plotting import ColumnDataSource, figure, output_file, save
+
         from mindboggle.mio.colors import viridis_colormap
         from mindboggle.mio.labels import DKTprotocol
         #from mindboggle.mio.plots import histograms_of_lists
@@ -412,7 +416,7 @@ if __name__ == "__main__":
             n10 = len(np.where(data.values > 0.1)[0])
             print(title)
             print("Fractional absolute differences above "
-                  "0.5: {0}; 0.25: {1}; 0.1: {2}".format(n50, n25, n10))
+                  f"0.5: {n50}; 0.25: {n25}; 0.1: {n10}")
             print("")
             #iInf, jInf = np.where(data.values == np.inf)
             #data.iloc[iInf, jInf] = 'NaN'
@@ -531,13 +535,15 @@ if __name__ == "__main__":
     def compare_shapes_between_hemispheres():
 
         import os
-        import numpy as np
-        import pandas as pd
 
         # For plotting:
         from math import pi
+
+        import numpy as np
+        import pandas as pd
         from bokeh.models import HoverTool
-        from bokeh.plotting import ColumnDataSource, figure, show, save, output_file
+        from bokeh.plotting import ColumnDataSource, figure, output_file, save
+
         from mindboggle.mio.colors import viridis_colormap
         from mindboggle.mio.labels import DKTprotocol
 
@@ -600,7 +606,7 @@ if __name__ == "__main__":
         # Subjects:
         # --------------------------------------------------------------------
         subject_list = '/Users/arno/Data/subject_list_Mindboggle101.txt'
-        fid = open(subject_list, 'r')
+        fid = open(subject_list)
         subjects = [x.strip() for x in fid.readlines()]
 
         # --------------------------------------------------------------------
@@ -674,7 +680,7 @@ if __name__ == "__main__":
             n10 = len(np.where(data.values > 0.1)[0])
             print(title)
             print("Fractional absolute differences above "
-                  "0.5: {0}; 0.25: {1}; 0.1: {2}".format(n50, n25, n10))
+                  f"0.5: {n50}; 0.25: {n25}; 0.1: {n10}")
             print("")
             data.to_csv(name + '_fractional_abs_differences.csv', encoding='utf-8')
             data_summary = data.describe(include='all')

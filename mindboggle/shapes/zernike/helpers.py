@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def nested_loop(stack, args):
     if len(stack) != 0:
         fn = stack.pop()

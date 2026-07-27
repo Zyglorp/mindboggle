@@ -218,7 +218,9 @@ def pairwise_vector_distances(vectors, save_file=False, normalize=False):
 
     """
     import os
+
     import numpy as np
+
     from mindboggle.guts.compute import vector_distance
 
     # Make sure argument is a numpy array
@@ -247,7 +249,7 @@ def pairwise_vector_distances(vectors, save_file=False, normalize=False):
         np.savetxt(outfile, vector_distances,
                    fmt=len(vectors) * '%.4f ', delimiter='\t', newline='\n')
         if not os.path.exists(outfile):
-            raise IOError(outfile + " not found")
+            raise OSError(outfile + " not found")
     else:
         outfile = ''
 
@@ -294,6 +296,7 @@ def source_to_target_distances(sourceIDs, targetIDs, points,
 
     """
     import numpy as np
+
     from mindboggle.guts.compute import point_distance
 
     if isinstance(points, list):
@@ -440,6 +443,7 @@ def weighted_median(X, W=[], precision=1):
 
     """
     import numpy as np
+
     from mindboggle.guts.compute import weighted_to_repeated_values
 
     # Make sure arguments have the correct type:
@@ -491,6 +495,7 @@ def median_abs_dev(X, W=[], precision=1, c=1.0):
 
     """
     import numpy as np
+
     from mindboggle.guts.compute import weighted_to_repeated_values
 
     # Make sure arguments have the correct type:
@@ -799,8 +804,9 @@ def stats_per_label(values, labels, include_labels=[], exclude_labels=[],
 
     """
     import numpy as np
-    from scipy.stats import skew, kurtosis, scoreatpercentile
-    from mindboggle.guts.compute import weighted_to_repeated_values, median_abs_dev
+    from scipy.stats import kurtosis, scoreatpercentile, skew
+
+    from mindboggle.guts.compute import median_abs_dev, weighted_to_repeated_values
 
     # Make sure arguments are numpy arrays:
     if not isinstance(values, np.ndarray):
@@ -959,7 +965,7 @@ def count_per_label(labels, include_labels=[], exclude_labels=[]):
     elif isinstance(labels, np.ndarray):
         pass
     else:
-        raise IOError("labels should be a numpy array.")
+        raise OSError("labels should be a numpy array.")
 
     # Unique list of labels:
     if include_labels:
@@ -1030,6 +1036,7 @@ def compute_overlaps(targets, list1, list2, output_file='', save_output=True,
 
     """
     import os
+
     import numpy as np
     import pandas as pd
 
@@ -1039,7 +1046,7 @@ def compute_overlaps(targets, list1, list2, output_file='', save_output=True,
         list2 = np.array(list2)
 
     if np.size(list1) != np.size(list2):
-        raise IOError("Files are different sizes")
+        raise OSError("Files are different sizes")
 
     # Initialize output:
     dice_overlaps = np.zeros(len(targets))
@@ -1069,8 +1076,7 @@ def compute_overlaps(targets, list1, list2, output_file='', save_output=True,
             dice_overlaps[itarget] = dice
             jacc_overlaps[itarget] = jacc
             if verbose:
-                print('target: {0}, dice: {1:.2f}, jacc: {2:.2f}'.format(
-                      target, dice, jacc))
+                print(f'target: {target}, dice: {dice:.2f}, jacc: {jacc:.2f}')
 
     # Save output:
     if save_output:
@@ -1117,8 +1123,8 @@ def compute_image_histogram(infile, nbins=100, threshold=0.0):
     array([102865, 119610,      0,      0,      0])
 
     """
-    import numpy as np
     import nibabel as nb
+    import numpy as np
     #from pylab import plot #, hist
 
     # ------------------------------------------------------------------------

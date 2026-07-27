@@ -99,8 +99,8 @@ def find_depth_threshold(depth_file, min_vertices=10000, verbose=False):
     if npoints > min_vertices:
         nbins = np.int(np.round(npoints / 100.0))
     else:
-        raise IOError("  Expecting at least {0} vertices to create "
-                      "depth histogram".format(min_vertices))
+        raise OSError(f"  Expecting at least {min_vertices} vertices to create "
+                      "depth histogram")
     bins, bin_edges = np.histogram(depths, bins=nbins)
 
     # ------------------------------------------------------------------------
@@ -121,7 +121,7 @@ def find_depth_threshold(depth_file, min_vertices=10000, verbose=False):
 
     # Print statement:
     if verbose:
-        print('  Depth threshold: {0}'.format(depth_threshold))
+        print(f'  Depth threshold: {depth_threshold}')
 
     return depth_threshold, bins, bin_edges
 
@@ -222,12 +222,13 @@ def extract_folds(depth_file, depth_threshold=2, min_fold_size=50,
 
     """
     import os
-    import numpy as np
     from time import time
 
-    from mindboggle.mio.vtks import rewrite_scalars, read_vtk
+    import numpy as np
+
     from mindboggle.guts.mesh import find_neighbors
     from mindboggle.guts.segment import segment_regions
+    from mindboggle.mio.vtks import read_vtk, rewrite_scalars
 
     if verbose:
         print("Extract folds in surface mesh")
@@ -254,19 +255,19 @@ def extract_folds(depth_file, depth_threshold=2, min_fold_size=50,
         # Segment deep vertices as an initial set of folds
         # --------------------------------------------------------------------
         if verbose:
-            print("  Segment vertices deeper than {0:.2f} as folds".format(depth_threshold))
+            print(f"  Segment vertices deeper than {depth_threshold:.2f} as folds")
             t1 = time()
         folds = segment_regions(indices_deep, neighbor_lists, 1, [], False,
                                 False, [], [], [], '', background_value, False)
         if verbose:
-            print('  ...Segmented folds ({0:.2f} seconds)'.format(time() - t1))
+            print(f'  ...Segmented folds ({time() - t1:.2f} seconds)')
 
         # --------------------------------------------------------------------
         # Remove small folds
         # --------------------------------------------------------------------
         if min_fold_size > 1:
             if verbose:
-                print('  Remove folds smaller than {0}'.format(min_fold_size))
+                print(f'  Remove folds smaller than {min_fold_size}')
             unique_folds = [x for x in np.unique(folds)
                             if x != background_value]
             for nfold in unique_folds:
@@ -297,8 +298,7 @@ def extract_folds(depth_file, depth_threshold=2, min_fold_size=50,
 
         # Print statement
         if verbose:
-            print('  ...Extracted {0} folds ({1:.2f} seconds)'.
-                  format(n_folds, time() - t0))
+            print(f'  ...Extracted {n_folds} folds ({time() - t0:.2f} seconds)')
     else:
         if verbose:
             print('  No deep vertices')
@@ -316,7 +316,7 @@ def extract_folds(depth_file, depth_threshold=2, min_fold_size=50,
                         background_value)
 
         if not os.path.exists(folds_file):
-            raise IOError(folds_file + " not found")
+            raise OSError(folds_file + " not found")
 
     else:
         folds_file = None

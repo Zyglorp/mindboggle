@@ -37,6 +37,7 @@ Arno Klein, 2012-2016  .  arno@mindboggle.info  .  www.binarybottle.com
 Copyright 2016,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 
 """
+import builtins
 
 
 def compute_likelihood(trained_file, depth_file, curvature_file, folds,
@@ -102,10 +103,10 @@ def compute_likelihood(trained_file, depth_file, curvature_file, folds,
 
     """
     import os
-    import numpy as np
-    from math import pi
     import pickle
-    from io import open
+    from math import pi
+
+    import numpy as np
 
     from mindboggle.mio.vtks import read_scalars, rewrite_scalars
 
@@ -117,7 +118,7 @@ def compute_likelihood(trained_file, depth_file, curvature_file, folds,
 
     # Load estimated depth and curvature distribution parameters:
     depth_border, curv_border, depth_nonborder, \
-        curv_nonborder = pickle.load(open(trained_file, "rb"))
+        curv_nonborder = pickle.load(builtins.open(trained_file, "rb"))
 
     # Load depths, curvatures:
     depths, name = read_scalars(depth_file, True, True)
@@ -168,7 +169,7 @@ def compute_likelihood(trained_file, depth_file, curvature_file, folds,
         rewrite_scalars(depth_file, likelihoods_file, likelihoods,
                         'likelihoods', likelihoods, background_value)
         if not os.path.exists(likelihoods_file):
-            raise IOError(likelihoods_file + " not found")
+            raise OSError(likelihoods_file + " not found")
 
     else:
         likelihoods_file = None
@@ -276,11 +277,13 @@ def estimate_distribution(scalar_files, scalar_range, fold_files, label_files,
     ...     open("depth_curv_border_nonborder_parameters.pkl", "wb"))
 
     """
-    from mindboggle.shapes.likelihood import concatenate_sulcus_scalars, \
-        fit_normals_to_histogram
+    from mindboggle.shapes.likelihood import (
+        concatenate_sulcus_scalars,
+        fit_normals_to_histogram,
+    )
 
     if not scalar_files or not fold_files or not label_files:
-        raise IOError("Input file lists cannot be empty.")
+        raise OSError("Input file lists cannot be empty.")
 
     # Concatenate scalars across multiple training files:
     border_scalars, nonborder_scalars = concatenate_sulcus_scalars(scalar_files,
@@ -360,10 +363,10 @@ def concatenate_sulcus_scalars(scalar_files, fold_files, label_files,
     """
     import numpy as np
 
-    from mindboggle.mio.vtks import read_scalars
     from mindboggle.guts.mesh import find_neighbors_from_file
     from mindboggle.guts.segment import extract_borders
     from mindboggle.mio.labels import DKTprotocol
+    from mindboggle.mio.vtks import read_scalars
 
     dkt = DKTprotocol()
 
@@ -454,8 +457,9 @@ def fit_normals_to_histogram(data, x, verbose=False):
     [0.43959, 0.39286, 0.16755]
 
     """
-    import numpy as np
     from math import pi
+
+    import numpy as np
 
     # Initialize variables:
     k = 3
@@ -495,13 +499,13 @@ def fit_normals_to_histogram(data, x, verbose=False):
             means[i] = sum(W[:,i] * data) / d1
 
         if verbose:
-            print('    means: {0}; sigmas: {1}'.format(means, sigmas))
+            print(f'    means: {means}; sigmas: {sigmas}')
 
     for i in range(k):
         weights[i] = sum(W[:,i]) / (np.sum(W) + tiny)
 
     if verbose:
-        print('    weights: {0}'.format(weights))
+        print(f'    weights: {weights}')
 
     return means, sigmas, weights
 

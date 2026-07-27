@@ -21,6 +21,7 @@ Authors:
 Copyright 2016,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 
 """
+import builtins
 
 
 def antsApplyTransformsToPoints(points, transform_files,
@@ -69,7 +70,6 @@ def antsApplyTransformsToPoints(points, transform_files,
 
     """
     import os
-    from io import open
 
     from mindboggle.guts.utilities import execute
 
@@ -77,10 +77,10 @@ def antsApplyTransformsToPoints(points, transform_files,
     # Write points (x,y,z,1) to a .csv file:
     # ------------------------------------------------------------------------
     points_file = os.path.join(os.getcwd(), 'points.csv')
-    fid = open(points_file, 'w', encoding='utf-8')
+    fid = builtins.open(points_file, 'w', encoding='utf-8')
     fid.write('x,y,z,t\n')
     fid.close()
-    fid = open(points_file, 'a', encoding='utf-8')
+    fid = builtins.open(points_file, 'a', encoding='utf-8')
     for point in points:
         string_of_zeros = (4 - len(point)) * ',0'
         fid.write(','.join([str(x) for x in point]) + string_of_zeros + '\n')
@@ -93,8 +93,7 @@ def antsApplyTransformsToPoints(points, transform_files,
                                            'transformed_points.csv')
     transform_string = ''
     for ixfm, transform_file in enumerate(transform_files):
-        transform_string += " --t [{0},{1}]".\
-            format(transform_file, str(inverse_booleans[ixfm]))
+        transform_string += f" --t [{transform_file},{inverse_booleans[ixfm]!s}]"
     cmd = ['antsApplyTransformsToPoints', '-d', '3', '-i', points_file,
            '-o', transformed_points_file, transform_string]
     try:
@@ -103,13 +102,12 @@ def antsApplyTransformsToPoints(points, transform_files,
         raise Exception("Cannot find antsApplyTransformsToPoints command.")
 
     if not os.path.exists(transformed_points_file):
-        raise IOError("antsApplyTransformsToPoints did not create {0}.".
-                      format(transformed_points_file))
+        raise OSError(f"antsApplyTransformsToPoints did not create {transformed_points_file}.")
 
     # ------------------------------------------------------------------------
     # Return transformed points:
     # ------------------------------------------------------------------------
-    fid = open(transformed_points_file, 'r')
+    fid = builtins.open(transformed_points_file)
     lines = fid.readlines()
     fid.close()
     transformed_points = []
@@ -177,6 +175,7 @@ def ImageMath(volume1, volume2, operator='m', output_file=''):
 
     """
     import os
+
     from mindboggle.guts.utilities import execute
 
     if not output_file:
@@ -186,7 +185,7 @@ def ImageMath(volume1, volume2, operator='m', output_file=''):
     cmd = ['ImageMath', '3', output_file, operator, volume1, volume2]
     execute(cmd, 'os')
     if not os.path.exists(output_file):
-        raise IOError("ImageMath did not create " + output_file + ".")
+        raise OSError("ImageMath did not create " + output_file + ".")
 
     return output_file
 
@@ -235,6 +234,7 @@ def ThresholdImage(volume, output_file='', threshlo=1, threshhi=10000):
 
     """
     import os
+
     from mindboggle.guts.utilities import execute
 
     if not output_file:
@@ -244,7 +244,7 @@ def ThresholdImage(volume, output_file='', threshlo=1, threshhi=10000):
            str(threshlo), str(threshhi)]
     execute(cmd, 'os')
     if not os.path.exists(output_file):
-        raise IOError("ThresholdImage did not create " + output_file + ".")
+        raise OSError("ThresholdImage did not create " + output_file + ".")
 
     return output_file
 
@@ -307,6 +307,7 @@ def PropagateLabelsThroughMask(mask, labels, mask_index=None, output_file='',
 
     """
     import os
+
     from mindboggle.guts.utilities import execute
 
     if not output_file:
@@ -316,7 +317,7 @@ def PropagateLabelsThroughMask(mask, labels, mask_index=None, output_file='',
                                    os.path.basename(labels) + '_through_' +
                                    os.path.basename(mask))
 
-    print('mask: {0}, labels: {1}'.format(mask, labels))
+    print(f'mask: {mask}, labels: {labels}')
 
     # Binarize image volume:
     if binarize:
@@ -344,7 +345,7 @@ def PropagateLabelsThroughMask(mask, labels, mask_index=None, output_file='',
         cmd.extend(str(stopvalue))
     execute(cmd, 'os')
     if not os.path.exists(output_file):
-        raise IOError("ImageMath did not create " + output_file + ".")
+        raise OSError("ImageMath did not create " + output_file + ".")
 
     return output_file
 
@@ -408,6 +409,7 @@ def ResampleImageBySpacing(volume, output_file='', outxspc=1, outyspc=1,
 
     """
     import os
+
     from mindboggle.guts.utilities import execute
 
     if not output_file:
@@ -417,7 +419,7 @@ def ResampleImageBySpacing(volume, output_file='', outxspc=1, outyspc=1,
            str(outxspc), str(outyspc), str(outzspc)]
     execute(cmd, 'os')
     if not os.path.exists(output_file):
-        raise IOError("ResampleImageBySpacing did not create {0).".
+        raise OSError("ResampleImageBySpacing did not create {0).".
                       format(output_file))
 
     return output_file

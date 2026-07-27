@@ -63,12 +63,14 @@ def evaluate_deep_features(features_file, labels_file, sulci_file='', hemi='',
     """
     import os
     import sys
+
     import numpy as np
-    from mindboggle.mio.vtks import read_vtk, read_scalars, write_vtk
+
+    from mindboggle.guts.compute import source_to_target_distances
     from mindboggle.guts.mesh import find_neighbors, keep_faces
     from mindboggle.guts.segment import extract_borders
-    from mindboggle.guts.compute import source_to_target_distances
     from mindboggle.mio.labels import DKTprotocol
+    from mindboggle.mio.vtks import read_scalars, read_vtk, write_vtk
 
     dkt = DKTprotocol()
     # ------------------------------------------------------------------------
@@ -167,8 +169,7 @@ def evaluate_deep_features(features_file, labels_file, sulci_file='', hemi='',
         if output_vtk_name:
             feature_to_border_distances_vtk = os.path.join(os.getcwd(),
                 output_vtk_name + '_feature_to_border_mean_distances.vtk')
-            print('Write feature-to-border distances to {0}...'.
-                  format(feature_to_border_distances_vtk))
+            print(f'Write feature-to-border distances to {feature_to_border_distances_vtk}...')
             write_vtk(feature_to_border_distances_vtk, points,
                       [], [], sulcus_faces, [distances],
                       ['feature-to-border_distances'], 'float')
@@ -203,8 +204,7 @@ def evaluate_deep_features(features_file, labels_file, sulci_file='', hemi='',
         if output_vtk_name:
             border_to_feature_distances_vtk = os.path.join(os.getcwd(),
                 output_vtk_name + '_border_to_feature_mean_distances.vtk')
-            print('Write border-to-feature distances to {0}...'.
-                  format(border_to_feature_distances_vtk))
+            print(f'Write border-to-feature distances to {border_to_feature_distances_vtk}...')
             write_vtk(border_to_feature_distances_vtk, points,
                       [], [], sulcus_faces, [distances],
                       ['border-to-feature_distances'], 'float')
@@ -225,17 +225,18 @@ def evaluate_deep_features(features_file, labels_file, sulci_file='', hemi='',
 if __name__ == "__main__":
 
     import os
-    import numpy as np
-    import pandas as pd
-
-    from mindboggle.mio.labels import DKTprotocol
-    from mindboggle.evaluate.evaluate_features import evaluate_deep_features
 
     # For plotting:
     from math import pi
+
+    import numpy as np
+    import pandas as pd
     from bokeh.models import HoverTool
-    from bokeh.plotting import ColumnDataSource, figure, show, save, output_file
+    from bokeh.plotting import ColumnDataSource, figure, output_file, save
+
+    from mindboggle.evaluate.evaluate_features import evaluate_deep_features
     from mindboggle.mio.colors import viridis_colormap
+    from mindboggle.mio.labels import DKTprotocol
 
     measure_feature_distances = False
     maxd = 53

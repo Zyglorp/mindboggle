@@ -50,10 +50,9 @@ def execute(cmd, type='os'):
         try:
             retcode = call(cmd)
             if retcode < 0:
-                raise IOError("Child terminated by signal: retcode {0}".
-                              format(retcode))
+                raise OSError(f"Child terminated by signal: retcode {retcode}")
         except OSError as e:
-            raise OSError("Execution failed: {0}".format(e))
+            raise OSError(f"Execution failed: {e}")
 
     # Use os.system:
     elif type == 'os':
@@ -66,10 +65,10 @@ def execute(cmd, type='os'):
         try:
             system(cmd)
         except OSError as e:
-            raise OSError("Execution failed: {0}".format(e))
+            raise OSError(f"Execution failed: {e}")
 
     else:
-        raise IOError('Select either "subprocess" or "os" for execution type.')
+        raise OSError('Select either "subprocess" or "os" for execution type.')
 
 
 def list_strings(string1='', string2='', string3='', string4=''):

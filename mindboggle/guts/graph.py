@@ -115,17 +115,17 @@ def weight_graph(Nodes, Indices, Meshes, kernel=rbf_kernel, add_to_graph=True,
     """
     import numpy as np
     from scipy.sparse import lil_matrix
-    from mindboggle.guts.kernels import rbf_kernel, inverse_distance
+
+    from mindboggle.guts.kernels import inverse_distance, rbf_kernel
                                         #cotangent_kernel
 
     if kernel is rbf_kernel or kernel is inverse_distance:
         if verbose:
             if kernel is rbf_kernel:
-                print('Compute weights using rbf kernel (sigma={0})'.
-                      format(sigma))
+                print(f'Compute weights using rbf kernel (sigma={sigma})')
             else:
                 print('Compute weights using inverse distance kernel '
-                      '(sigma={0})'.format(sigma))
+                      f'(sigma={sigma})')
 
         # Construct matrix of edge lines by breaking triangle into three edges.
         if Meshes.shape[1] == 3:
@@ -146,8 +146,7 @@ def weight_graph(Nodes, Indices, Meshes, kernel=rbf_kernel, add_to_graph=True,
 
         # Construct affinity matrix
         if verbose:
-            print('Construct sparse affinity matrix of size {0}'.
-                format(Nodes.shape[0]))
+            print(f'Construct sparse affinity matrix of size {Nodes.shape[0]}')
         affinity_matrix = lil_matrix((Nodes.shape[0], Nodes.shape[0]))
         for [i, j, edge_weight] in weighted_edges:
             affinity_matrix[i, j] = affinity_matrix[j, i] = edge_weight
@@ -225,30 +224,30 @@ def graph_laplacian(W, type_of_laplacian='norm1', verbose=False):
 
     """
 
-    if type_of_laplacian is 'basic':
+    if type_of_laplacian == 'basic':
         if verbose:
             print("Calculate unnormalized Laplacian")
         Laplacian = diagonal_degree_matrix(W) - W
 
-    elif type_of_laplacian is 'norm1':
+    elif type_of_laplacian == 'norm1':
         if verbose:
             print("Normalize the Laplacian")
         ddmi_sq = diagonal_degree_matrix(W, inverse=True, square_root=True)
         Laplacian = ddmi_sq * (diagonal_degree_matrix(W, inverse=False, square_root=False) - W) * ddmi_sq
 
-    elif type_of_laplacian is 'norm2':
+    elif type_of_laplacian == 'norm2':
         if verbose:
             print("Normalize the Laplacian")
         ddmi_sq = diagonal_degree_matrix(W, inverse=True, square_root=True)
         Laplacian = ddmi_sq * W * ddmi_sq
 
-    elif type_of_laplacian is 'norm3':
+    elif type_of_laplacian == 'norm3':
         if verbose:
             print("Normalize the Laplacian")
         ddmi = diagonal_degree_matrix(W, inverse=True, square_root=False)
         Laplacian = ddmi * (diagonal_degree_matrix(W, inverse=False, square_root=False) - W)
 
-    elif type_of_laplacian is 'random_walk':
+    elif type_of_laplacian == 'random_walk':
         if verbose:
             print("Compute Random Walk Laplacian")
         ddmi = diagonal_degree_matrix(W, inverse=True, square_root=False)

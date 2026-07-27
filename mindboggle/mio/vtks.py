@@ -11,6 +11,7 @@ Authors:
 Copyright 2016,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 
 """
+import builtins
 
 
 def read_vertices(filename):
@@ -106,9 +107,8 @@ def read_lines(filename):
               for i in range(Data.GetNumberOfLines())]
 
     PointData = Data.GetPointData()
-    print("There are {0} scalars in file {1}".format(
-        Reader.GetNumberOfscalarsInFile(), filename))
-    print("Loading the scalar {0}".format(Reader.GetScalarsNameInFile(0)))
+    print(f"There are {Reader.GetNumberOfscalarsInFile()} scalars in file {filename}")
+    print(f"Loading the scalar {Reader.GetScalarsNameInFile(0)}")
     ScalarsArray = PointData.GetArray(Reader.GetScalarsNameInFile(0))
     scalars = [ScalarsArray.GetValue(i)
                for i in range(0, ScalarsArray.GetDataSize())]
@@ -468,8 +468,7 @@ def write_header(Fp, Header='# vtk DataFile Version 2.0',
 
     """
 
-    Fp.write('{0}\n{1}\n{2}\nDATASET {3}\n'.format(Header, Title, fileType,
-                                                   dataType))
+    Fp.write(f'{Header}\n{Title}\n{fileType}\nDATASET {dataType}\n')
 
 
 def write_points(Fp, points, dataType="float"):
@@ -490,18 +489,18 @@ def write_points(Fp, points, dataType="float"):
     """
     import numpy as np
 
-    Fp.write('POINTS {0} {1}\n'.format(len(points), dataType))
+    Fp.write(f'POINTS {len(points)} {dataType}\n')
 
     n = np.shape(points)[1]
     for point in points:
         if n == 3:
             [R, A, S] = point
-            Fp.write('{0} {1} {2}\n'.format(R, A, S))
+            Fp.write(f'{R} {A} {S}\n')
         elif n == 2:
             [R, A] = point
-            Fp.write('{0} {1}\n'.format(R, A))
+            Fp.write(f'{R} {A}\n')
         else:
-            raise IOError('Unrecognized number of coordinates per point')
+            raise OSError('Unrecognized number of coordinates per point')
 
 
 def write_faces(Fp, faces):
@@ -519,22 +518,20 @@ def write_faces(Fp, faces):
     n = np.shape(faces)[1]
     if n == 3:
         face_name = 'POLYGONS '
-        Fp.write('{0} {1} {2}\n'.format(face_name, len(faces),
-                 len(faces) * (n + 1)))
+        Fp.write(f'{face_name} {len(faces)} {len(faces) * (n + 1)}\n')
     elif n == 2:
         face_name = 'LINES '
-        Fp.write('{0} {1} {2}\n'.format(face_name, len(faces),
-                 len(faces) * (n + 1)))
+        Fp.write(f'{face_name} {len(faces)} {len(faces) * (n + 1)}\n')
     else:
-        raise IOError('Unrecognized number of vertices per face')
+        raise OSError('Unrecognized number of vertices per face')
 
     for face in faces:
         if n == 3:
             [V0, V1, V2] = face
-            Fp.write('{0} {1} {2} {3}\n'.format(n, V0, V1, V2))
+            Fp.write(f'{n} {V0} {V1} {V2}\n')
         elif n == 2:
             [V0, V1] = face
-            Fp.write('{0} {1} {2}\n'.format(n, V0, V1))
+            Fp.write(f'{n} {V0} {V1}\n')
 
 
 def write_lines(Fp, lines):
@@ -575,9 +572,8 @@ def write_vertices(Fp, indices):
 
     """
 
-    Fp.write('VERTICES {0} {1}\n{2} '.format(
-             1, len(indices) + 1, len(indices)))
-    [Fp.write('{0} '.format(i)) for i in indices]
+    Fp.write(f'VERTICES {1} {len(indices) + 1}\n{len(indices)} ')
+    [Fp.write(f'{i} ') for i in indices]
     Fp.write('\n')
 
 
@@ -613,11 +609,11 @@ def write_scalars(Fp, scalars, scalar_name, begin_scalars=True,
     """
 
     if begin_scalars:
-        Fp.write('POINT_DATA {0}\n'.format(len(scalars)))
-    Fp.write('SCALARS {0} {1}\n'.format(scalar_name, scalar_type))
-    Fp.write('LOOKUP_TABLE {0}\n'.format(scalar_name))
+        Fp.write(f'POINT_DATA {len(scalars)}\n')
+    Fp.write(f'SCALARS {scalar_name} {scalar_type}\n')
+    Fp.write(f'LOOKUP_TABLE {scalar_name}\n')
     for Value in scalars:
-        Fp.write('{0}\n'.format(Value))
+        Fp.write(f'{Value}\n')
     Fp.write('\n')
 
 
@@ -693,11 +689,17 @@ def write_vtk(output_vtk, points, indices=[], lines=[], faces=[],
 
     """
     import os
-    import numpy as np
-    from io import open
 
-    from mindboggle.mio.vtks import write_header, write_points, \
-        write_vertices, write_faces, write_scalars, scalars_checker
+    import numpy as np
+
+    from mindboggle.mio.vtks import (
+        scalars_checker,
+        write_faces,
+        write_header,
+        write_points,
+        write_scalars,
+        write_vertices,
+    )
 
     # Convert numpy arrays to lists
     if isinstance(faces, np.ndarray):
@@ -707,7 +709,7 @@ def write_vtk(output_vtk, points, indices=[], lines=[], faces=[],
 
     output_vtk = os.path.join(os.getcwd(), output_vtk)
 
-    Fp = open(output_vtk,'w', encoding="utf-8")
+    Fp = builtins.open(output_vtk,'w', encoding="utf-8")
     write_header(Fp)
     write_points(Fp, points)
     if indices:
@@ -736,7 +738,7 @@ def write_vtk(output_vtk, points, indices=[], lines=[], faces=[],
     Fp.close()
 
     if not os.path.exists(output_vtk):
-        raise IOError(output_vtk + " not found")
+        raise OSError(output_vtk + " not found")
 
 
 def rewrite_scalars(input_vtk, output_vtk, new_scalars,
@@ -786,12 +788,19 @@ def rewrite_scalars(input_vtk, output_vtk, new_scalars,
 
     """
     import os
+
     import numpy as np
-    from io import open
 
     from mindboggle.guts.mesh import keep_faces, reindex_faces_points
-    from mindboggle.mio.vtks import write_header, write_points, \
-        write_vertices, write_faces, write_scalars, read_vtk, scalars_checker
+    from mindboggle.mio.vtks import (
+        read_vtk,
+        scalars_checker,
+        write_faces,
+        write_header,
+        write_points,
+        write_scalars,
+        write_vertices,
+    )
 
     # Convert numpy arrays to lists
     if isinstance(new_scalars, np.ndarray):
@@ -817,7 +826,7 @@ def rewrite_scalars(input_vtk, output_vtk, new_scalars,
         faces, points, original_indices = reindex_faces_points(faces, points)
 
     # Write VTK file
-    Fp = open(output_vtk,'w', encoding="utf-8")
+    Fp = builtins.open(output_vtk,'w', encoding="utf-8")
     write_header(Fp)
     if points:
         write_points(Fp, points)
@@ -841,7 +850,7 @@ def rewrite_scalars(input_vtk, output_vtk, new_scalars,
             elif np.ndim(new_scalar_list) == 2:
                 scalar_type = type(new_scalar_list[0][0]).__name__
             else:
-                raise IOError("Undefined scalar type!")
+                raise OSError("Undefined scalar type!")
             if i == 0:
                 new_scalar_name = new_scalar_names[0]
                 write_scalars(Fp, new_scalar_list, new_scalar_name,
@@ -856,12 +865,12 @@ def rewrite_scalars(input_vtk, output_vtk, new_scalars,
                               begin_scalars=False,
                               scalar_type=scalar_type)
     else:
-        raise IOError('new_scalars is empty')
+        raise OSError('new_scalars is empty')
 
     Fp.close()
 
     if not os.path.exists(output_vtk):
-        raise IOError(output_vtk + " not found")
+        raise OSError(output_vtk + " not found")
 
 
 def explode_scalars(input_indices_vtk, input_values_vtk='', output_stem='',
@@ -946,9 +955,11 @@ def explode_scalars(input_indices_vtk, input_values_vtk='', output_stem='',
 
     """
     import os
+
     import numpy as np
+
+    from mindboggle.guts.mesh import keep_faces, reindex_faces_points
     from mindboggle.mio.vtks import read_scalars, read_vtk, write_vtk
-    from mindboggle.guts.mesh import reindex_faces_points, keep_faces
 
     if not input_values_vtk:
         input_values_vtk = input_indices_vtk
@@ -957,15 +968,12 @@ def explode_scalars(input_indices_vtk, input_values_vtk='', output_stem='',
     points, indices, lines, faces, scalars, scalar_names, npoints, \
         input_vtk = read_vtk(input_indices_vtk, True, True)
     if verbose:
-        print("Explode the scalar list in {0}".
-            format(os.path.basename(input_indices_vtk)))
+        print(f"Explode the scalar list in {os.path.basename(input_indices_vtk)}")
     if input_values_vtk != input_indices_vtk:
         values, name = read_scalars(input_values_vtk, True, True)
         if verbose:
-            print("Explode the scalar list of values in {0} "
-                  "with the scalar list of indices in {1}".
-                format(os.path.basename(input_values_vtk),
-                       os.path.basename(input_indices_vtk)))
+            print(f"Explode the scalar list of values in {os.path.basename(input_values_vtk)} "
+                  f"with the scalar list of indices in {os.path.basename(input_indices_vtk)}")
     else:
         values = np.copy(scalars)
 
@@ -1000,8 +1008,7 @@ def explode_scalars(input_indices_vtk, input_values_vtk='', output_stem='',
         select_values[scalars != scalar] = background_value
 
         if verbose:
-            print("  Scalar {0}: {1} vertices".format(scalar,
-                                                      len(select_points)))
+            print(f"  Scalar {scalar}: {len(select_points)} vertices")
 
         if len(select_points) > 0:
             # Write VTK file with scalar values (list of values):
@@ -1011,7 +1018,7 @@ def explode_scalars(input_indices_vtk, input_values_vtk='', output_stem='',
                 scalar_type = type(select_values[0][0]).__name__
             else:
                 if verbose:
-                    raise IOError("Undefined scalar type!")
+                    raise OSError("Undefined scalar type!")
             output_vtk = os.path.join(os.getcwd(),
                                       output_stem + str(scalar) + '.vtk')
             write_vtk(output_vtk, select_points, indices, lines, scalar_faces,
@@ -1064,10 +1071,11 @@ def explode_scalars_mindboggle(subject_path, output_path='',
 
     """
     import os
+
     from mindboggle.mio.vtks import explode_scalars
 
     if not os.path.exists(output_path):
-        raise IOError("{0} does not exist".format(output_path))
+        raise OSError(f"{output_path} does not exist")
     else:
 
         for side in ['left', 'right']:
@@ -1076,8 +1084,7 @@ def explode_scalars_mindboggle(subject_path, output_path='',
                                       side + '_exploded_' + pieces + '_vtks')
             if not os.path.exists(output_dir):
                 if verbose:
-                    print("Create missing output directory: {0}".
-                          format(output_dir))
+                    print(f"Create missing output directory: {output_dir}")
                 os.mkdir(output_dir)
             if os.path.exists(output_dir):
 
@@ -1090,7 +1097,7 @@ def explode_scalars_mindboggle(subject_path, output_path='',
                                           side + '_cortical_surface',
                                           pieces + '.vtk')
                 else:
-                    raise IOError("Choose from: {'labels', 'sulci'}")
+                    raise OSError("Choose from: {'labels', 'sulci'}")
                                   #'fundus_per_sulcus', 'folds'}")
 
                 labels_vtk = os.path.join(subject_path, File)
@@ -1118,7 +1125,7 @@ def explode_scalars_mindboggle(subject_path, output_path='',
                                     'scalars', True, True, False)
 
             else:
-                raise IOError('Unable to make directory {0}'.format(output_dir))
+                raise OSError(f'Unable to make directory {output_dir}')
 
 
 def scalars_checker(scalars, scalar_names):
@@ -1179,9 +1186,9 @@ def scalars_checker(scalars, scalar_names):
             elif len(scalars.shape) == 2: # 2-D numpy array
                 scalars = scalars.tolist()
             else:
-                raise IOError("Error: Dimension of new_scalars is too high.")
+                raise OSError("Error: Dimension of new_scalars is too high.")
         else:
-            raise IOError("Error: scalars is neither a list nor a numpy array.")
+            raise OSError("Error: scalars is neither a list nor a numpy array.")
 
     if scalars:
 
@@ -1202,7 +1209,7 @@ def scalars_checker(scalars, scalar_names):
                     scalars2.append(x.tolist())
             scalars = scalars2
         else:
-            raise IOError("Error: scalars is a 1-D list containing unacceptable elements.")
+            raise OSError("Error: scalars is a 1-D list containing unacceptable elements.")
             #print("scalars type is: {0}".format(type(scalars)))
             #print("scalars length is: {0}".format(len(scalars)))
             #print("scalars[0] type is: {0}".format(type(scalars[0])))
@@ -1217,7 +1224,7 @@ def scalars_checker(scalars, scalar_names):
             else:
                 pass
         else:
-            raise IOError("Error: scalar_names is neither a list nor a string")
+            raise OSError("Error: scalar_names is neither a list nor a string")
     #else:
         #print("Warning: scalars is empty")
 
@@ -1432,11 +1439,13 @@ def apply_affine_transforms(transform_files, inverse_booleans,
 
     """
     import os
-    import numpy as np
-    #from scipy.io import loadmat
 
-    from mindboggle.thirdparty.ants import antsApplyTransformsToPoints
+    import numpy as np
+
     from mindboggle.mio.vtks import read_vtk, write_vtk
+
+    #from scipy.io import loadmat
+    from mindboggle.thirdparty.ants import antsApplyTransformsToPoints
                                         #read_itk_transform
     transform_format = 'itk'
 
@@ -1490,7 +1499,7 @@ def apply_affine_transforms(transform_files, inverse_booleans,
             elif np.ndim(scalars) == 2:
                 scalar_type = type(scalars[0][0]).__name__
             else:
-                raise IOError("Undefined scalar type!")
+                raise OSError("Undefined scalar type!")
         else:
             scalars = []
             scalar_type = 'int'
@@ -1551,10 +1560,10 @@ def freesurfer_surface_to_vtk(surface_file, orig_file='', output_vtk=''):
 
     """
     import os
-    import nibabel as nb
-    from io import open
 
-    from mindboggle.mio.vtks import write_header, write_points, write_faces
+    import nibabel as nb
+
+    from mindboggle.mio.vtks import write_faces, write_header, write_points
 
     surf = nb.freesurfer.read_geometry(surface_file)
     points = surf[0]
@@ -1580,20 +1589,20 @@ def freesurfer_surface_to_vtk(surface_file, orig_file='', output_vtk=''):
             np.concatenate((points, np.ones((np.shape(points)[0],1))),
                            axis=1))))[:,0:3]
     else:
-        raise IOError(orig_file + " does not exist in the FreeSurfer "
+        raise OSError(orig_file + " does not exist in the FreeSurfer "
                       "subjects directory.")
 
     if not output_vtk:
         output_vtk = os.path.join(os.getcwd(),
                                   os.path.basename(surface_file + '.vtk'))
-    Fp = open(output_vtk, 'w')
+    Fp = builtins.open(output_vtk, 'w')
     write_header(Fp, Title='vtk output from ' + surface_file)
     write_points(Fp, points)
     write_faces(Fp, faces)
     Fp.close()
 
     if not os.path.exists(output_vtk):
-        raise IOError("Output VTK file " + output_vtk + " not created.")
+        raise OSError("Output VTK file " + output_vtk + " not created.")
 
     return output_vtk
 
@@ -1639,6 +1648,7 @@ def freesurfer_curvature_to_vtk(surface_file, vtk_file, output_vtk='',
 
     """
     import os
+
     import nibabel as nb
 
     from mindboggle.mio.vtks import rewrite_scalars
@@ -1652,7 +1662,7 @@ def freesurfer_curvature_to_vtk(surface_file, vtk_file, output_vtk='',
     rewrite_scalars(vtk_file, output_vtk, curvature_values, scalar_names,
                     [], background_value)
     if not os.path.exists(output_vtk):
-        raise IOError("Output VTK file " + output_vtk + " not created.")
+        raise OSError("Output VTK file " + output_vtk + " not created.")
 
     return output_vtk
 
@@ -1705,8 +1715,8 @@ def freesurfer_annot_to_vtk(annot_file, vtk_file, output_vtk='',
 
     """
     import os
+
     import nibabel as nb
-    import numpy as np
 
     from mindboggle.mio.vtks import rewrite_scalars
 
@@ -1737,7 +1747,7 @@ def freesurfer_annot_to_vtk(annot_file, vtk_file, output_vtk='',
                     background_value)
 
     if not os.path.exists(output_vtk):
-        raise IOError("Output VTK file " + output_vtk + " not created.")
+        raise OSError("Output VTK file " + output_vtk + " not created.")
 
     return labels, output_vtk
 

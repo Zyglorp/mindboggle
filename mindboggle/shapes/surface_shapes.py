@@ -52,6 +52,7 @@ def area(command, surface_file, verbose=False):
 
     """
     import os
+
     from nipype.interfaces.base import CommandLine
 
     basename = os.path.splitext(os.path.basename(surface_file))[0]
@@ -59,7 +60,7 @@ def area(command, surface_file, verbose=False):
     args = ' '.join([surface_file, area_file])
 
     if verbose:
-        print("{0} {1}".format(command, args))
+        print(f"{command} {args}")
 
     cli = CommandLine(command=command)
     cli.inputs.args = args
@@ -67,7 +68,7 @@ def area(command, surface_file, verbose=False):
     cli.run()
 
     if not os.path.exists(area_file):
-        raise IOError(area_file + " not found")
+        raise OSError(area_file + " not found")
 
     return area_file
 
@@ -110,6 +111,7 @@ def travel_depth(command, surface_file, verbose=False):
 
     """
     import os
+
     from nipype.interfaces.base import CommandLine
 
     basename = os.path.splitext(os.path.basename(surface_file))[0]
@@ -117,7 +119,7 @@ def travel_depth(command, surface_file, verbose=False):
     args = ' '.join([surface_file, depth_file])
 
     if verbose:
-        print("{0} {1}".format(command, args))
+        print(f"{command} {args}")
 
     cli = CommandLine(command=command)
     cli.inputs.args = args
@@ -125,7 +127,7 @@ def travel_depth(command, surface_file, verbose=False):
     cli.run()
 
     if not os.path.exists(depth_file):
-        raise IOError(depth_file + " not found")
+        raise OSError(depth_file + " not found")
 
     return depth_file
 
@@ -166,6 +168,7 @@ def geodesic_depth(command, surface_file, verbose=False):
 
     """
     import os
+
     from nipype.interfaces.base import CommandLine
 
     basename = os.path.splitext(os.path.basename(surface_file))[0]
@@ -173,7 +176,7 @@ def geodesic_depth(command, surface_file, verbose=False):
     args = ' '.join([surface_file, depth_file])
 
     if verbose:
-        print("{0} {1}".format(command, args))
+        print(f"{command} {args}")
 
     cli = CommandLine(command=command)
     cli.inputs.args = args
@@ -181,7 +184,7 @@ def geodesic_depth(command, surface_file, verbose=False):
     cli.run()
 
     if not os.path.exists(depth_file):
-        raise IOError(depth_file + " not found")
+        raise OSError(depth_file + " not found")
 
     return depth_file
 
@@ -278,6 +281,7 @@ def curvature(command, method, arguments, surface_file, verbose=False):
 
     """
     import os
+
     from nipype.interfaces.base import CommandLine
 
     args = ['-m', str(method)]
@@ -306,7 +310,7 @@ def curvature(command, method, arguments, surface_file, verbose=False):
     args.extend([surface_file, mean_curvature_file])
 
     if verbose:
-        print("{0} {1}".format(command, args))
+        print(f"{command} {args}")
 
     cli = CommandLine(command=command)
     cli.inputs.args = ' '.join(args)

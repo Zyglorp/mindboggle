@@ -87,7 +87,7 @@ def plot_surfaces(vtk_files, use_colormap=False, colormap_file=''):
         if os.path.isfile(vtk_file):
             vv.AddFile(vtk_file, colormap)
         else:
-            sys.exit("Huh?: {0}".format(vtk_file))
+            sys.exit(f"Huh?: {vtk_file}")
 
     vv.Start()
 
@@ -151,13 +151,13 @@ def plot_mask_surface(vtk_file, mask_file='', nonmask_value=-1,
 
     """
     import os
+
     import numpy as np
 
     from mindboggle.guts.mesh import keep_faces, reindex_faces_points
     from mindboggle.guts.utilities import execute
     from mindboggle.mio.plots import plot_surfaces
-    from mindboggle.mio.vtks import read_scalars, rewrite_scalars, \
-                                        read_vtk, write_vtk
+    from mindboggle.mio.vtks import read_scalars, read_vtk, rewrite_scalars, write_vtk
 
     # ------------------------------------------------------------------------
     # Filter mesh with non-background values from a second (same-size) mesh:
@@ -248,11 +248,11 @@ def plot_volumes(volume_files, command='fslview'):
     if isinstance(volume_files, str):
         volume_files = [volume_files]
     elif not isinstance(volume_files, list):
-        raise IOError('plot_volumes() requires volume_files to be a list '
+        raise OSError('plot_volumes() requires volume_files to be a list '
                       'or string.')
 
     if not isinstance(command, str):
-        raise IOError('plot_volumes() requires command to be a string.')
+        raise OSError('plot_volumes() requires command to be a string.')
     else:
         command = [command]
 
@@ -285,6 +285,7 @@ def histogram_of_vtk_scalars(vtk_file, nbins=100):
 
     """
     import matplotlib.pyplot as plt
+
     from mindboggle.mio.vtks import read_scalars
 
     # Load values:
@@ -332,8 +333,8 @@ def histograms_of_lists(columns, column_name='', ignore_columns=[],
     ...                     axis_limits, titles) # doctest: +SKIP
 
     """
-    import numpy as np
     import matplotlib.pyplot as plt
+    import numpy as np
 
     ncolumns = len(columns)
     if ncolumns < 9:
@@ -459,10 +460,10 @@ def scatterplot_lists(y_columns, x_column, ignore_columns=[], plot_line=True,
     ...                   y_label, legend, legend_labels) # doctest: +SKIP
 
     """
-    import matplotlib.pyplot as plt
-    from matplotlib.font_manager import FontProperties
     import matplotlib.cm as cm
+    import matplotlib.pyplot as plt
     import numpy as np
+    from matplotlib.font_manager import FontProperties
 
     ncolumns = len(y_columns)
 
@@ -584,10 +585,10 @@ def scatterplot_list_pairs(columns, ignore_first_column=False, plot_line=True,
     ...                        x_label, y_label, limit, legend, legend_labels) # doctest: +SKIP
 
     """
-    import matplotlib.pyplot as plt
     import matplotlib.cm as cm
-    from matplotlib.font_manager import FontProperties
+    import matplotlib.pyplot as plt
     import numpy as np
+    from matplotlib.font_manager import FontProperties
 
     ncolumns = len(columns)
 
