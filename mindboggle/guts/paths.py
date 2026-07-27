@@ -11,10 +11,19 @@ Copyright 2016,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 """
 
 
-def connect_points_erosion(S, neighbor_lists, outer_anchors, inner_anchors=[],
-                           values=[], erode_ratio=0.1, erode_min_size=10,
-                           save_steps=[], save_vtk='', background_value=-1,
-                           verbose=False):
+def connect_points_erosion(
+    S,
+    neighbor_lists,
+    outer_anchors,
+    inner_anchors=[],
+    values=[],
+    erode_ratio=0.1,
+    erode_min_size=10,
+    save_steps=[],
+    save_vtk="",
+    background_value=-1,
+    verbose=False,
+):
     """
     Connect mesh vertices with a skeleton of 1-vertex-thick curves by erosion.
 
@@ -140,13 +149,14 @@ def connect_points_erosion(S, neighbor_lists, outer_anchors, inner_anchors=[],
 
     if save_steps:
         from mindboggle.mio.vtks import rewrite_scalars
+
         S0 = S.copy()
 
     # ------------------------------------------------------------------------
     # Iteratively remove simple points:
     # ------------------------------------------------------------------------
     if verbose:
-        print(f'  Remove up to {erode_ratio} of edge vertices per iteration')
+        print(f"  Remove up to {erode_ratio} of edge vertices per iteration")
     complex = []
     count = -1
     exist_simple = True
@@ -165,29 +175,41 @@ def connect_points_erosion(S, neighbor_lists, outer_anchors, inner_anchors=[],
             edge = np.array(list(set(edge).difference(complex)))
             len_edge = np.shape(edge)[0]
             if len_edge:
-
                 # ------------------------------------------------------------
                 # Segment edge vertices into separate connected groups:
                 # ------------------------------------------------------------
-                edge_segs = segment_regions(edge, neighbor_lists, 1, [],
-                                            False, False, [], [], [], '',
-                                            background_value, verbose)
+                edge_segs = segment_regions(
+                    edge,
+                    neighbor_lists,
+                    1,
+                    [],
+                    False,
+                    False,
+                    [],
+                    [],
+                    [],
+                    "",
+                    background_value,
+                    verbose,
+                )
 
-                edge_seg_numbers = [x for x in np.unique(edge_segs)
-                                    if x != background_value]
+                edge_seg_numbers = [
+                    x for x in np.unique(edge_segs) if x != background_value
+                ]
                 if verbose:
                     len_numbers = len(edge_seg_numbers)
                     if len_numbers > 1:
-                        print(f'    {count}: {len_edge} edge points in {len_numbers} segments')
+                        print(
+                            f"    {count}: {len_edge} edge points in {len_numbers} segments"
+                        )
                     else:
-                        print(f'    {count}: {len_edge} edge points')
+                        print(f"    {count}: {len_edge} edge points")
                 first_seg = True
                 for edge_seg_number in edge_seg_numbers:
                     edge_seg = np.where(edge_segs == edge_seg_number)[0]
                     edge_seg = np.array(list(set(edge_seg).difference(keep)))
                     len_edge_seg = np.shape(edge_seg)[0]
                     if len_edge_seg:
-
                         # ----------------------------------------------------
                         # Remove topologically simple points
                         # in order of lowest to highest values:
@@ -200,7 +222,6 @@ def connect_points_erosion(S, neighbor_lists, outer_anchors, inner_anchors=[],
                                 ntests = int(len_edge_seg * erode_ratio) + 1
 
                         for index in edge_seg[0:ntests]:
-
                             # Test to see if each index is a simple point:
                             simple, d = topo_test(index, S, neighbor_lists)
 
@@ -216,7 +237,7 @@ def connect_points_erosion(S, neighbor_lists, outer_anchors, inner_anchors=[],
                         # If no simple points, test all of the indices:
                         if not exist_simple and erode_by_value:
                             if verbose:
-                                print('    No simple points')
+                                print("    No simple points")
                             for index in edge_seg[ntests::]:
                                 simple, d = topo_test(index, S, neighbor_lists)
                                 # If a simple point, remove and run again:
@@ -231,10 +252,14 @@ def connect_points_erosion(S, neighbor_lists, outer_anchors, inner_anchors=[],
                         if count in save_steps and first_seg:
                             IDs = background_value * np.ones(len(values))
                             IDs[indices] = values[indices]
-                            rewrite_scalars(save_vtk,
-                                            'edge'+str(count)+'.vtk',
-                                            IDs, 'edges', S0,
-                                            background_value)
+                            rewrite_scalars(
+                                save_vtk,
+                                "edge" + str(count) + ".vtk",
+                                IDs,
+                                "edges",
+                                S0,
+                                background_value,
+                            )
                         first_seg = False
 
                 # ------------------------------------------------------------
@@ -256,9 +281,16 @@ def connect_points_erosion(S, neighbor_lists, outer_anchors, inner_anchors=[],
     return skeleton
 
 
-def connect_points_hmmf(indices_points, indices, L, neighbor_lists,
-                        wN_max=1.0, do_erode=True, background_value=-1,
-                        verbose=False):
+def connect_points_hmmf(
+    indices_points,
+    indices,
+    L,
+    neighbor_lists,
+    wN_max=1.0,
+    do_erode=True,
+    background_value=-1,
+    verbose=False,
+):
     """
     Connect mesh vertices with a skeleton of 1-vertex-thick curves using HMMF.
 
@@ -378,7 +410,7 @@ def connect_points_hmmf(indices_points, indices, L, neighbor_lists,
     # ------------------------------------------------------------------------
     # Cost and cost gradient parameters:
     wN_min = 0.0  # minimum neighborhood weight
-    #wN_max = 2.0  # maximum neighborhood weight (trust prior more for smoother fundi)
+    # wN_max = 2.0  # maximum neighborhood weight (trust prior more for smoother fundi)
     H_step = 0.1  # step down HMMF value
 
     # Parameters to speed up optimization and for termination of the algorithm:
@@ -394,8 +426,9 @@ def connect_points_hmmf(indices_points, indices, L, neighbor_lists,
     # Miscellaneous parameters:
     print_interval = 10
 
-    def compute_costs(likelihoods, hmmfs, hmmfs_neighbors, numbers_of_neighbors,
-                      wN, Z=[]):
+    def compute_costs(
+        likelihoods, hmmfs, hmmfs_neighbors, numbers_of_neighbors, wN, Z=[]
+    ):
         """
         Cost function for penalizing unlikely fundus curve vertices.
 
@@ -436,7 +469,6 @@ def connect_points_hmmf(indices_points, indices, L, neighbor_lists,
         import numpy as np
 
         if all(numbers_of_neighbors):
-
             # Subtract each HMMF value from its neighbors:
             diff = abs(hmmfs - hmmfs_neighbors)
 
@@ -445,10 +477,12 @@ def connect_points_hmmf(indices_points, indices, L, neighbor_lists,
             diff = diff * Z
 
             # Compute the cost for each vertex:
-            costs = hmmfs * (1.1 - likelihoods) + \
-                    wN * np.sum(diff, axis=0) / numbers_of_neighbors
+            costs = (
+                hmmfs * (1.1 - likelihoods)
+                + wN * np.sum(diff, axis=0) / numbers_of_neighbors
+            )
         else:
-            raise OSError('No HMMF neighbors to compute cost.')
+            raise OSError("No HMMF neighbors to compute cost.")
 
         return costs
 
@@ -473,23 +507,24 @@ def connect_points_hmmf(indices_points, indices, L, neighbor_lists,
     max_num_neighbors = max(N_sizes[indices])
     N_array = np.zeros((max_num_neighbors, len(L)))
     for index in indices:
-        N_array[0:N_sizes[index], index] = N[index]
+        N_array[0 : N_sizes[index], index] = N[index]
     N_array_shape = np.shape(N_array)
     N_flat = np.ravel(N_array)
     N_flat_list = N_flat.tolist()
     H_N = np.reshape(H[[np.int(x) for x in N_flat_list]], N_array_shape)
-    ind_flat = [i for i,x in enumerate(N_flat_list) if x > 0]
+    ind_flat = [i for i, x in enumerate(N_flat_list) if x > 0]
     len_flat = len(N_flat_list)
 
     # A zero in N calls H[0], so remove zero-padded neighborhood elements:
     Z = np.zeros((max_num_neighbors, len(L)))
     for index in indices:
-        Z[0:N_sizes[index], index] = 1
+        Z[0 : N_sizes[index], index] = 1
 
     # Assign cost values to each vertex (for indices):
     C = np.zeros(len(L))
-    C[indices] = compute_costs(L[indices], H[indices], H_N[:,indices],
-                               N_sizes[indices], wN_max, Z[:,indices])
+    C[indices] = compute_costs(
+        L[indices], H[indices], H_N[:, indices], N_sizes[indices], wN_max, Z[:, indices]
+    )
     npoints = len(indices)
 
     # Loop until count reaches max_count or until end_flag equals zero
@@ -499,12 +534,11 @@ def connect_points_hmmf(indices_points, indices, L, neighbor_lists,
     wN = wN_max
     gradient_factor = grad_min
     while end_flag < n_tries_no_change and count < max_count:
-
         # Select indices with a positive HMMF value:
-        V = [indices[i] for i,x in enumerate(H[indices]) if x > 0.0]
+        V = [indices[i] for i, x in enumerate(H[indices]) if x > 0.0]
 
         # Update neighborhood H values:
-        #H_N = np.reshape(H[N_flat_list], N_array_shape)
+        # H_N = np.reshape(H[N_flat_list], N_array_shape)
         H_N = np.zeros(len_flat)
         H_N[ind_flat] = H[[np.int(x) for x in N_flat[ind_flat]]]
         H_N = np.reshape(H_N, N_array_shape)
@@ -512,17 +546,15 @@ def connect_points_hmmf(indices_points, indices, L, neighbor_lists,
         # Compute the cost gradient for the HMMF values:
         H_decr = H - H_step
         H_decr[H_decr < 0] = 0.0
-        C_decr = compute_costs(L[V], H_decr[V], H_N[:,V], N_sizes[V], wN, Z[:,V])
+        C_decr = compute_costs(L[V], H_decr[V], H_N[:, V], N_sizes[V], wN, Z[:, V])
         H_tests[V] = H[V] - gradient_factor * (C[V] - C_decr)
         H_tests[H_tests < 0] = 0.0
         H_tests[H_tests > 1] = 1.0
 
         # For each index:
         for index in V:
-
             # Do not update anchor point costs:
             if index not in indices_points:
-
                 # Update a vertex HMMF value if it is away from the threshold:
                 update = True
                 # Or if it crosses the threshold and is a topologically
@@ -535,7 +567,7 @@ def connect_points_hmmf(indices_points, indices, L, neighbor_lists,
                     H_new[index] = H_tests[index]
 
         # Update the cost values:
-        C[V] = compute_costs(L[V], H_new[V], H_N[:,V], N_sizes[V], wN, Z[:,V])
+        C[V] = compute_costs(L[V], H_new[V], H_N[:, V], N_sizes[V], wN, Z[:, V])
 
         # Sum the cost values across all vertices and tally the number
         # of HMMF values greater than the threshold.
@@ -556,12 +588,14 @@ def connect_points_hmmf(indices_points, indices, L, neighbor_lists,
 
             # Display information every n_mod iterations:
             if verbose and not np.mod(count, print_interval):
-                print(f'      Iteration {count}: {delta_points} crossing threshold '
-                      f'(wN={wN:0.3f}, grad={gradient_factor:0.3f}, cost={delta_cost:0.3f})')
+                print(
+                    f"      Iteration {count}: {delta_points} crossing threshold "
+                    f"(wN={wN:0.3f}, grad={gradient_factor:0.3f}, cost={delta_cost:0.3f})"
+                )
 
             # Increment the gradient factor and decrement the neighborhood factor
             # so that spacing is close in early iterations and far apart later:
-            factor = (count / np.round(rate_factor*max_count))**slope_exp
+            factor = (count / np.round(rate_factor * max_count)) ** slope_exp
             if gradient_factor < grad_max:
                 gradient_factor = factor * (grad_max - grad_min) + grad_min
             if wN > wN_min:
@@ -575,7 +609,7 @@ def connect_points_hmmf(indices_points, indices, L, neighbor_lists,
         count += 1
 
     if verbose:
-        print('      Updated hidden Markov measure field (HMMF) values')
+        print("      Updated hidden Markov measure field (HMMF) values")
 
     # Skeletonize:
     if do_erode:
@@ -585,35 +619,53 @@ def connect_points_hmmf(indices_points, indices, L, neighbor_lists,
         S[S > 0.5] = 1.0
         S[S <= 0.5] = background_value
 
-        skeleton = connect_points_erosion(S, neighbor_lists=N,
-                                          outer_anchors=indices_points,
-                                          inner_anchors=[],
-                                          values=H, erode_ratio=0.5,
-                                          erode_min_size=10, save_steps=[],
-                                          save_vtk='',
-                                          background_value=background_value,
-                                          verbose=verbose)
+        skeleton = connect_points_erosion(
+            S,
+            neighbor_lists=N,
+            outer_anchors=indices_points,
+            inner_anchors=[],
+            values=H,
+            erode_ratio=0.5,
+            erode_min_size=10,
+            save_steps=[],
+            save_vtk="",
+            background_value=background_value,
+            verbose=verbose,
+        )
         if verbose:
             npoints_thr = len([x for x in S if x != background_value])
-            print(f'      Removed {int(npoints_thr - len(skeleton))} points to create one-vertex-thin '
-                  'skeletons')
+            print(
+                f"      Removed {int(npoints_thr - len(skeleton))} points to create one-vertex-thin "
+                "skeletons"
+            )
     else:
         # Threshold the resulting array:
         S = np.zeros(len(L))
         S[indices] = H[indices]
         S[S > 0.5] = 1.0
         S[S <= 0.5] = 0.0
-        skeleton = [i for i,x in enumerate(S.tolist()) if x == 1]
+        skeleton = [i for i, x in enumerate(S.tolist()) if x == 1]
         if verbose:
-            print(f'      Removed {int(sum(S.tolist()) - len(skeleton))} points to create one-vertex-thin '
-                  'skeletons')
+            print(
+                f"      Removed {int(sum(S.tolist()) - len(skeleton))} points to create one-vertex-thin "
+                "skeletons"
+            )
 
     return skeleton
 
 
-def smooth_skeletons(skeletons, bounds, vtk_file, likelihoods, wN_max=1.0,
-                     do_erode=True, save_file=False, output_file='',
-                     background_value=-1, verbose=False):
+def smooth_skeletons(
+    skeletons,
+    bounds,
+    vtk_file,
+    likelihoods,
+    wN_max=1.0,
+    do_erode=True,
+    save_file=False,
+    output_file="",
+    background_value=-1,
+    verbose=False,
+):
     """
     Smooth skeleton by dilation followed by connect_points_hmmf().
 
@@ -733,30 +785,40 @@ def smooth_skeletons(skeletons, bounds, vtk_file, likelihoods, wN_max=1.0,
     unique_IDs = [x for x in np.unique(skeletons) if x != background_value]
     n_skeletons = len(unique_IDs)
     if n_skeletons == 1:
-        sdum = ''
+        sdum = ""
     else:
-        sdum = 's'
+        sdum = "s"
     if verbose:
         print(f"Smooth {n_skeletons} skeleton{sdum}...")
     Z = background_value * np.ones(npoints)
     smoothed_skeletons = Z.copy()
     for ID in unique_IDs:
-        skeleton = [i for i,x in enumerate(skeletons) if x == ID]
+        skeleton = [i for i, x in enumerate(skeletons) if x == ID]
         if verbose:
-            print(f'  Skeleton {int(ID)}:')
+            print(f"  Skeleton {int(ID)}:")
 
         # --------------------------------------------------------------------
         # Segment skeleton vertices into separate connected groups:
         # --------------------------------------------------------------------
-        skel_segs = segment_regions(skeleton, neighbor_lists, 1, [], False,
-                                    False, [], [], [], '', background_value,
-                                    verbose)
+        skel_segs = segment_regions(
+            skeleton,
+            neighbor_lists,
+            1,
+            [],
+            False,
+            False,
+            [],
+            [],
+            [],
+            "",
+            background_value,
+            verbose,
+        )
 
-        skel_seg_numbers = [x for x in np.unique(skel_segs)
-                            if x != background_value]
+        skel_seg_numbers = [x for x in np.unique(skel_segs) if x != background_value]
         len_numbers = len(skel_seg_numbers)
         if verbose and len_numbers > 1:
-            print(f'    {len_numbers} segments')
+            print(f"    {len_numbers} segments")
         for skel_seg_number in skel_seg_numbers:
             skel_seg = np.where(skel_segs == skel_seg_number)[0].tolist()
 
@@ -764,45 +826,51 @@ def smooth_skeletons(skeletons, bounds, vtk_file, likelihoods, wN_max=1.0,
             # Find endpoints:
             # ----------------------------------------------------------------
             endpoints = find_endpoints(skel_seg, neighbor_lists)
-    
+
             # ----------------------------------------------------------------
             # Dilate the skeleton within the bounds:
             # ----------------------------------------------------------------
             nedges = 2
             if verbose:
-                print('    Dilate skeleton within bounds...')
+                print("    Dilate skeleton within bounds...")
             dilated = dilate(skel_seg, nedges, neighbor_lists)
             dilated = list(set(dilated).intersection(indices))
             if dilated:
-    
                 # ------------------------------------------------------------
                 # Set undilated likelihoods to background to keep neighbors:
                 # ------------------------------------------------------------
                 L = Z.copy()
                 L[dilated] = likelihoods[dilated]
-    
+
                 # ------------------------------------------------------------
                 # Smoothly re-skeletonize the dilated skeleton:
                 # ------------------------------------------------------------
                 if verbose:
-                    print('    Smoothly re-skeletonize dilated skeleton...')
-                new_skeleton = connect_points_hmmf(endpoints, dilated, L,
-                    neighbor_lists, wN_max, do_erode, background_value,
-                    verbose)
+                    print("    Smoothly re-skeletonize dilated skeleton...")
+                new_skeleton = connect_points_hmmf(
+                    endpoints,
+                    dilated,
+                    L,
+                    neighbor_lists,
+                    wN_max,
+                    do_erode,
+                    background_value,
+                    verbose,
+                )
 
                 ## Plot overlap of dilated and pre-/post-smoothed skeleton:
-                #from mindboggle.mio.plots import plot_surfaces
-                #D = background_value * np.ones(npoints)
-                #D[dilated]=1; D[skel_seg]=2; D[new_skeleton]=3
-                #rewrite_scalars(vtk_file, 'test.vtk', D, 'D', bounds)
-                #plot_surfaces('test.vtk')
-    
+                # from mindboggle.mio.plots import plot_surfaces
+                # D = background_value * np.ones(npoints)
+                # D[dilated]=1; D[skel_seg]=2; D[new_skeleton]=3
+                # rewrite_scalars(vtk_file, 'test.vtk', D, 'D', bounds)
+                # plot_surfaces('test.vtk')
+
                 # ------------------------------------------------------------
                 # Store skeleton:
                 # ------------------------------------------------------------
                 smoothed_skeletons[new_skeleton] = ID
     if verbose:
-        print(f'  ...Smoothed {n_skeletons} skeleton{sdum} ({time() - t0:.2f} seconds)')
+        print(f"  ...Smoothed {n_skeletons} skeleton{sdum} ({time() - t0:.2f} seconds)")
 
     # ------------------------------------------------------------------------
     # Return skeletons, number of skeletons, and file name:
@@ -813,17 +881,22 @@ def smooth_skeletons(skeletons, bounds, vtk_file, likelihoods, wN_max=1.0,
         if output_file:
             skeletons_file = output_file
         else:
-            skeletons_file = os.path.join(os.getcwd(), 'smooth_skeletons.vtk')
-            rewrite_scalars(vtk_file, skeletons_file, smoothed_skeletons,
-                            'smoothed_skeletons', [], background_value)
+            skeletons_file = os.path.join(os.getcwd(), "smooth_skeletons.vtk")
+            rewrite_scalars(
+                vtk_file,
+                skeletons_file,
+                smoothed_skeletons,
+                "smoothed_skeletons",
+                [],
+                background_value,
+            )
     else:
         skeletons_file = None
 
     return smoothed_skeletons, n_skeletons, skeletons_file
 
 
-def track_segments(seed, segments, neighbor_lists, values, sink,
-                   background_value=-1):
+def track_segments(seed, segments, neighbor_lists, values, sink, background_value=-1):
     """
     Build a track from a seed vertex through concentric segments of a mesh.
 
@@ -910,25 +983,24 @@ def track_segments(seed, segments, neighbor_lists, values, sink,
 
     if not sink:
         import sys
-        sys.exit('Missing sink vertices.')
+
+        sys.exit("Missing sink vertices.")
 
     track = [seed]
     for isegment, segment in enumerate(segments):
-
         # Find the seed's neighborhood N in the segment:
         N = neighbor_lists[seed]
         N = [x for x in N if values[x] != background_value]
         segment_set = set(segment)
         N_segment = list(segment_set.intersection(frozenset(N)))
         if N:
-
             # Add the neighborhood vertex with the maximum value to the track:
             if N_segment:
                 seed = N_segment[np.argmax(values[N_segment])]
                 track.append(seed)
 
                 # If the track has run into the region's border, return the track:
-                #if list(set(N_segment).intersection(sink)):
+                # if list(set(N_segment).intersection(sink)):
                 if seed in sink:
                     return track
 
@@ -937,7 +1009,7 @@ def track_segments(seed, segments, neighbor_lists, values, sink,
             elif isegment > 0:
                 bridge = []
                 max_bridge = 0
-                N_previous = list(set(N).intersection(segments[isegment-1]))
+                N_previous = list(set(N).intersection(segments[isegment - 1]))
                 for Np in N_previous:
                     N_next = list(segment_set.intersection(neighbor_lists[Np]))
                     if N_next:
@@ -959,9 +1031,16 @@ def track_segments(seed, segments, neighbor_lists, values, sink,
     # If the track remains empty or does not reach the border, return the track:
     return None
 
-def find_outer_endpoints(indices, neighbor_lists, values, values_seeding,
-                         min_separation=10, background_value=-1,
-                         verbose=False):
+
+def find_outer_endpoints(
+    indices,
+    neighbor_lists,
+    values,
+    values_seeding,
+    min_separation=10,
+    background_value=-1,
+    verbose=False,
+):
     """
     Find vertices on the boundary of a surface mesh region that are the
     endpoints to multiple, high-value tracks from the region's center.
@@ -1070,35 +1149,33 @@ def find_outer_endpoints(indices, neighbor_lists, values, values_seeding,
     # ------------------------------------------------------------------------
     B = np.ones(len(V))
     B[indices] = 2
-    borders, foo1, foo2 = extract_borders(list(range(len(B))), B,
-                                          neighbor_lists)
+    borders, foo1, foo2 = extract_borders(list(range(len(B))), B, neighbor_lists)
 
     # ------------------------------------------------------------------------
     # Initialize seeds with vertices at the median-depth boundary:
     # ------------------------------------------------------------------------
     if do_threshold:
-        thresholdS = np.median(S[indices]) #+ np.std(S[indices])
+        thresholdS = np.median(S[indices])  # + np.std(S[indices])
         indices_high = [x for x in indices if S[x] >= thresholdS]
         # Make sure threshold is within the maximum values of the boundary:
         if list(frozenset(indices_high).intersection(borders)):
             do_threshold = False
         else:
             if verbose:
-                print(f'  Initialize seeds at {thresholdS:.2f} (median of fold depth)')
+                print(f"  Initialize seeds at {thresholdS:.2f} (median of fold depth)")
     # ------------------------------------------------------------------------
     # Or initialize seeds with vertices at the shrunken region boundary:
     # ------------------------------------------------------------------------
     if not do_threshold:
         thresholdS = remove_fraction * np.max(S[indices])
         if verbose:
-            print(f'  Initialize seeds at {1-remove_fraction:.2f} of fold depth')
+            print(f"  Initialize seeds at {1 - remove_fraction:.2f} of fold depth")
 
     # Extract threshold boundary vertices as seeds:
     indices_high = [x for x in indices if S[x] >= thresholdS]
     B = np.ones(len(S))
     B[indices_high] = 2
-    seeds, foo1, foo2 = extract_borders(list(range(len(S))), B,
-                                        neighbor_lists)
+    seeds, foo1, foo2 = extract_borders(list(range(len(S))), B, neighbor_lists)
 
     # ------------------------------------------------------------------------
     # Segment the mesh from the seeds iteratively toward the boundary:
@@ -1109,11 +1186,14 @@ def find_outer_endpoints(indices, neighbor_lists, values, values_seeding,
 
     # Run tracks from the seeds through the segments toward the boundary:
     if verbose:
-        print(f'    Track through {len(segments)} concentric segments ({len(R)} vertices) '
-            f'from threshold {thresholdS:0.2f}')
+        print(
+            f"    Track through {len(segments)} concentric segments ({len(R)} vertices) "
+            f"from threshold {thresholdS:0.2f}"
+        )
     for seed in seeds:
-        track = track_segments(seed, segments, neighbor_lists, V, borders,
-                               background_value)
+        track = track_segments(
+            seed, segments, neighbor_lists, V, borders, background_value
+        )
         if track:
             T.append(track)
 
@@ -1125,18 +1205,17 @@ def find_outer_endpoints(indices, neighbor_lists, values, values_seeding,
     # with higher median value when their endpoints are close.
     # ------------------------------------------------------------------------
     if do_filter_tracks and T:
-
         if verbose:
-            print(f'    Filter {len(T)} tracks')
+            print(f"    Filter {len(T)} tracks")
 
         # Compute median track values:
         Tvalues = [np.median(V[x]) for x in T]
 
         # Keep tracks with a high median track value:
-        #background = np.median(V[indices])
-        #background = np.median(Tvalues) + np.std(Tvalues)
+        # background = np.median(V[indices])
+        # background = np.median(Tvalues) + np.std(Tvalues)
         background = np.median(V[R]) + np.std(V[R])
-        Ihigh = [i for i,x in enumerate(T) if Tvalues[i] > background]
+        Ihigh = [i for i, x in enumerate(T) if Tvalues[i] > background]
         T = [T[i] for i in Ihigh]
         Tvalues = [Tvalues[i] for i in Ihigh]
 
@@ -1147,11 +1226,10 @@ def find_outer_endpoints(indices, neighbor_lists, values, values_seeding,
         E2 = []
         T2 = []
         while E:
-
             # Find endpoints close to the first endpoint:
             near = find_neighborhood(neighbor_lists, [E[0]], min_separation)
-            Isame = [i for i,x in enumerate(E) if x == E[0]]
-            Inear = [i for i,x in enumerate(E) if x in near]
+            Isame = [i for i, x in enumerate(E) if x == E[0]]
+            Inear = [i for i, x in enumerate(E) if x in near]
             if Inear or len(Isame) > 1:
                 Inear.extend(Isame)
 
@@ -1170,19 +1248,19 @@ def find_outer_endpoints(indices, neighbor_lists, values, values_seeding,
             else:
                 E2.append(E[0])
                 T2.append(T[0])
-                del(E[0])
-                del(T[0])
-                del(Tvalues[0])
+                del E[0]
+                del T[0]
+                del Tvalues[0]
 
         endpoints = E2
         endtracks = T2
 
         if len(T2) == 1:
-            s = 'track'
+            s = "track"
         else:
-            s = 'tracks'
+            s = "tracks"
         if verbose:
-            print(f'    Retain {len(T2)} {s}')
+            print(f"    Retain {len(T2)} {s}")
 
     else:
         # Gather endpoint vertex indices:
@@ -1265,23 +1343,20 @@ def find_max_values(points, values, min_separation=10, thr=0.5):
         points = np.array(points)
 
     # Sort values and find indices for values above the threshold:
-    L_table = [[i,x] for i,x in enumerate(values)]
+    L_table = [[i, x] for i, x in enumerate(values)]
     L_table_sort = np.transpose(sorted(L_table, key=itemgetter(1)))[:, ::-1]
-    IL = [int(L_table_sort[0,i]) for i,x in enumerate(L_table_sort[1,:])
-          if x > thr]
+    IL = [int(L_table_sort[0, i]) for i, x in enumerate(L_table_sort[1, :]) if x > thr]
 
     # Initialize special points list with the index of the maximum value,
     # remove this value, and loop through the remaining high values:
     if IL:
         highest = [IL.pop(0)]
         for imax in IL:
-
             # Determine if there are any special points
             # near to the current maximum value vertex:
             i = 0
             found = 0
             while i < len(highest) and found == 0:
-
                 # Compute Euclidean distance between points:
                 D = np.linalg.norm(points[highest[i]] - points[imax])
 
@@ -1289,7 +1364,7 @@ def find_max_values(points, values, min_separation=10, thr=0.5):
                 if min_separation > D:
                     found = 1
                 ## Compute directional distance between points if close:
-                #elif D < max_distance:
+                # elif D < max_distance:
                 #    dirV = np.dot(points[indices_special[i]] - points[imax],
                 #               min_directions[highest[i]])
                 #    # If distance less than threshold, consider point found:
@@ -1472,4 +1547,5 @@ def find_max_values(points, values, min_separation=10, thr=0.5):
 # ============================================================================
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod(verbose=True)  # py.test --doctest-modules

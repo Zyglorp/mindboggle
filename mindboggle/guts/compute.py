@@ -52,16 +52,16 @@ def distcorr(X, Y):
     Y = np.atleast_2d(Y)
     n = X.shape[0]
     if Y.shape[0] != X.shape[0]:
-        raise ValueError('Number of samples must match')
+        raise ValueError("Number of samples must match")
     a = squareform(pdist(X))
     b = squareform(pdist(Y))
     A = a - a.mean(axis=0)[None, :] - a.mean(axis=1)[:, None] + a.mean()
     B = b - b.mean(axis=0)[None, :] - b.mean(axis=1)[:, None] + b.mean()
 
-    dcov2_xy = (A * B).sum()/float(n * n)
-    dcov2_xx = (A * A).sum()/float(n * n)
-    dcov2_yy = (B * B).sum()/float(n * n)
-    dcor = np.sqrt(dcov2_xy)/np.sqrt(np.sqrt(dcov2_xx) * np.sqrt(dcov2_yy))
+    dcov2_xy = (A * B).sum() / float(n * n)
+    dcov2_xx = (A * A).sum() / float(n * n)
+    dcov2_yy = (B * B).sum() / float(n * n)
+    dcor = np.sqrt(dcov2_xy) / np.sqrt(np.sqrt(dcov2_xx) * np.sqrt(dcov2_yy))
 
     return dcor
 
@@ -103,10 +103,12 @@ def point_distance(point, points):
 
     # If points is a single point
     if np.ndim(points) == 1:
-       #return np.linalg.norm(np.array(point) - np.array(points))
-       return np.sqrt((point[0] - points[0]) ** 2 + \
-                       (point[1] - points[1]) ** 2 + \
-                       (point[2] - points[2]) ** 2), 0
+        # return np.linalg.norm(np.array(point) - np.array(points))
+        return np.sqrt(
+            (point[0] - points[0]) ** 2
+            + (point[1] - points[1]) ** 2
+            + (point[2] - points[2]) ** 2
+        ), 0
 
     # If points is a set of multiple points
     elif np.ndim(points) == 2:
@@ -114,11 +116,13 @@ def point_distance(point, points):
         min_index = 0
         point = np.array(point)
         for index, point2 in enumerate(points):
-            distance = np.sqrt((point[0] - point2[0]) ** 2 + \
-                               (point[1] - point2[1]) ** 2 + \
-                               (point[2] - point2[2]) ** 2)
+            distance = np.sqrt(
+                (point[0] - point2[0]) ** 2
+                + (point[1] - point2[1]) ** 2
+                + (point[2] - point2[2]) ** 2
+            )
 
-            #distance = np.linalg.norm(point - np.array(point2))
+            # distance = np.linalg.norm(point - np.array(point2))
 
             if distance < min_distance:
                 min_distance = distance
@@ -175,7 +179,7 @@ def vector_distance(vector1, vector2, normalize=False):
                     vector_diff[i] = (vector1[i] - vector2[i]) / max_v1v2
         else:
             vector_diff = vector1 - vector2
-        return np.sqrt(sum((vector_diff)**2)) / np.size(vector1)
+        return np.sqrt(sum((vector_diff) ** 2)) / np.size(vector1)
     else:
         print("Vectors have to be of equal size to compute distance.")
         return None
@@ -237,27 +241,32 @@ def pairwise_vector_distances(vectors, save_file=False, normalize=False):
     for ihist1 in range(len(vectors)):
         for ihist2 in range(len(vectors)):
             if ihist2 >= ihist1:
-
                 # Store pairwise distances between histogram values
-                d = vector_distance(1.0*vectors[ihist1],
-                                            1.0*vectors[ihist2],
-                                            normalize=normalize)
+                d = vector_distance(
+                    1.0 * vectors[ihist1], 1.0 * vectors[ihist2], normalize=normalize
+                )
                 vector_distances[ihist1, ihist2] = d
 
     if save_file:
-        outfile = os.path.join(os.getcwd(), 'vector_distances.txt')
-        np.savetxt(outfile, vector_distances,
-                   fmt=len(vectors) * '%.4f ', delimiter='\t', newline='\n')
+        outfile = os.path.join(os.getcwd(), "vector_distances.txt")
+        np.savetxt(
+            outfile,
+            vector_distances,
+            fmt=len(vectors) * "%.4f ",
+            delimiter="\t",
+            newline="\n",
+        )
         if not os.path.exists(outfile):
             raise OSError(outfile + " not found")
     else:
-        outfile = ''
+        outfile = ""
 
     return vector_distances, outfile
 
 
-def source_to_target_distances(sourceIDs, targetIDs, points,
-                               segmentIDs=[], excludeIDs=[-1]):
+def source_to_target_distances(
+    sourceIDs, targetIDs, points, segmentIDs=[], excludeIDs=[-1]
+):
     """
     Create a Euclidean distance matrix between source and target points.
 
@@ -317,26 +326,28 @@ def source_to_target_distances(sourceIDs, targetIDs, points,
 
     # For each segment:
     for segment in segments:
-        segment_indices = [i for i,x in enumerate(segmentIDs)
-                           if x == segment]
+        segment_indices = [i for i, x in enumerate(segmentIDs) if x == segment]
 
         # Find all source points in the segment:
-        source_indices = [i for i,x in enumerate(sourceIDs)
-                          if x not in excludeIDs
-                          if i in segment_indices]
+        source_indices = [
+            i
+            for i, x in enumerate(sourceIDs)
+            if x not in excludeIDs
+            if i in segment_indices
+        ]
         # Find all target points in the segment:
-        target_indices = [i for i,x in enumerate(targetIDs)
-                          if x not in excludeIDs
-                          if i in segment_indices]
+        target_indices = [
+            i
+            for i, x in enumerate(targetIDs)
+            if x not in excludeIDs
+            if i in segment_indices
+        ]
 
         if source_indices and target_indices:
-
             # For each source point in the segment:
             for isource in source_indices:
-
                 # Find the closest target point:
-                d, i = point_distance(points[isource],
-                                      points[target_indices])
+                d, i = point_distance(points[isource], points[target_indices])
                 distances[isource] = d
                 distance_matrix[isource, segment] = d
 
@@ -392,19 +403,19 @@ def weighted_to_repeated_values(X, W=[], precision=1):
         # If weights are decimals, multiply by 10 until they are whole numbers.
         # If after multiplying precision times they are not whole, round them:
         whole = True
-        if any(np.mod(W,1)):
+        if any(np.mod(W, 1)):
             whole = False
             for i in range(precision):
-                if any(np.mod(W,1)):
+                if any(np.mod(W, 1)):
                     W *= 10
                 else:
                     whole = True
                     break
 
         if not whole:
-             W = [int(np.round(x)) for x in W]
+            W = [int(np.round(x)) for x in W]
 
-        repeat_values = sum([[x]*w for x,w in zip(X,W)],[])
+        repeat_values = sum([[x] * w for x, w in zip(X, W)], [])
 
     else:
         repeat_values = X
@@ -613,7 +624,7 @@ def means_per_label(values, labels, include_labels=[], exclude_labels=[], areas=
         dim = 1
 
     for label in label_list:
-        I = [i for i,x in enumerate(labels) if x == label]
+        I = [i for i, x in enumerate(labels) if x == label]
         if I:
             X = values[I]
             if np.size(areas):
@@ -622,7 +633,7 @@ def means_per_label(values, labels, include_labels=[], exclude_labels=[], areas=
                 label_areas.append(sumW)
                 if sumW > 0:
                     if dim > 1:
-                        W = np.transpose(np.tile(W, (dim,1)))
+                        W = np.transpose(np.tile(W, (dim, 1)))
                     means.append(np.sum(W * X, axis=0) / sumW)
                     Xdiff = X - np.mean(X, axis=0)
                     sdevs.append(np.sqrt(np.sum(W * Xdiff**2, axis=0) / sumW))
@@ -708,7 +719,7 @@ def sum_per_label(values, labels, include_labels=[], exclude_labels=[]):
     label_list = [int(x) for x in label_list if int(x) not in exclude_labels]
     sums = []
     for label in label_list:
-        I = [i for i,x in enumerate(labels) if x == label]
+        I = [i for i, x in enumerate(labels) if x == label]
         if I:
             X = values[I]
             sums.append(np.sum(X))
@@ -718,8 +729,9 @@ def sum_per_label(values, labels, include_labels=[], exclude_labels=[]):
     return sums, label_list
 
 
-def stats_per_label(values, labels, include_labels=[], exclude_labels=[],
-                    weights=[], precision=1):
+def stats_per_label(
+    values, labels, include_labels=[], exclude_labels=[], weights=[], precision=1
+):
     """
     Compute various statistical measures across vertices per label,
     optionally using weights (such as surface area per vertex).
@@ -831,7 +843,7 @@ def stats_per_label(values, labels, include_labels=[], exclude_labels=[],
 
     # Extract all vertex indices for each label:
     for label in label_list:
-        I = [i for i,x in enumerate(labels) if x == label]
+        I = [i for i, x in enumerate(labels) if x == label]
         if I:
             # Get the vertex values:
             X = values[I]
@@ -900,8 +912,17 @@ def stats_per_label(values, labels, include_labels=[], exclude_labels=[],
             lower_quarts.append(0)
             upper_quarts.append(0)
 
-    return medians, mads, means, sdevs, skews, kurts, \
-           lower_quarts, upper_quarts, label_list
+    return (
+        medians,
+        mads,
+        means,
+        sdevs,
+        skews,
+        kurts,
+        lower_quarts,
+        upper_quarts,
+        label_list,
+    )
 
 
 def count_per_label(labels, include_labels=[], exclude_labels=[]):
@@ -978,7 +999,6 @@ def count_per_label(labels, include_labels=[], exclude_labels=[]):
     unique_labels = []
     counts = []
     for ilabel, label in enumerate(label_list):
-
         # Find which voxels contain the label in each volume:
         indices = np.where(labels == label)[0]
         count = len(indices)
@@ -988,8 +1008,9 @@ def count_per_label(labels, include_labels=[], exclude_labels=[]):
     return unique_labels, counts
 
 
-def compute_overlaps(targets, list1, list2, output_file='', save_output=True,
-                     verbose=False):
+def compute_overlaps(
+    targets, list1, list2, output_file="", save_output=True, verbose=False
+):
     """
     Compute overlap for each target between two lists of numbers.
 
@@ -1052,11 +1073,10 @@ def compute_overlaps(targets, list1, list2, output_file='', save_output=True,
     dice_overlaps = np.zeros(len(targets))
     jacc_overlaps = np.zeros(len(targets))
     if save_output and not output_file:
-        output_file = os.path.join(os.getcwd(), 'ID_dice_jaccard.csv')
+        output_file = os.path.join(os.getcwd(), "ID_dice_jaccard.csv")
 
     # Loop through targets:
     for itarget, target in enumerate(targets):
-
         # Find which indices contain the target:
         list1_indices = np.where(list1 == target)[0]
         list2_indices = np.where(list2 == target)[0]
@@ -1069,24 +1089,23 @@ def compute_overlaps(targets, list1, list2, output_file='', save_output=True,
 
         # If there is at least one target in each list:
         if len2 * len1 > 0:
-
             # Compute Dice and Jaccard coefficients:
             dice = np.float(2.0 * len_intersection) / (len2 + len1)
             jacc = np.float(len_intersection) / len_union
             dice_overlaps[itarget] = dice
             jacc_overlaps[itarget] = jacc
             if verbose:
-                print(f'target: {target}, dice: {dice:.2f}, jacc: {jacc:.2f}')
+                print(f"target: {target}, dice: {dice:.2f}, jacc: {jacc:.2f}")
 
     # Save output:
     if save_output:
-        #np.savetxt(output_file, overlaps, fmt='%d %.4f %.4f',
+        # np.savetxt(output_file, overlaps, fmt='%d %.4f %.4f',
         #           delimiter='\t', newline='\n')
-        df1 = pd.DataFrame({'ID': targets})
-        df2 = pd.DataFrame({'Dice overlap': dice_overlaps})
-        df3 = pd.DataFrame({'Jaccard overlap': jacc_overlaps})
+        df1 = pd.DataFrame({"ID": targets})
+        df2 = pd.DataFrame({"Dice overlap": dice_overlaps})
+        df3 = pd.DataFrame({"Jaccard overlap": jacc_overlaps})
         df = pd.concat([df1, df2, df3], axis=1)
-        df.to_csv(output_file, index=False, encoding='utf-8')
+        df.to_csv(output_file, index=False, encoding="utf-8")
 
     return dice_overlaps, jacc_overlaps, output_file
 
@@ -1125,7 +1144,7 @@ def compute_image_histogram(infile, nbins=100, threshold=0.0):
     """
     import nibabel as nb
     import numpy as np
-    #from pylab import plot #, hist
+    # from pylab import plot #, hist
 
     # ------------------------------------------------------------------------
     # Compute histogram
@@ -1152,4 +1171,5 @@ def compute_image_histogram(infile, nbins=100, threshold=0.0):
 # ============================================================================
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod(verbose=True)  # py.test --doctest-modules

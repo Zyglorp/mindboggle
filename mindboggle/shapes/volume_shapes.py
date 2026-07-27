@@ -9,12 +9,19 @@ Authors:
 Copyright 2016,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 
 """
+
 import builtins
 
 
-def volume_per_brain_region(input_file, include_labels=[], exclude_labels=[],
-                            label_names=[], save_table=False,
-                            output_table='', verbose=False):
+def volume_per_brain_region(
+    input_file,
+    include_labels=[],
+    exclude_labels=[],
+    label_names=[],
+    save_table=False,
+    output_table="",
+    verbose=False,
+):
     """
     Compute volume per labeled region in a nibabel-readable image.
 
@@ -91,8 +98,7 @@ def volume_per_brain_region(input_file, include_labels=[], exclude_labels=[],
     volume_per_voxel = np.product(img.header.get_zooms())
     labels = img.get_data().ravel()
 
-    unique_labels, counts = count_per_label(labels, include_labels,
-                                            exclude_labels)
+    unique_labels, counts = count_per_label(labels, include_labels, exclude_labels)
     volumes = [volume_per_voxel * x for x in counts]
 
     # Output table:
@@ -100,9 +106,8 @@ def volume_per_brain_region(input_file, include_labels=[], exclude_labels=[],
         if output_table:
             output_table = os.path.join(os.getcwd(), output_table)
         else:
-            output_table = os.path.join(os.getcwd(),
-                                        'volume_for_each_label.csv')
-        fid = builtins.open(output_table, 'w', encoding='utf-8')
+            output_table = os.path.join(os.getcwd(), "volume_for_each_label.csv")
+        fid = builtins.open(output_table, "w", encoding="utf-8")
         if len(label_names) == len(unique_labels):
             fid.write("name, ID, volume\n")
         else:
@@ -111,25 +116,37 @@ def volume_per_brain_region(input_file, include_labels=[], exclude_labels=[],
         # Loop through labels:
         for ilabel, label in enumerate(unique_labels):
             if volumes[ilabel]:
-
                 if len(label_names) == len(unique_labels):
                     if verbose:
-                        print(f'{label_names[ilabel]} ({label}) volume = {volumes[ilabel]:2.3f}mm^3\n')
-                    fid.write(f'{label_names[ilabel]}, {label}, {volumes[ilabel]:2.3f}\n')
+                        print(
+                            f"{label_names[ilabel]} ({label}) volume = {volumes[ilabel]:2.3f}mm^3\n"
+                        )
+                    fid.write(
+                        f"{label_names[ilabel]}, {label}, {volumes[ilabel]:2.3f}\n"
+                    )
                 else:
                     if verbose:
-                        print(f'{label} volume = {volumes[ilabel]:2.3f}mm^3\n')
-                    fid.write(f'{label}, {volumes[ilabel]:2.3f}\n')
+                        print(f"{label} volume = {volumes[ilabel]:2.3f}mm^3\n")
+                    fid.write(f"{label}, {volumes[ilabel]:2.3f}\n")
     else:
-        output_table = ''
+        output_table = ""
 
     return unique_labels, volumes, output_table
 
 
-def thickinthehead(segmented_file, labeled_file,
-                   cortex_value=2, noncortex_value=3, labels=[], names=[],
-                   propagate=False, output_dir='', save_table=False,
-                   output_table='', verbose=False):
+def thickinthehead(
+    segmented_file,
+    labeled_file,
+    cortex_value=2,
+    noncortex_value=3,
+    labels=[],
+    names=[],
+    propagate=False,
+    output_dir="",
+    save_table=False,
+    output_table="",
+    verbose=False,
+):
     """
     Compute a simple thickness measure for each labeled cortex region volume.
 
@@ -262,48 +279,69 @@ def thickinthehead(segmented_file, labeled_file,
             os.mkdir(output_dir)
     else:
         output_dir = os.getcwd()
-    cortex = os.path.join(output_dir, 'cortex.nii.gz')
-    noncortex = os.path.join(output_dir, 'noncortex.nii.gz')
-    temp = os.path.join(output_dir, 'temp.nii.gz')
-    inner_edge = os.path.join(output_dir, 'cortex_inner_edge.nii.gz')
+    cortex = os.path.join(output_dir, "cortex.nii.gz")
+    noncortex = os.path.join(output_dir, "noncortex.nii.gz")
+    temp = os.path.join(output_dir, "temp.nii.gz")
+    inner_edge = os.path.join(output_dir, "cortex_inner_edge.nii.gz")
     use_outer_edge = True
     if use_outer_edge:
-        outer_edge = os.path.join(output_dir, 'cortex_outer_edge.nii.gz')
+        outer_edge = os.path.join(output_dir, "cortex_outer_edge.nii.gz")
 
     if save_table:
         if output_table:
             output_table = os.path.join(os.getcwd(), output_table)
         else:
-            output_table = os.path.join(os.getcwd(),
-                                        'thickinthehead_for_each_label.csv')
-        fid = builtins.open(output_table, 'w', encoding='utf-8')
+            output_table = os.path.join(
+                os.getcwd(), "thickinthehead_for_each_label.csv"
+            )
+        fid = builtins.open(output_table, "w", encoding="utf-8")
         if names:
             fid.write("name, ID, thickness (thickinthehead)\n")
         else:
             fid.write("ID, thickness (thickinthehead)\n")
     else:
-        output_table = ''
+        output_table = ""
 
     # ------------------------------------------------------------------------
     # Extract noncortex and cortex:
     # ------------------------------------------------------------------------
-    cmd = ['ThresholdImage', '3', segmented_file, noncortex,
-           str(noncortex_value), str(noncortex_value), '1 0']
-    execute(cmd, 'os')
-    cmd = ['ThresholdImage', '3', segmented_file, cortex,
-           str(cortex_value), str(cortex_value), '1 0']
-    execute(cmd, 'os')
+    cmd = [
+        "ThresholdImage",
+        "3",
+        segmented_file,
+        noncortex,
+        str(noncortex_value),
+        str(noncortex_value),
+        "1 0",
+    ]
+    execute(cmd, "os")
+    cmd = [
+        "ThresholdImage",
+        "3",
+        segmented_file,
+        cortex,
+        str(cortex_value),
+        str(cortex_value),
+        "1 0",
+    ]
+    execute(cmd, "os")
 
     # ------------------------------------------------------------------------
     # Either mask labels with cortex or fill cortex with labels:
     # ------------------------------------------------------------------------
     if propagate:
-        cmd = ['ImageMath', '3', cortex, 'PropagateLabelsThroughMask',
-               cortex, labeled_file]
-        execute(cmd, 'os')
+        cmd = [
+            "ImageMath",
+            "3",
+            cortex,
+            "PropagateLabelsThroughMask",
+            cortex,
+            labeled_file,
+        ]
+        execute(cmd, "os")
     else:
-        cmd = ['ImageMath', '3', cortex, 'm', cortex, labeled_file]
-        execute(cmd, 'os')
+        cmd = ["ImageMath", "3", cortex, "m", cortex, labeled_file]
+        execute(cmd, "os")
 
     # ------------------------------------------------------------------------
     # Load data and dimensions:
@@ -312,34 +350,34 @@ def thickinthehead(segmented_file, labeled_file,
     cortex_data = img.get_data().ravel()
     voxsize = img.header.get_zooms()
     voxvol = np.prod(voxsize)
-    voxarea = (voxsize[0] * voxsize[1] + \
-               voxsize[0] * voxsize[2] + \
-               voxsize[1] * voxsize[2]) / 3
+    voxarea = (
+        voxsize[0] * voxsize[1] + voxsize[0] * voxsize[2] + voxsize[1] * voxsize[2]
+    ) / 3
 
     # ------------------------------------------------------------------------
     # Extract outer and inner boundary voxels of the cortex,
     # by eroding 1 voxel for cortex voxels (=2) bordering
     # the outside of the brain (=0) and bordering noncortex (=3):
     # ------------------------------------------------------------------------
-    cmd = ['ImageMath', '3', inner_edge, 'MD', noncortex, '1']
-    execute(cmd, 'os')
-    cmd = ['ImageMath', '3', inner_edge, 'm', cortex, inner_edge]
-    execute(cmd, 'os')
+    cmd = ["ImageMath", "3", inner_edge, "MD", noncortex, "1"]
+    execute(cmd, "os")
+    cmd = ["ImageMath", "3", inner_edge, "m", cortex, inner_edge]
+    execute(cmd, "os")
     if use_outer_edge:
-        cmd = ['ThresholdImage', '3', cortex, outer_edge, '1 10000 1 0']
-        execute(cmd, 'os')
-        cmd = ['ImageMath', '3', outer_edge, 'ME', outer_edge, '1']
-        execute(cmd, 'os')
-        cmd = ['ThresholdImage', '3', outer_edge, outer_edge, '1 1 0 1']
-        execute(cmd, 'os')
-        cmd = ['ImageMath', '3', outer_edge, 'm', cortex, outer_edge]
-        execute(cmd, 'os')
-        cmd = ['ThresholdImage', '3', inner_edge, temp, '1 10000 1 0']
-        execute(cmd, 'os')
-        cmd = ['ThresholdImage', '3', temp, temp, '1 1 0 1']
-        execute(cmd, 'os')
-        cmd = ['ImageMath', '3', outer_edge, 'm', temp, outer_edge]
-        execute(cmd, 'os')
+        cmd = ["ThresholdImage", "3", cortex, outer_edge, "1 10000 1 0"]
+        execute(cmd, "os")
+        cmd = ["ImageMath", "3", outer_edge, "ME", outer_edge, "1"]
+        execute(cmd, "os")
+        cmd = ["ThresholdImage", "3", outer_edge, outer_edge, "1 1 0 1"]
+        execute(cmd, "os")
+        cmd = ["ImageMath", "3", outer_edge, "m", cortex, outer_edge]
+        execute(cmd, "os")
+        cmd = ["ThresholdImage", "3", inner_edge, temp, "1 10000 1 0"]
+        execute(cmd, "os")
+        cmd = ["ThresholdImage", "3", temp, temp, "1 1 0 1"]
+        execute(cmd, "os")
+        cmd = ["ImageMath", "3", outer_edge, "m", temp, outer_edge]
+        execute(cmd, "os")
 
     # ------------------------------------------------------------------------
     # Load data:
@@ -371,15 +409,14 @@ def thickinthehead(segmented_file, labeled_file,
         #   - Estimate the thickness of the labeled cortical region as the
         #     volume of the labeled region divided by the middle surface area.
         # --------------------------------------------------------------------
-        label_cortex_volume = voxvol * len(np.where(cortex_data==label)[0])
-        label_inner_edge_area = voxarea * \
-                                  len(np.where(inner_edge_data==label)[0])
+        label_cortex_volume = voxvol * len(np.where(cortex_data == label)[0])
+        label_inner_edge_area = voxarea * len(np.where(inner_edge_data == label)[0])
         if label_inner_edge_area:
             if use_outer_edge:
-                label_outer_edge_area = \
-                    voxarea * len(np.where(outer_edge_data==label)[0])
-                label_area = (label_inner_edge_area +
-                              label_outer_edge_area) / 2.0
+                label_outer_edge_area = voxarea * len(
+                    np.where(outer_edge_data == label)[0]
+                )
+                label_area = (label_inner_edge_area + label_outer_edge_area) / 2.0
             else:
                 label_area = label_inner_edge_area
             thickness = label_cortex_volume / label_area
@@ -389,13 +426,15 @@ def thickinthehead(segmented_file, labeled_file,
             if save_table:
                 if names:
                     if verbose:
-                        print(f'{name} ({label}) thickinthehead thickness = '
-                              f'{thickness:2.2f}mm')
-                    fid.write(f'{name}, {label}, {thickness:2.3f}\n')
+                        print(
+                            f"{name} ({label}) thickinthehead thickness = "
+                            f"{thickness:2.2f}mm"
+                        )
+                    fid.write(f"{name}, {label}, {thickness:2.3f}\n")
                 else:
                     if verbose:
-                        print(f'{label} thickinthehead thickness = {thickness:2.2f}mm')
-                    fid.write(f'{label}, {thickness:2.3f}\n')
+                        print(f"{label} thickinthehead thickness = {thickness:2.2f}mm")
+                    fid.write(f"{label}, {thickness:2.3f}\n")
 
     label_volume_thickness = label_volume_thickness.transpose().tolist()
 
@@ -407,4 +446,5 @@ def thickinthehead(segmented_file, labeled_file,
 # ============================================================================
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod(verbose=True)  # py.test --doctest-modules

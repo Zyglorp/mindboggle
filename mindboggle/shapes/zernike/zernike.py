@@ -13,8 +13,15 @@ Copyright 2013,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 """
 
 
-def zernike_moments(points, faces, order=10, scale_input=True,
-                    decimate_fraction=0, decimate_smooth=0, verbose=False):
+def zernike_moments(
+    points,
+    faces,
+    order=10,
+    scale_input=True,
+    decimate_fraction=0,
+    decimate_smooth=0,
+    verbose=False,
+):
     """
     Compute the Zernike moments of a surface patch of points and faces.
 
@@ -146,8 +153,9 @@ def zernike_moments(points, faces, order=10, scale_input=True,
     # Decimate surface:
     # ------------------------------------------------------------------------
     if 0 < decimate_fraction < 1:
-        points, faces, u1,u2 = decimate(points, faces,
-            decimate_fraction, decimate_smooth, [], save_vtk=False)
+        points, faces, u1, u2 = decimate(
+            points, faces, decimate_fraction, decimate_smooth, [], save_vtk=False
+        )
 
         # Convert lists to numpy arrays:
         points = np.array(points)
@@ -178,9 +186,15 @@ def zernike_moments(points, faces, order=10, scale_input=True,
     return descriptors
 
 
-def zernike_moments_per_label(vtk_file, order=10, exclude_labels=[-1],
-                              scale_input=True, decimate_fraction=0,
-                              decimate_smooth=25, verbose=False):
+def zernike_moments_per_label(
+    vtk_file,
+    order=10,
+    exclude_labels=[-1],
+    scale_input=True,
+    decimate_fraction=0,
+    decimate_smooth=25,
+    verbose=False,
+):
     """
     Compute the Zernike moments per labeled region in a file.
 
@@ -252,8 +266,9 @@ def zernike_moments_per_label(vtk_file, order=10, exclude_labels=[-1],
     # ------------------------------------------------------------------------
     # Read VTK surface mesh file:
     # ------------------------------------------------------------------------
-    points, indices, lines, faces, labels, scalar_names, npoints, \
-            input_vtk = read_vtk(vtk_file)
+    points, indices, lines, faces, labels, scalar_names, npoints, input_vtk = read_vtk(
+        vtk_file
+    )
 
     # ------------------------------------------------------------------------
     # Loop through labeled regions:
@@ -262,31 +277,34 @@ def zernike_moments_per_label(vtk_file, order=10, exclude_labels=[-1],
     label_list = []
     descriptors_lists = []
     for label in ulabels:
-      #if label == 1022:  # 22:
-      #    print("DEBUG: COMPUTE FOR ONLY ONE LABEL")
+        # if label == 1022:  # 22:
+        #    print("DEBUG: COMPUTE FOR ONLY ONE LABEL")
 
         # --------------------------------------------------------------------
         # Determine the indices per label:
         # --------------------------------------------------------------------
-        Ilabel = [i for i,x in enumerate(labels) if x == label]
+        Ilabel = [i for i, x in enumerate(labels) if x == label]
         if verbose:
-          print(f'  {len(Ilabel)} vertices for label {label}')
+            print(f"  {len(Ilabel)} vertices for label {label}")
 
         if len(Ilabel) > min_points_faces:
-
             # ----------------------------------------------------------------
             # Remove background faces:
             # ----------------------------------------------------------------
             pick_faces = keep_faces(faces, Ilabel)
             if len(pick_faces) > min_points_faces:
-
                 # ------------------------------------------------------------
                 # Compute Zernike moments for the label:
                 # ------------------------------------------------------------
-                descriptors = zernike_moments(points, pick_faces,
-                                              order, scale_input,
-                                              decimate_fraction,
-                                              decimate_smooth, verbose)
+                descriptors = zernike_moments(
+                    points,
+                    pick_faces,
+                    order,
+                    scale_input,
+                    decimate_fraction,
+                    decimate_smooth,
+                    verbose,
+                )
 
                 # ------------------------------------------------------------
                 # Append to a list of lists of spectra:
@@ -302,4 +320,5 @@ def zernike_moments_per_label(vtk_file, order=10, exclude_labels=[-1],
 # ============================================================================
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod(verbose=True)  # py.test --doctest-modules

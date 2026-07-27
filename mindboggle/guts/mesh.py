@@ -171,14 +171,14 @@ def find_neighbors_vertex(faces, index):
         faces = np.array(faces)
 
     # Create list of vertex indices sharing the same faces as "index"
-    I = [faces[np.where(faces[:,i] == index)[0], :] for i in (0,1,2)]
+    I = [faces[np.where(faces[:, i] == index)[0], :] for i in (0, 1, 2)]
 
     # Create single list from nested lists
     I = [int(x) for lst in I for sublst in lst for x in sublst]
 
     # Find unique indices not equal to "index"
-    neighbor_list = []; [neighbor_list.append(x)
-                         for x in I if x not in neighbor_list if x != index]
+    neighbor_list = []
+    [neighbor_list.append(x) for x in I if x not in neighbor_list if x != index]
 
     return neighbor_list
 
@@ -222,7 +222,6 @@ def find_neighborhood(neighbor_lists, indices, nedges=1):
 
     # Propagate nedges away from indices:
     for iedge in range(nedges):
-
         # Find neighbors of seeds:
         if seed_list:
             local_neighbors = []
@@ -295,8 +294,9 @@ def find_endpoints(indices, neighbor_lists):
 
     # Find vertices with only one neighbor in a set of given indices:
     I = set(indices)
-    indices_endpoints = [x for x in indices
-                         if len(I.intersection(neighbor_lists[x])) == 1]
+    indices_endpoints = [
+        x for x in indices if len(I.intersection(neighbor_lists[x])) == 1
+    ]
 
     return indices_endpoints
 
@@ -324,10 +324,10 @@ def find_edges(faces):
     [[0, 1], [1, 2], [0, 2], [1, 4], [0, 4], [2, 3], [1, 3], [2, 5], [0, 5]]
 
     """
-    edges = [ ]
+    edges = []
     for face in faces:
-        for edge in [face[0:2], face[1:3], [face[0], face[2]] ]:
-            if edge not in edges: # I know that this is costly
+        for edge in [face[0:2], face[1:3], [face[0], face[2]]]:
+            if edge not in edges:  # I know that this is costly
                 edges.append(edge)
 
     return edges
@@ -365,9 +365,11 @@ def find_faces_at_edges(faces):
 
     faces_at_edges = {}
     for face_id, face in enumerate(faces):
-        for edge in [face[0:2], face[1:3], [face[0], face[2]] ]:
+        for edge in [face[0:2], face[1:3], [face[0], face[2]]]:
             faces_at_edges.setdefault((edge[0], edge[1]), []).append(face_id)
-            faces_at_edges.setdefault((edge[1], edge[0]), []).append(face_id) # make it symmetric
+            faces_at_edges.setdefault((edge[1], edge[0]), []).append(
+                face_id
+            )  # make it symmetric
 
     return faces_at_edges
 
@@ -434,7 +436,7 @@ def find_faces_at_vertices(faces, npoints):
     faces_at_vertices = [[] for i in range(npoints)]
     for face_id, face in enumerate(faces):
         for vertex in face:
-           faces_at_vertices[vertex].append(face_id)
+            faces_at_vertices[vertex].append(face_id)
 
     return faces_at_vertices
 
@@ -470,31 +472,29 @@ def find_adjacent_faces(faces):
 
     """
 
-    #print("Calculating face neighbor list")
+    # print("Calculating face neighbor list")
 
     n_faces = len(faces)
 
     adjacent_faces = []
-    [adjacent_faces.append([[-1,-1,-1], [-1,-1,-1]]) for i in range(n_faces)]
+    [adjacent_faces.append([[-1, -1, -1], [-1, -1, -1]]) for i in range(n_faces)]
 
-    Done =[]
+    Done = []
     [Done.append(0) for i in range(n_faces)]
 
     # Loop through faces:
     for i1, face1 in enumerate(faces):
         # Loop through remaining faces:
-        for i2 in range(i1+1, n_faces):
+        for i2 in range(i1 + 1, n_faces):
             face2 = faces[i2]
 
             # Loop through first two vertices of face:
-            for ivertex in [0,1]:
+            for ivertex in [0, 1]:
                 index1 = face1[ivertex]
                 # Loop through remaining vertices of face:
-                for index2 in face1[ivertex+1:3]:
-
+                for index2 in face1[ivertex + 1 : 3]:
                     # If pair of vertices in face2:
                     if index1 in face2 and index2 in face2:
-
                         # Determine if it is face0, face1 or face2:
                         NbrID1 = 3 - face1.index(index1) - face1.index(index2)
                         NbrID2 = 3 - face2.index(index1) - face2.index(index2)
@@ -545,8 +545,11 @@ def find_complete_faces(indices, faces):
         if len(list(frozenset(face).intersection(indices))) == 3:
             indices_complete_list.extend(face)
     indices_complete = []
-    [indices_complete.append(x) for x in indices_complete_list
-     if x not in indices_complete]
+    [
+        indices_complete.append(x)
+        for x in indices_complete_list
+        if x not in indices_complete
+    ]
 
     return indices_complete
 
@@ -582,8 +585,8 @@ def keep_faces(faces, indices):
     faces = [lst for lst in faces if len(fs.intersection(lst)) == 3]
     faces = np.reshape(np.ravel(faces), (-1, 3))
 
-    #len_faces = len(faces)
-    #if verbose and len(faces) < len_faces:
+    # len_faces = len(faces)
+    # if verbose and len(faces) < len_faces:
     #    print('Reduced {0} to {1} triangular faces'.
     #        format(len_faces, len(faces)))
 
@@ -669,8 +672,9 @@ def reindex_faces_points(faces, points=[]):
 
     # set() to remove repeated indices and list() to order them for later use:
     indices_to_keep = list(set(itertools.chain(*faces)))
-    reindex = dict([(old_index, new_index)
-                    for new_index, old_index in enumerate(indices_to_keep)])
+    reindex = dict(
+        [(old_index, new_index) for new_index, old_index in enumerate(indices_to_keep)]
+    )
 
     new_faces = [[reindex[old_index] for old_index in face] for face in faces]
 
@@ -712,8 +716,7 @@ def remove_neighbor_lists(neighbor_lists, indices):
 
     """
 
-    neighbor_lists = [list(frozenset(indices).intersection(x))
-                      for x in neighbor_lists]
+    neighbor_lists = [list(frozenset(indices).intersection(x)) for x in neighbor_lists]
 
     return neighbor_lists
 
@@ -743,13 +746,20 @@ def reindex_faces_0to1(faces):
 
     """
 
-    faces = [[old_index+1 for old_index in face] for face in faces]
+    faces = [[old_index + 1 for old_index in face] for face in faces]
 
     return faces
 
 
-def decimate(points, faces, reduction=0.75, smooth_steps=25,
-             scalars=[], save_vtk=False, output_vtk=''):
+def decimate(
+    points,
+    faces,
+    reduction=0.75,
+    smooth_steps=25,
+    scalars=[],
+    save_vtk=False,
+    output_vtk="",
+):
     """
     Decimate vtk triangular mesh with vtk.vtkDecimatePro.
 
@@ -816,7 +826,7 @@ def decimate(points, faces, reduction=0.75, smooth_steps=25,
     # vtk points:
     # ------------------------------------------------------------------------
     vtk_points = vtk.vtkPoints()
-    [vtk_points.InsertPoint(i, x[0], x[1], x[2]) for i,x in enumerate(points)]
+    [vtk_points.InsertPoint(i, x[0], x[1], x[2]) for i, x in enumerate(points)]
 
     # ------------------------------------------------------------------------
     # vtk faces:
@@ -868,7 +878,7 @@ def decimate(points, faces, reduction=0.75, smooth_steps=25,
     # ------------------------------------------------------------------------
     if save_vtk:
         if not output_vtk:
-            output_vtk = os.path.join(os.getcwd(), 'decimated.vtk')
+            output_vtk = os.path.join(os.getcwd(), "decimated.vtk")
         exporter = vtk.vtkPolyDataWriter()
     else:
         output_vtk = None
@@ -912,17 +922,18 @@ def decimate(points, faces, reduction=0.75, smooth_steps=25,
     # ------------------------------------------------------------------------
     # Extract decimated points, faces, and scalars:
     # ------------------------------------------------------------------------
-    points = [list(out.GetPoint(point_id))
-              for point_id in range(out.GetNumberOfPoints())]
+    points = [
+        list(out.GetPoint(point_id)) for point_id in range(out.GetNumberOfPoints())
+    ]
     if out.GetNumberOfPolys() > 0:
         polys = out.GetPolys()
         pt_data = out.GetPointData()
-        faces = [[int(polys.GetData().GetValue(j))
-                  for j in range(i*4 + 1, i*4 + 4)]
-                  for i in range(polys.GetNumberOfCells())]
+        faces = [
+            [int(polys.GetData().GetValue(j)) for j in range(i * 4 + 1, i * 4 + 4)]
+            for i in range(polys.GetNumberOfCells())
+        ]
         if scalars:
-            scalars = [pt_data.GetScalars().GetValue(i)
-                       for i in range(len(points))]
+            scalars = [pt_data.GetScalars().GetValue(i) for i in range(len(points))]
     else:
         faces = []
         scalars = []
@@ -930,8 +941,9 @@ def decimate(points, faces, reduction=0.75, smooth_steps=25,
     return points, faces, scalars, output_vtk
 
 
-def decimate_file(input_vtk, reduction=0.5, smooth_steps=100,
-                  save_vtk=True, output_vtk=''):
+def decimate_file(
+    input_vtk, reduction=0.5, smooth_steps=100, save_vtk=True, output_vtk=""
+):
     """
     Decimate vtk triangular mesh file with vtk.vtkDecimatePro.
 
@@ -986,19 +998,27 @@ def decimate_file(input_vtk, reduction=0.5, smooth_steps=100,
         raise NotImplementedError()
 
     # Read VTK surface mesh file:
-    points, indices, lines, faces, scalars, scalar_names, npoints, \
-            input_vtk = read_vtk(input_vtk)
+    points, indices, lines, faces, scalars, scalar_names, npoints, input_vtk = read_vtk(
+        input_vtk
+    )
 
     # Decimate vtk triangular mesh with vtk.vtkDecimatePro
-    points, faces, scalars, output_vtk = decimate(points, faces, reduction,
-                                                  smooth_steps, scalars,
-                                                  save_vtk, output_vtk)
+    points, faces, scalars, output_vtk = decimate(
+        points, faces, reduction, smooth_steps, scalars, save_vtk, output_vtk
+    )
     return output_vtk
 
 
-def rescale_by_neighborhood(input_vtk, indices=[], nedges=10, p=99,
-    set_max_to_1=True, save_file=False, output_filestring='rescaled_scalars',
-    background_value=-1):
+def rescale_by_neighborhood(
+    input_vtk,
+    indices=[],
+    nedges=10,
+    p=99,
+    set_max_to_1=True,
+    save_file=False,
+    output_filestring="rescaled_scalars",
+    background_value=-1,
+):
     """
     Rescale the scalar values of a VTK file by a percentile value
     in each vertex's surface mesh neighborhood.
@@ -1070,14 +1090,13 @@ def rescale_by_neighborhood(input_vtk, indices=[], nedges=10, p=99,
     # Load scalars and vertex neighbor lists:
     scalars, name = read_scalars(input_vtk, True, True)
     if not indices:
-        indices = [i for i,x in enumerate(scalars) if x != background_value]
-    #print("  Rescaling {0} scalar values by neighborhood...".format(len(indices)))
+        indices = [i for i, x in enumerate(scalars) if x != background_value]
+    # print("  Rescaling {0} scalar values by neighborhood...".format(len(indices)))
     neighbor_lists = find_neighbors_from_file(input_vtk)
 
     # Loop through vertices:
     rescaled_scalars = scalars.copy()
     for index in indices:
-
         # Determine the scalars in the vertex's neighborhood:
         neighborhood = find_neighborhood(neighbor_lists, [index], nedges)
 
@@ -1096,11 +1115,15 @@ def rescale_by_neighborhood(input_vtk, indices=[], nedges=10, p=99,
     # Return rescaled scalars and file name
     # ------------------------------------------------------------------------
     if save_file:
-
-        rescaled_scalars_file = os.path.join(os.getcwd(), output_filestring + '.vtk')
-        rewrite_scalars(input_vtk, rescaled_scalars_file,
-                        rescaled_scalars, 'rescaled_scalars', [],
-                        background_value)
+        rescaled_scalars_file = os.path.join(os.getcwd(), output_filestring + ".vtk")
+        rewrite_scalars(
+            input_vtk,
+            rescaled_scalars_file,
+            rescaled_scalars,
+            "rescaled_scalars",
+            [],
+            background_value,
+        )
         if not os.path.exists(rescaled_scalars_file):
             raise OSError(rescaled_scalars_file + " not found")
 
@@ -1110,9 +1133,14 @@ def rescale_by_neighborhood(input_vtk, indices=[], nedges=10, p=99,
     return rescaled_scalars, rescaled_scalars_file
 
 
-def rescale_by_label(input_vtk, labels_or_file, save_file=False,
-                     output_filestring='rescaled_scalars',
-                     background_value=-1, verbose=False):
+def rescale_by_label(
+    input_vtk,
+    labels_or_file,
+    save_file=False,
+    output_filestring="rescaled_scalars",
+    background_value=-1,
+    verbose=False,
+):
     """
     Rescale scalars for each label (such as depth values within each fold).
 
@@ -1191,13 +1219,14 @@ def rescale_by_label(input_vtk, labels_or_file, save_file=False,
     # Loop through labels:
     for label in unique_labels:
         if verbose:
-            print(f"  Rescaling values within label {int(label)} of {len(unique_labels)} labels...")
-        indices = [i for i,x in enumerate(labels) if x == label]
+            print(
+                f"  Rescaling values within label {int(label)} of {len(unique_labels)} labels..."
+            )
+        indices = [i for i, x in enumerate(labels) if x == label]
         if indices:
-
             # Rescale by the maximum label scalar value:
             scalars[indices] = scalars[indices] / np.max(scalars[indices])
-            #print(max(scalars), max(scalars[indices]))
+            # print(max(scalars), max(scalars[indices]))
 
     rescaled_scalars = scalars.tolist()
 
@@ -1205,12 +1234,15 @@ def rescale_by_label(input_vtk, labels_or_file, save_file=False,
     # Return rescaled scalars and file name
     # ------------------------------------------------------------------------
     if save_file:
-
-        rescaled_scalars_file = os.path.join(os.getcwd(),
-                                             output_filestring + '.vtk')
-        rewrite_scalars(input_vtk, rescaled_scalars_file,
-                        rescaled_scalars, 'rescaled_scalars', labels,
-                        background_value)
+        rescaled_scalars_file = os.path.join(os.getcwd(), output_filestring + ".vtk")
+        rewrite_scalars(
+            input_vtk,
+            rescaled_scalars_file,
+            rescaled_scalars,
+            "rescaled_scalars",
+            labels,
+            background_value,
+        )
         if not os.path.exists(rescaled_scalars_file):
             raise OSError(rescaled_scalars_file + " not found")
 
@@ -1257,13 +1289,12 @@ def area_of_faces(points, faces):
     points = np.array(points)
 
     for i, triangle in enumerate(faces):
-
         a = np.linalg.norm(points[triangle[0]] - points[triangle[1]])
         b = np.linalg.norm(points[triangle[1]] - points[triangle[2]])
         c = np.linalg.norm(points[triangle[2]] - points[triangle[0]])
-        s = (a+b+c) / 2.0
+        s = (a + b + c) / 2.0
 
-        area[i] = np.sqrt(s*(s-a)*(s-b)*(s-c))
+        area[i] = np.sqrt(s * (s - a) * (s - b) * (s - c))
 
     return area
 
@@ -1496,7 +1527,7 @@ def topo_test(index, values, neighbor_lists):
     # ("inside" and "outside"); count inside and outside neighbors:
     I_neighbors = neighbor_lists[index]
     neighbor_values = values[I_neighbors]
-    inside = [I_neighbors[i] for i,x in enumerate(neighbor_values) if x > 0.5]
+    inside = [I_neighbors[i] for i, x in enumerate(neighbor_values) if x > 0.5]
     n_inside = len(inside)
     n_outside = len(I_neighbors) - n_inside
 
@@ -1518,8 +1549,7 @@ def topo_test(index, values, neighbor_lists):
         N = []
         for i_in in range(n_inside):
             new_neighbors = neighbor_lists[inside[i_in]]
-            new_neighbors = [x for x in new_neighbors
-                             if values[x] > 0.5 if x != index]
+            new_neighbors = [x for x in new_neighbors if values[x] > 0.5 if x != index]
             new_neighbors.extend([inside[i_in]])
             N.append(new_neighbors)
 
@@ -1902,4 +1932,5 @@ def topo_test(index, values, neighbor_lists):
 # ============================================================================
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod(verbose=True)  # py.test --doctest-modules

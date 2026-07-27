@@ -13,7 +13,7 @@ Copyright 2013,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 """
 
 
-def plot_surfaces(vtk_files, use_colormap=False, colormap_file=''):
+def plot_surfaces(vtk_files, use_colormap=False, colormap_file=""):
     """
     Use vtkviewer to visualize one or more VTK surface files.
 
@@ -92,11 +92,17 @@ def plot_surfaces(vtk_files, use_colormap=False, colormap_file=''):
     vv.Start()
 
 
-def plot_mask_surface(vtk_file, mask_file='', nonmask_value=-1,
-                      masked_output='', remove_nonmask=False,
-                      program='vtkviewer',
-                      use_colormap=False, colormap_file='',
-                      background_value=-1):
+def plot_mask_surface(
+    vtk_file,
+    mask_file="",
+    nonmask_value=-1,
+    masked_output="",
+    remove_nonmask=False,
+    program="vtkviewer",
+    use_colormap=False,
+    colormap_file="",
+    background_value=-1,
+):
     """
     Use vtkviewer or mayavi2 to visualize VTK surface mesh data.
 
@@ -165,7 +171,7 @@ def plot_mask_surface(vtk_file, mask_file='', nonmask_value=-1,
     if mask_file:
         mask, name = read_scalars(mask_file, True, True)
         if not masked_output:
-            masked_output = os.path.join(os.getcwd(), 'temp.vtk')
+            masked_output = os.path.join(os.getcwd(), "temp.vtk")
         file_to_plot = masked_output
 
         # --------------------------------------------------------------------
@@ -175,15 +181,17 @@ def plot_mask_surface(vtk_file, mask_file='', nonmask_value=-1,
             # ----------------------------------------------------------------
             # Load VTK files:
             # ----------------------------------------------------------------
-            points, indices, lines, faces, scalars, scalar_names, npoints, \
-                input_vtk = read_vtk(vtk_file, True, True)
+            points, indices, lines, faces, scalars, scalar_names, npoints, input_vtk = (
+                read_vtk(vtk_file, True, True)
+            )
             # ----------------------------------------------------------------
             # Find mask indices, remove nonmask faces, and reindex:
             # ----------------------------------------------------------------
-            Imask = [i for i,x in enumerate(mask) if x != nonmask_value]
+            Imask = [i for i, x in enumerate(mask) if x != nonmask_value]
             mask_faces = keep_faces(faces, Imask)
-            mask_faces, points, \
-            original_indices = reindex_faces_points(mask_faces, points)
+            mask_faces, points, original_indices = reindex_faces_points(
+                mask_faces, points
+            )
             # ----------------------------------------------------------------
             # Write VTK file with scalar values:
             # ----------------------------------------------------------------
@@ -193,32 +201,41 @@ def plot_mask_surface(vtk_file, mask_file='', nonmask_value=-1,
                 scalar_type = type(scalars[0][0]).__name__
             else:
                 print("Undefined scalar type!")
-            write_vtk(file_to_plot, points, [], [], mask_faces,
-                      scalars[original_indices].tolist(), scalar_names,
-                      scalar_type=scalar_type)
+            write_vtk(
+                file_to_plot,
+                points,
+                [],
+                [],
+                mask_faces,
+                scalars[original_indices].tolist(),
+                scalar_names,
+                scalar_type=scalar_type,
+            )
         else:
             scalars, name = read_scalars(vtk_file, True, True)
             scalars[mask == nonmask_value] = nonmask_value
-            rewrite_scalars(vtk_file, file_to_plot, scalars, ['scalars'], [],
-                            background_value)
+            rewrite_scalars(
+                vtk_file, file_to_plot, scalars, ["scalars"], [], background_value
+            )
     else:
         file_to_plot = vtk_file
 
     # ------------------------------------------------------------------------
     # Display with vtkviewer.py:
     # ------------------------------------------------------------------------
-    if program == 'vtkviewer':
-        plot_surfaces(file_to_plot, use_colormap=use_colormap,
-                      colormap_file=colormap_file)
+    if program == "vtkviewer":
+        plot_surfaces(
+            file_to_plot, use_colormap=use_colormap, colormap_file=colormap_file
+        )
     # ------------------------------------------------------------------------
     # Display with mayavi2:
     # ------------------------------------------------------------------------
-    elif program == 'mayavi2':
+    elif program == "mayavi2":
         cmd = ["mayavi2", "-d", file_to_plot, "-m", "Surface", "&"]
-        execute(cmd, 'os')
+        execute(cmd, "os")
 
 
-def plot_volumes(volume_files, command='fslview'):
+def plot_volumes(volume_files, command="fslview"):
     """
     Use fslview to visualize image volume data.
 
@@ -248,17 +265,16 @@ def plot_volumes(volume_files, command='fslview'):
     if isinstance(volume_files, str):
         volume_files = [volume_files]
     elif not isinstance(volume_files, list):
-        raise OSError('plot_volumes() requires volume_files to be a list '
-                      'or string.')
+        raise OSError("plot_volumes() requires volume_files to be a list or string.")
 
     if not isinstance(command, str):
-        raise OSError('plot_volumes() requires command to be a string.')
+        raise OSError("plot_volumes() requires command to be a string.")
     else:
         command = [command]
 
     command.extend(volume_files)
-    command.extend('&')
-    execute(command, 'os')
+    command.extend("&")
+    execute(command, "os")
 
 
 def histogram_of_vtk_scalars(vtk_file, nbins=100):
@@ -293,13 +309,14 @@ def histogram_of_vtk_scalars(vtk_file, nbins=100):
 
     # Histogram:
     fig = plt.figure()
-    ax = fig.add_subplot(1,1,1)
-    ax.hist(values, bins=nbins, density=False, facecolor='gray', alpha=0.5)
+    ax = fig.add_subplot(1, 1, 1)
+    ax.hist(values, bins=nbins, density=False, facecolor="gray", alpha=0.5)
     plt.show()
 
 
-def histograms_of_lists(columns, column_name='', ignore_columns=[],
-                        nbins=100, axis_limits=[], titles=[]):
+def histograms_of_lists(
+    columns, column_name="", ignore_columns=[], nbins=100, axis_limits=[], titles=[]
+):
     """
     Construct a histogram for each table column.
 
@@ -352,18 +369,18 @@ def histograms_of_lists(columns, column_name='', ignore_columns=[],
         if icolumn not in ignore_columns:
             ax = fig.add_subplot(nplotrows, nplotcols, icolumn + 1)
             column = [np.float(x) for x in column]
-            ax.hist(column, bins=nbins, density=False, facecolor='gray', alpha=0.5)
-            plt.xlabel(column_name, fontsize='small')
+            ax.hist(column, bins=nbins, density=False, facecolor="gray", alpha=0.5)
+            plt.xlabel(column_name, fontsize="small")
             if len(titles) == ncolumns:
-                plt.title(titles[icolumn], fontsize='small')
+                plt.title(titles[icolumn], fontsize="small")
             else:
-                plt.title(column_name + ' histogram', fontsize='small')
+                plt.title(column_name + " histogram", fontsize="small")
             if axis_limits:
                 ax.axis(axis_limits)
     plt.show()
 
 
-def boxplots_of_lists(columns, xlabel='', ylabel='', ylimit=None, title=''):
+def boxplots_of_lists(columns, xlabel="", ylabel="", ylimit=None, title=""):
     """
     Construct a box plot for each table column.
 
@@ -401,15 +418,25 @@ def boxplots_of_lists(columns, xlabel='', ylabel='', ylimit=None, title=''):
     plt.boxplot(columns, 1)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
-    plt.ylim([0,ylimit])
+    plt.ylim([0, ylimit])
     plt.title(title)
     plt.show()
 
 
-def scatterplot_lists(y_columns, x_column, ignore_columns=[], plot_line=True,
-                      connect_markers=True, mstyle='o', msize=1,
-                      title='', x_label='', y_label='',
-                      legend=True, legend_labels=[]):
+def scatterplot_lists(
+    y_columns,
+    x_column,
+    ignore_columns=[],
+    plot_line=True,
+    connect_markers=True,
+    mstyle="o",
+    msize=1,
+    title="",
+    x_label="",
+    y_label="",
+    legend=True,
+    legend_labels=[],
+):
     """
     Scatter plot columns against the values of one of the columns.
 
@@ -469,7 +496,7 @@ def scatterplot_lists(y_columns, x_column, ignore_columns=[], plot_line=True,
 
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
-    #colors = ['b','r','c','m','k','g','y']
+    # colors = ['b','r','c','m','k','g','y']
     colors = iter(cm.hsv(np.linspace(0, 1, ncolumns)))
     # ------------------------------------------------------------------------
     # Scatter plot:
@@ -482,24 +509,54 @@ def scatterplot_lists(y_columns, x_column, ignore_columns=[], plot_line=True,
         column = [np.float(x) for x in column]
         if icolumn not in ignore_columns:
             color = next(colors)
-            #color = colors[icolumn]
+            # color = colors[icolumn]
             if len(legend_labels) == ncolumns:
                 color_text = legend_labels[icolumn]
                 if connect_markers and not plot_line:
-                    plt.plot(x_column, column, '-', marker=mstyle, s=msize,
-                             facecolors='none', edgecolors=color, hold=hold,
-                             label=color_text)
+                    plt.plot(
+                        x_column,
+                        column,
+                        "-",
+                        marker=mstyle,
+                        s=msize,
+                        facecolors="none",
+                        edgecolors=color,
+                        hold=hold,
+                        label=color_text,
+                    )
                 else:
-                    plt.scatter(x_column, column, marker=mstyle, s=msize,
-                                facecolors='none', edgecolors=color, hold=hold,
-                                label=color_text)
+                    plt.scatter(
+                        x_column,
+                        column,
+                        marker=mstyle,
+                        s=msize,
+                        facecolors="none",
+                        edgecolors=color,
+                        hold=hold,
+                        label=color_text,
+                    )
             else:
                 if connect_markers and not plot_line:
-                    plt.plot(x_column, column, '-', marker=mstyle, s=msize,
-                             facecolors='none', edgecolors=color, hold=hold)
+                    plt.plot(
+                        x_column,
+                        column,
+                        "-",
+                        marker=mstyle,
+                        s=msize,
+                        facecolors="none",
+                        edgecolors=color,
+                        hold=hold,
+                    )
                 else:
-                    plt.scatter(x_column, column, marker=mstyle, s=msize,
-                                facecolors='none', edgecolors=color, hold=hold)
+                    plt.scatter(
+                        x_column,
+                        column,
+                        marker=mstyle,
+                        s=msize,
+                        facecolors="none",
+                        edgecolors=color,
+                        hold=hold,
+                    )
 
         if plot_line:
             if min(column) < min_value:
@@ -514,9 +571,9 @@ def scatterplot_lists(y_columns, x_column, ignore_columns=[], plot_line=True,
         plt.plot(list(range(int(min_value), int(max_value) + 2)))
     if legend:
         fontP = FontProperties()
-        fontP.set_size('small')
+        fontP.set_size("small")
         handles, labels = ax.get_legend_handles_labels()
-        ax.legend(handles, labels, loc='lower right', prop=fontP)
+        ax.legend(handles, labels, loc="lower right", prop=fontP)
     ax.grid()
     if x_label:
         plt.xlabel(x_label)
@@ -526,10 +583,21 @@ def scatterplot_lists(y_columns, x_column, ignore_columns=[], plot_line=True,
     plt.show()
 
 
-def scatterplot_list_pairs(columns, ignore_first_column=False, plot_line=True,
-                           connect_markers=True, mstyle='o', msize=1,
-                           mcolor='', title='', x_label='', y_label='',
-                           limit=None, legend=True, legend_labels=[]):
+def scatterplot_list_pairs(
+    columns,
+    ignore_first_column=False,
+    plot_line=True,
+    connect_markers=True,
+    mstyle="o",
+    msize=1,
+    mcolor="",
+    title="",
+    x_label="",
+    y_label="",
+    limit=None,
+    legend=True,
+    legend_labels=[],
+):
     """
     Scatter plot pairs of columns.
 
@@ -605,8 +673,8 @@ def scatterplot_list_pairs(columns, ignore_first_column=False, plot_line=True,
         max_value = -np.inf
     if ignore_first_column:
         columns = columns[1::]
-    columns1 = [x for i,x in enumerate(columns) if np.mod(i,2) == 1]
-    columns2 = [x for i,x in enumerate(columns) if np.mod(i,2) == 0]
+    columns1 = [x for i, x in enumerate(columns) if np.mod(i, 2) == 1]
+    columns2 = [x for i, x in enumerate(columns) if np.mod(i, 2) == 0]
     if not limit:
         limit = np.ceil(np.max([np.max(columns1), np.max(columns1)]))
     for icolumn, column1 in enumerate(columns1):
@@ -619,20 +687,39 @@ def scatterplot_list_pairs(columns, ignore_first_column=False, plot_line=True,
             color = next(colors)
         if len(legend_labels) == ncolumns:
             if connect_markers and not plot_line:
-                plt.plot(column1, column2, '-', marker=mstyle,
-                         color=color, hold=hold,
-                         label=legend_labels[icolumn])
+                plt.plot(
+                    column1,
+                    column2,
+                    "-",
+                    marker=mstyle,
+                    color=color,
+                    hold=hold,
+                    label=legend_labels[icolumn],
+                )
             else:
-                plt.scatter(column1, column2, marker=mstyle, s=msize,
-                            facecolors='none', edgecolors=color, hold=hold,
-                            label=legend_labels[icolumn])
+                plt.scatter(
+                    column1,
+                    column2,
+                    marker=mstyle,
+                    s=msize,
+                    facecolors="none",
+                    edgecolors=color,
+                    hold=hold,
+                    label=legend_labels[icolumn],
+                )
         else:
             if connect_markers and not plot_line:
-                plt.plot(column1, column2, '-', marker=mstyle,
-                         color=color, hold=hold)
+                plt.plot(column1, column2, "-", marker=mstyle, color=color, hold=hold)
             else:
-                plt.scatter(column1, column2, marker=mstyle, s=msize,
-                            facecolors='none', edgecolors=color, hold=hold)
+                plt.scatter(
+                    column1,
+                    column2,
+                    marker=mstyle,
+                    s=msize,
+                    facecolors="none",
+                    edgecolors=color,
+                    hold=hold,
+                )
 
         if plot_line:
             if min(column1) < min_value:
@@ -647,13 +734,13 @@ def scatterplot_list_pairs(columns, ignore_first_column=False, plot_line=True,
         plt.plot(list(range(int(min_value), int(max_value) + 2)))
     if legend:
         fontP = FontProperties()
-        fontP.set_size('small')
+        fontP.set_size("small")
         handles, labels = ax.get_legend_handles_labels()
-        ax.legend(handles, labels, loc='lower right', prop=fontP)
-    plt.xlim([0,limit])
-    plt.ylim([0,limit])
+        ax.legend(handles, labels, loc="lower right", prop=fontP)
+    plt.xlim([0, limit])
+    plt.ylim([0, limit])
     ax.grid()
-    ax.set_aspect(aspect='equal')
+    ax.set_aspect(aspect="equal")
     if x_label:
         plt.xlabel(x_label)
     if y_label:
@@ -667,6 +754,7 @@ def scatterplot_list_pairs(columns, ignore_first_column=False, plot_line=True,
 # ============================================================================
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod(verbose=True)  # py.test --doctest-modules
 
 

@@ -56,15 +56,15 @@ def area(command, surface_file, verbose=False):
     from nipype.interfaces.base import CommandLine
 
     basename = os.path.splitext(os.path.basename(surface_file))[0]
-    area_file = os.path.join(os.getcwd(), basename + '.area.vtk')
-    args = ' '.join([surface_file, area_file])
+    area_file = os.path.join(os.getcwd(), basename + ".area.vtk")
+    args = " ".join([surface_file, area_file])
 
     if verbose:
         print(f"{command} {args}")
 
     cli = CommandLine(command=command)
     cli.inputs.args = args
-    cli.terminal_output = 'file'
+    cli.terminal_output = "file"
     cli.run()
 
     if not os.path.exists(area_file):
@@ -115,15 +115,15 @@ def travel_depth(command, surface_file, verbose=False):
     from nipype.interfaces.base import CommandLine
 
     basename = os.path.splitext(os.path.basename(surface_file))[0]
-    depth_file = os.path.join(os.getcwd(), basename + '.travel_depth.vtk')
-    args = ' '.join([surface_file, depth_file])
+    depth_file = os.path.join(os.getcwd(), basename + ".travel_depth.vtk")
+    args = " ".join([surface_file, depth_file])
 
     if verbose:
         print(f"{command} {args}")
 
     cli = CommandLine(command=command)
     cli.inputs.args = args
-    cli.terminal_output = 'file'
+    cli.terminal_output = "file"
     cli.run()
 
     if not os.path.exists(depth_file):
@@ -172,15 +172,15 @@ def geodesic_depth(command, surface_file, verbose=False):
     from nipype.interfaces.base import CommandLine
 
     basename = os.path.splitext(os.path.basename(surface_file))[0]
-    depth_file = os.path.join(os.getcwd(), basename + '.geodesic_depth.vtk')
-    args = ' '.join([surface_file, depth_file])
+    depth_file = os.path.join(os.getcwd(), basename + ".geodesic_depth.vtk")
+    args = " ".join([surface_file, depth_file])
 
     if verbose:
         print(f"{command} {args}")
 
     cli = CommandLine(command=command)
     cli.inputs.args = args
-    cli.terminal_output = 'file'
+    cli.terminal_output = "file"
     cli.run()
 
     if not os.path.exists(depth_file):
@@ -284,7 +284,7 @@ def curvature(command, method, arguments, surface_file, verbose=False):
 
     from nipype.interfaces.base import CommandLine
 
-    args = ['-m', str(method)]
+    args = ["-m", str(method)]
     gauss_curvature_file = None
     max_curvature_file = None
     min_curvature_file = None
@@ -292,17 +292,24 @@ def curvature(command, method, arguments, surface_file, verbose=False):
 
     basename = os.path.splitext(os.path.basename(surface_file))[0]
     stem = os.path.join(os.getcwd(), basename)
-    mean_curvature_file = stem + '.mean_curvature.vtk'
+    mean_curvature_file = stem + ".mean_curvature.vtk"
     if method in [0, 1]:
-        gauss_curvature_file = stem + '.gauss_curvature.vtk'
-        args.extend(['-g', gauss_curvature_file])
+        gauss_curvature_file = stem + ".gauss_curvature.vtk"
+        args.extend(["-g", gauss_curvature_file])
     if method == 0:
-        max_curvature_file = stem + '.max_curvature.vtk'
-        min_curvature_file = stem + '.min_curvature.vtk'
-        min_curvature_vector_file = stem + '.min_curvature.txt'
-        args.extend(['-x', max_curvature_file,
-                     '-i', min_curvature_file,
-                     '-d', min_curvature_vector_file])
+        max_curvature_file = stem + ".max_curvature.vtk"
+        min_curvature_file = stem + ".min_curvature.vtk"
+        min_curvature_vector_file = stem + ".min_curvature.txt"
+        args.extend(
+            [
+                "-x",
+                max_curvature_file,
+                "-i",
+                min_curvature_file,
+                "-d",
+                min_curvature_vector_file,
+            ]
+        )
 
     if arguments:
         args.extend([arguments])
@@ -313,12 +320,17 @@ def curvature(command, method, arguments, surface_file, verbose=False):
         print(f"{command} {args}")
 
     cli = CommandLine(command=command)
-    cli.inputs.args = ' '.join(args)
-    cli.terminal_output = 'file'
+    cli.inputs.args = " ".join(args)
+    cli.terminal_output = "file"
     cli.run()
 
-    return mean_curvature_file, gauss_curvature_file, \
-           max_curvature_file, min_curvature_file, min_curvature_vector_file
+    return (
+        mean_curvature_file,
+        gauss_curvature_file,
+        max_curvature_file,
+        min_curvature_file,
+        min_curvature_vector_file,
+    )
 
 
 # ============================================================================
@@ -326,4 +338,5 @@ def curvature(command, method, arguments, surface_file, verbose=False):
 # ============================================================================
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod(verbose=True)  # py.test --doctest-modules

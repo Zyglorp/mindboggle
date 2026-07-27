@@ -10,9 +10,18 @@ Copyright 2016,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 """
 
 
-def extract_fundi(folds, curv_file, depth_file, min_separation=10,
-                  erode_ratio=0.1, erode_min_size=1, save_file=False,
-                  output_file='', background_value=-1, verbose=False):
+def extract_fundi(
+    folds,
+    curv_file,
+    depth_file,
+    min_separation=10,
+    erode_ratio=0.1,
+    erode_min_size=1,
+    save_file=False,
+    output_file="",
+    background_value=-1,
+    verbose=False,
+):
     """
     Extract fundi from folds.
 
@@ -142,7 +151,7 @@ def extract_fundi(folds, curv_file, depth_file, min_separation=10,
     from mindboggle.guts.compute import median_abs_dev
     from mindboggle.guts.mesh import find_neighbors_from_file
 
-    #from mindboggle.guts.mesh import find_complete_faces
+    # from mindboggle.guts.mesh import find_complete_faces
     from mindboggle.guts.paths import (
         connect_points_erosion,
         find_max_values,
@@ -155,8 +164,9 @@ def extract_fundi(folds, curv_file, depth_file, min_separation=10,
 
     # Load values, inner anchor threshold, and neighbors:
     if os.path.isfile(curv_file):
-        points, indices, lines, faces, curvs, scalar_names, npoints, \
-            input_vtk = read_vtk(curv_file, True, True)
+        points, indices, lines, faces, curvs, scalar_names, npoints, input_vtk = (
+            read_vtk(curv_file, True, True)
+        )
     else:
         raise OSError(f"{curv_file} doesn't exist!")
     if os.path.isfile(curv_file):
@@ -182,54 +192,72 @@ def extract_fundi(folds, curv_file, depth_file, min_separation=10,
             print(f"Extract a fundus from each of {len(unique_fold_IDs)} folds...")
 
     for fold_ID in unique_fold_IDs:
-        indices_fold = [i for i,x in enumerate(folds) if x == fold_ID]
+        indices_fold = [i for i, x in enumerate(folds) if x == fold_ID]
         if indices_fold:
             if verbose:
-                print(f'  Fold {int(fold_ID)}:')
+                print(f"  Fold {int(fold_ID)}:")
 
             # ----------------------------------------------------------------
             # Find outer anchor points on the boundary of the surface region,
             # to serve as fundus endpoints:
             # ----------------------------------------------------------------
-            outer_anchors, tracks = find_outer_endpoints(indices_fold,
-                neighbor_lists, values, depths, min_separation,
-                background_value, verbose)
+            outer_anchors, tracks = find_outer_endpoints(
+                indices_fold,
+                neighbor_lists,
+                values,
+                depths,
+                min_separation,
+                background_value,
+                verbose,
+            )
 
             # ----------------------------------------------------------------
             # Find inner anchor points:
             # ----------------------------------------------------------------
-            inner_anchors = find_max_values(points, values, min_separation,
-                                            thr)
+            inner_anchors = find_max_values(points, values, min_separation, thr)
 
             # ----------------------------------------------------------------
             # Connect anchor points to create skeleton:
             # ----------------------------------------------------------------
             B = background_value * np.ones(npoints)
             B[indices_fold] = 1
-            skeleton = connect_points_erosion(B, neighbor_lists,
-                outer_anchors, inner_anchors, values, erode_ratio,
-                erode_min_size, [], '', background_value, verbose)
+            skeleton = connect_points_erosion(
+                B,
+                neighbor_lists,
+                outer_anchors,
+                inner_anchors,
+                values,
+                erode_ratio,
+                erode_min_size,
+                [],
+                "",
+                background_value,
+                verbose,
+            )
             if skeleton:
                 skeletons.extend(skeleton)
 
             ## ---------------------------------------------------------------
             ## Remove fundus vertices if they make complete triangle faces:
             ## ---------------------------------------------------------------
-            #Iremove = find_complete_faces(skeletons, faces)
-            #if Iremove:
+            # Iremove = find_complete_faces(skeletons, faces)
+            # if Iremove:
             #    skeletons = list(frozenset(skeletons).difference(Iremove))
 
     indices_skel = [x for x in skeletons if folds[x] != background_value]
     fundus_per_fold = background_value * np.ones(npoints)
     fundus_per_fold[indices_skel] = folds[indices_skel]
-    n_fundi_in_folds = len([x for x in np.unique(fundus_per_fold)
-                             if x != background_value])
+    n_fundi_in_folds = len(
+        [x for x in np.unique(fundus_per_fold) if x != background_value]
+    )
     if n_fundi_in_folds == 1:
-        sdum = 'fold fundus'
+        sdum = "fold fundus"
     else:
-        sdum = 'fold fundi'
+        sdum = "fold fundi"
     if verbose:
-        print(f'  ...Extracted {n_fundi_in_folds} {sdum}; {n_fundi_in_folds} total ({time() - t1:.2f} seconds)')
+        print(
+            f"  ...Extracted {n_fundi_in_folds} {sdum}; {n_fundi_in_folds} total ({time() - t1:.2f} seconds)"
+        )
 
     # ------------------------------------------------------------------------
     # Return fundi, number of fundi, and file name:
@@ -241,14 +269,19 @@ def extract_fundi(folds, curv_file, depth_file, min_separation=10,
             if output_file:
                 fundus_per_fold_file = output_file
             else:
-                fundus_per_fold_file = os.path.join(os.getcwd(),
-                                                    'fundus_per_fold.vtk')
-            rewrite_scalars(curv_file, fundus_per_fold_file, fundus_per_fold,
-                            'fundi', [], background_value)
+                fundus_per_fold_file = os.path.join(os.getcwd(), "fundus_per_fold.vtk")
+            rewrite_scalars(
+                curv_file,
+                fundus_per_fold_file,
+                fundus_per_fold,
+                "fundi",
+                [],
+                background_value,
+            )
             if not os.path.exists(fundus_per_fold_file):
                 raise OSError(fundus_per_fold_file + " not found")
 
-    return fundus_per_fold,  n_fundi_in_folds, fundus_per_fold_file
+    return fundus_per_fold, n_fundi_in_folds, fundus_per_fold_file
 
 
 # ============================================================================
@@ -256,4 +289,5 @@ def extract_fundi(folds, curv_file, depth_file, min_separation=10,
 # ============================================================================
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod(verbose=True)  # py.test --doctest-modules

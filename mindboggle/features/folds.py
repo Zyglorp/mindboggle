@@ -90,8 +90,9 @@ def find_depth_threshold(depth_file, min_vertices=10000, verbose=False):
     # ------------------------------------------------------------------------
     # Load depth values for all vertices:
     # ------------------------------------------------------------------------
-    points, indices, lines, faces, depths, scalar_names, npoints, \
-        input_vtk = read_vtk(depth_file, return_first=True, return_array=True)
+    points, indices, lines, faces, depths, scalar_names, npoints, input_vtk = read_vtk(
+        depth_file, return_first=True, return_array=True
+    )
 
     # ------------------------------------------------------------------------
     # Compute histogram of depth measures:
@@ -99,8 +100,9 @@ def find_depth_threshold(depth_file, min_vertices=10000, verbose=False):
     if npoints > min_vertices:
         nbins = np.int(np.round(npoints / 100.0))
     else:
-        raise OSError(f"  Expecting at least {min_vertices} vertices to create "
-                      "depth histogram")
+        raise OSError(
+            f"  Expecting at least {min_vertices} vertices to create depth histogram"
+        )
     bins, bin_edges = np.histogram(depths, bins=nbins)
 
     # ------------------------------------------------------------------------
@@ -111,8 +113,7 @@ def find_depth_threshold(depth_file, min_vertices=10000, verbose=False):
     # ------------------------------------------------------------------------
     bins_smooth = gaussian_filter1d(bins.tolist(), 5)
     window = [-1, 0, 1]
-    bin_slopes = np.convolve(bins_smooth, window, mode='same') / \
-                 (len(window) - 1)
+    bin_slopes = np.convolve(bins_smooth, window, mode="same") / (len(window) - 1)
     ibins0 = np.where(bin_slopes == 0)[0]
     if ibins0.shape:
         depth_threshold = bin_edges[ibins0[0]]
@@ -121,14 +122,20 @@ def find_depth_threshold(depth_file, min_vertices=10000, verbose=False):
 
     # Print statement:
     if verbose:
-        print(f'  Depth threshold: {depth_threshold}')
+        print(f"  Depth threshold: {depth_threshold}")
 
     return depth_threshold, bins, bin_edges
 
 
-def extract_folds(depth_file, depth_threshold=2, min_fold_size=50,
-                  save_file=False, output_file='', background_value=-1,
-                  verbose=False):
+def extract_folds(
+    depth_file,
+    depth_threshold=2,
+    min_fold_size=50,
+    save_file=False,
+    output_file="",
+    background_value=-1,
+    verbose=False,
+):
     """
     Use depth threshold to extract folds from a triangular surface mesh.
 
@@ -237,15 +244,15 @@ def extract_folds(depth_file, depth_threshold=2, min_fold_size=50,
     # ------------------------------------------------------------------------
     # Load depth values for all vertices
     # ------------------------------------------------------------------------
-    points, indices, lines, faces, depths, scalar_names, npoints, \
-        input_vtk = read_vtk(depth_file, return_first=True, return_array=True)
+    points, indices, lines, faces, depths, scalar_names, npoints, input_vtk = read_vtk(
+        depth_file, return_first=True, return_array=True
+    )
 
     # ------------------------------------------------------------------------
     # Find the deepest vertices
     # ------------------------------------------------------------------------
-    indices_deep = [i for i,x in enumerate(depths) if x >= depth_threshold]
+    indices_deep = [i for i, x in enumerate(depths) if x >= depth_threshold]
     if indices_deep:
-
         # --------------------------------------------------------------------
         # Find neighbors for each vertex
         # --------------------------------------------------------------------
@@ -257,21 +264,32 @@ def extract_folds(depth_file, depth_threshold=2, min_fold_size=50,
         if verbose:
             print(f"  Segment vertices deeper than {depth_threshold:.2f} as folds")
             t1 = time()
-        folds = segment_regions(indices_deep, neighbor_lists, 1, [], False,
-                                False, [], [], [], '', background_value, False)
+        folds = segment_regions(
+            indices_deep,
+            neighbor_lists,
+            1,
+            [],
+            False,
+            False,
+            [],
+            [],
+            [],
+            "",
+            background_value,
+            False,
+        )
         if verbose:
-            print(f'  ...Segmented folds ({time() - t1:.2f} seconds)')
+            print(f"  ...Segmented folds ({time() - t1:.2f} seconds)")
 
         # --------------------------------------------------------------------
         # Remove small folds
         # --------------------------------------------------------------------
         if min_fold_size > 1:
             if verbose:
-                print(f'  Remove folds smaller than {min_fold_size}')
-            unique_folds = [x for x in np.unique(folds)
-                            if x != background_value]
+                print(f"  Remove folds smaller than {min_fold_size}")
+            unique_folds = [x for x in np.unique(folds) if x != background_value]
             for nfold in unique_folds:
-                indices_fold = [i for i,x in enumerate(folds) if x == nfold]
+                indices_fold = [i for i, x in enumerate(folds) if x == nfold]
                 if len(indices_fold) < min_fold_size:
                     folds[indices_fold] = background_value
 
@@ -290,7 +308,7 @@ def extract_folds(depth_file, depth_threshold=2, min_fold_size=50,
         renumber_folds = background_value * np.ones(npoints)
         fold_numbers = [x for x in np.unique(folds) if x != background_value]
         for i_fold, n_fold in enumerate(fold_numbers):
-            fold_indices = [i for i,x in enumerate(folds) if x == n_fold]
+            fold_indices = [i for i, x in enumerate(folds) if x == n_fold]
             renumber_folds[fold_indices] = i_fold
         folds = renumber_folds
         folds = [int(x) for x in folds]
@@ -298,22 +316,20 @@ def extract_folds(depth_file, depth_threshold=2, min_fold_size=50,
 
         # Print statement
         if verbose:
-            print(f'  ...Extracted {n_folds} folds ({time() - t0:.2f} seconds)')
+            print(f"  ...Extracted {n_folds} folds ({time() - t0:.2f} seconds)")
     else:
         if verbose:
-            print('  No deep vertices')
+            print("  No deep vertices")
 
     # ------------------------------------------------------------------------
     # Return folds, number of folds, file name
     # ------------------------------------------------------------------------
     if save_file:
-
         if output_file:
             folds_file = output_file
         else:
-            folds_file = os.path.join(os.getcwd(), 'folds.vtk')
-        rewrite_scalars(depth_file, folds_file, folds, 'folds', [],
-                        background_value)
+            folds_file = os.path.join(os.getcwd(), "folds.vtk")
+        rewrite_scalars(depth_file, folds_file, folds, "folds", [], background_value)
 
         if not os.path.exists(folds_file):
             raise OSError(folds_file + " not found")
@@ -481,4 +497,5 @@ def extract_folds(depth_file, depth_threshold=2, min_fold_size=50,
 # ============================================================================
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod(verbose=True)  # py.test --doctest-modules

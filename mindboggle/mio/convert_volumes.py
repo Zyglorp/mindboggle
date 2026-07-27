@@ -11,7 +11,7 @@ Copyright 2016,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 """
 
 
-def convert2nii(input_file, reference_file, output_file='', interp='continuous'):
+def convert2nii(input_file, reference_file, output_file="", interp="continuous"):
     """
     Convert volume from the input file format to the output file format.
 
@@ -70,8 +70,9 @@ def convert2nii(input_file, reference_file, output_file='', interp='continuous')
     if not os.path.exists(reference_file):
         raise OSError("Reference file " + reference_file + " not found.")
     if not output_file:
-        output_file = os.path.join(os.getcwd(),
-                                   os.path.basename(input_file) + '.nii.gz')
+        output_file = os.path.join(
+            os.getcwd(), os.path.basename(input_file) + ".nii.gz"
+        )
     # ------------------------------------------------------------------------
     # Load reference image:
     # ------------------------------------------------------------------------
@@ -98,14 +99,13 @@ def convert2nii(input_file, reference_file, output_file='', interp='continuous')
         b = np.dot(A, b)
 
     # order of the spline interpolation:
-    if interp == 'nearest':
+    if interp == "nearest":
         interpolation_order = 0
     else:
         interpolation_order = 3
-    resliced = ndimage.affine_transform(dat1, A,
-                         offset=np.dot(A_inv, b),
-                         output_shape=dim2,
-                         order=interpolation_order)
+    resliced = ndimage.affine_transform(
+        dat1, A, offset=np.dot(A_inv, b), output_shape=dim2, order=interpolation_order
+    )
 
     # ------------------------------------------------------------------------
     # Save the image with the reference affine transform:
@@ -116,7 +116,7 @@ def convert2nii(input_file, reference_file, output_file='', interp='continuous')
     return output_file
 
 
-def xyz2nii(input_xyz_file, output_nii_file='', origin=[], pad=10):
+def xyz2nii(input_xyz_file, output_nii_file="", origin=[], pad=10):
     """
     Convert [x,y,z] coordinate file to nifti (nii.gz) volume file.
 
@@ -159,7 +159,7 @@ def xyz2nii(input_xyz_file, output_nii_file='', origin=[], pad=10):
     # Load coordinates and scalars:
     XYZscalars = np.loadtxt(input_xyz_file)
     XYZ = np.round(XYZscalars[:, 0:3])
-    #scalars = XYZscalars[:, 3::]
+    # scalars = XYZscalars[:, 3::]
 
     if origin:
         XYZ -= origin
@@ -175,8 +175,8 @@ def xyz2nii(input_xyz_file, output_nii_file='', origin=[], pad=10):
 
     # Write output image volume:
     if not output_nii_file:
-        output_nii_file = os.path.join(os.getcwd(), 'xyz.nii.gz')
-    img = nb.Nifti1Image(data, affine=np.eye(4,4))
+        output_nii_file = os.path.join(os.getcwd(), "xyz.nii.gz")
+    img = nb.Nifti1Image(data, affine=np.eye(4, 4))
     img.to_filename(output_nii_file)
 
     return output_nii_file
@@ -187,4 +187,5 @@ def xyz2nii(input_xyz_file, output_nii_file='', origin=[], pad=10):
 # ============================================================================
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod(verbose=True)  # py.test --doctest-modules

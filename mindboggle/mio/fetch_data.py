@@ -8,6 +8,7 @@ Authors:
 Copyright 2016,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 
 """
+
 import builtins
 
 
@@ -71,233 +72,211 @@ def test_urls():
     # Atlases and templates:
     # ------------------------------------------------------------------------
     # OASIS-30_Atropos_template.nii.gz
-    urls['OASIS-30_Atropos_template'] = \
-        'https://osf.io/n6myv/?action=download&version=1'
+    urls["OASIS-30_Atropos_template"] = (
+        "https://osf.io/n6myv/?action=download&version=1"
+    )
     # OASIS-30_Atropos_template_in_MNI152.nii.gz
-    urls['OASIS-30_Atropos_template_in_MNI152'] = \
-        'https://osf.io/kmfau/?action=download&version=1'
+    urls["OASIS-30_Atropos_template_in_MNI152"] = (
+        "https://osf.io/kmfau/?action=download&version=1"
+    )
     # OASIS-30_Atropos_template_to_MNI152_affine.txt
-    urls['OASIS-30_Atropos_template_to_MNI152_affine'] = \
-        'https://osf.io/t2pq9/?action=download&version=1'
+    urls["OASIS-30_Atropos_template_to_MNI152_affine"] = (
+        "https://osf.io/t2pq9/?action=download&version=1"
+    )
     # OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152_v2.nii.gz
-    urls['OASIS-TRT-20_jointfusion_labels_in_MNI152'] = \
-        'https://osf.io/5q46g/?action=download&version=1'
+    urls["OASIS-TRT-20_jointfusion_labels_in_MNI152"] = (
+        "https://osf.io/5q46g/?action=download&version=1"
+    )
     # OASIS-TRT-20_jointfusion_DKT31_CMA_label_probabilities_in_MNI152_v2.nii.gz
-    urls['OASIS-TRT-20_jointfusion_probabilities_in_MNI152'] = \
-        'https://osf.io/dj6px/?action=download&version=1'
+    urls["OASIS-TRT-20_jointfusion_probabilities_in_MNI152"] = (
+        "https://osf.io/dj6px/?action=download&version=1"
+    )
     # MNI152_T1_1mm_brain.nii.gz
-    urls['MNI152_T1_brain'] = \
-        'https://osf.io/tuvx7/?action=download&version=1'
+    urls["MNI152_T1_brain"] = "https://osf.io/tuvx7/?action=download&version=1"
     # depth_curv_border_nonborder_parameters.pkl
-    urls['depth_curv_border_nonborder_parameters'] = \
-        'https://osf.io/v9rqe/?action=download&version=1'
+    urls["depth_curv_border_nonborder_parameters"] = (
+        "https://osf.io/v9rqe/?action=download&version=1"
+    )
     # ------------------------------------------------------------------------
     # Manual labels:
     # ------------------------------------------------------------------------
     # lh.labels.DKT31.manual.vtk
-    urls['left_manual_labels'] = \
-        'https://osf.io/3rmzs/?action=download&version=1'
+    urls["left_manual_labels"] = "https://osf.io/3rmzs/?action=download&version=1"
     # rh.labels.DKT31.manual.vtk
-    urls['right_manual_labels'] = \
-        'https://osf.io/y2pzr/?action=download&version=1'
+    urls["right_manual_labels"] = "https://osf.io/y2pzr/?action=download&version=1"
     # ------------------------------------------------------------------------
     # FreeSurfer output:
     # ------------------------------------------------------------------------
     # label/lh.aparc.annot
-    urls['left_freesurfer_aparc_annot'] = \
-        'https://osf.io/awcbk/?action=download&version=1'
+    urls["left_freesurfer_aparc_annot"] = (
+        "https://osf.io/awcbk/?action=download&version=1"
+    )
     # label/rh.aparc.annot
-    urls['right_freesurfer_aparc_annot'] = \
-        'https://osf.io/zhwge/?action=download&version=1'
+    urls["right_freesurfer_aparc_annot"] = (
+        "https://osf.io/zhwge/?action=download&version=1"
+    )
     # mri/orig.mgz
-    urls['freesurfer_orig_mgz'] = \
-        'https://osf.io/4jcq3/?action=download&version=1'
+    urls["freesurfer_orig_mgz"] = "https://osf.io/4jcq3/?action=download&version=1"
     # mri/orig/001.mgz
-    urls['freesurfer_001_mgz'] = \
-        'https://osf.io/d26ja/?action=download&version=1'
+    urls["freesurfer_001_mgz"] = "https://osf.io/d26ja/?action=download&version=1"
     # surf/lh.pial
-    urls['left_freesurfer_pial'] = \
-        'https://osf.io/pgqms/?action=download&version=1'
+    urls["left_freesurfer_pial"] = "https://osf.io/pgqms/?action=download&version=1"
     # surf/rh.pial
-    urls['right_freesurfer_pial'] = \
-        'https://osf.io/xn8ae/?action=download&version=1'
+    urls["right_freesurfer_pial"] = "https://osf.io/xn8ae/?action=download&version=1"
     # surf/lh.thickness
-    urls['left_freesurfer_thickness'] = \
-        'https://osf.io/rw6nv/?action=download&version=1'
+    urls["left_freesurfer_thickness"] = (
+        "https://osf.io/rw6nv/?action=download&version=1"
+    )
     # surf/rh.thickness
-    urls['right_freesurfer_thickness'] = \
-        'https://osf.io/fb6nm/?action=download&version=1'
+    urls["right_freesurfer_thickness"] = (
+        "https://osf.io/fb6nm/?action=download&version=1"
+    )
     # mri/t1weighted_brain.MNI152Affine.txt
-    urls['affine_mni_transform'] = \
-        'https://osf.io/ez7qx/?action=download&version=1'
+    urls["affine_mni_transform"] = "https://osf.io/ez7qx/?action=download&version=1"
     # ------------------------------------------------------------------------
     # ants (antsCorticalThickness.sh) output:
     # ------------------------------------------------------------------------
     # antsBrainSegmentation.nii.gz
-    urls['ants_segmentation'] = \
-        'https://osf.io/tbw95/?action=download&version=1'
+    urls["ants_segmentation"] = "https://osf.io/tbw95/?action=download&version=1"
     # antsBrainExtractionMask.nii.gz
-    urls['ants_mask'] = \
-        'https://osf.io/ar35t/?action=download&version=1'
+    urls["ants_mask"] = "https://osf.io/ar35t/?action=download&version=1"
     # antsSubjectToTemplate0GenericAffine.mat
-    urls['ants_affine_subject2template'] = \
-        'https://osf.io/t6pkv/?action=download&version=1'
+    urls["ants_affine_subject2template"] = (
+        "https://osf.io/t6pkv/?action=download&version=1"
+    )
     # antsSubjectToTemplate1Warp.nii.gz
-    urls['ants_warp_subject2template'] = \
-        'https://osf.io/qrhbz/?action=download&version=1'
+    urls["ants_warp_subject2template"] = (
+        "https://osf.io/qrhbz/?action=download&version=1"
+    )
     # antsTemplateToSubject0Warp.nii.gz
-    urls['ants_warp_template2subject'] = \
-        'https://osf.io/w5fzx/?action=download&version=1'
+    urls["ants_warp_template2subject"] = (
+        "https://osf.io/w5fzx/?action=download&version=1"
+    )
     # antsTemplateToSubject1GenericAffine.mat
-    urls['ants_affine_template2subject'] = \
-        'https://osf.io/n4puk/?action=download&version=1'
+    urls["ants_affine_template2subject"] = (
+        "https://osf.io/n4puk/?action=download&version=1"
+    )
     # ------------------------------------------------------------------------
     # Mindboggle working directory (including converted FreeSurfer output):
     # ------------------------------------------------------------------------
     # Volume_labels/Freesurfer_cerebrum_labels_to_graywhite/wmparc.mgz.nii.gz
-    urls['freesurfer_segmentation'] = \
-        'https://osf.io/gs45h/?action=download&version=1'
+    urls["freesurfer_segmentation"] = "https://osf.io/gs45h/?action=download&version=1"
     # Convert_MRI_to_nifti_format/001.mgz.nii.gz
-    urls['T1_001'] = \
-        'https://osf.io/m8vx6/?action=download&version=1'
+    urls["T1_001"] = "https://osf.io/m8vx6/?action=download&version=1"
     # _hemi_lh/Surface_to_vtk/lh.pial.vtk
-    urls['left_pial'] = \
-        'https://osf.io/fhs53/?action=download&version=1'
+    urls["left_pial"] = "https://osf.io/fhs53/?action=download&version=1"
     # _hemi_rh/Surface_to_vtk/rh.pial.vtk
-    urls['right_pial'] = \
-        'https://osf.io/c9j7z/?action=download&version=1'
+    urls["right_pial"] = "https://osf.io/c9j7z/?action=download&version=1"
     # ------------------------------------------------------------------------
     # Mindboggle features:
     # ------------------------------------------------------------------------
     # cortex_in_MNI152_space.vtk
-    urls['left_cortex_in_mni'] = \
-        'https://osf.io/gv24u/?action=download&version=1'
+    urls["left_cortex_in_mni"] = "https://osf.io/gv24u/?action=download&version=1"
     # folds.vtk
-    urls['left_folds'] = \
-        'https://osf.io/z793f/?action=download&version=1'
+    urls["left_folds"] = "https://osf.io/z793f/?action=download&version=1"
     # fundus_per_fold.vtk
-    urls['left_fundus_per_fold'] = \
-        'https://osf.io/syk4t/?action=download&version=1'
+    urls["left_fundus_per_fold"] = "https://osf.io/syk4t/?action=download&version=1"
     # fundus_per_sulcus.vtk
-    urls['left_fundus_per_sulcus'] = \
-        'https://osf.io/te5aw/?action=download&version=1'
+    urls["left_fundus_per_sulcus"] = "https://osf.io/te5aw/?action=download&version=1"
     # sulci.vtk
-    urls['left_sulci'] = \
-        'https://osf.io/2839a/?action=download&version=1'
+    urls["left_sulci"] = "https://osf.io/2839a/?action=download&version=1"
     # cortex_in_MNI152_space.vtk
-    urls['right_cortex_in_mni'] = \
-        'https://osf.io/48ncx/?action=download&version=1'
+    urls["right_cortex_in_mni"] = "https://osf.io/48ncx/?action=download&version=1"
     # folds.vtk
-    urls['right_folds'] = \
-        'https://osf.io/jy7bh/?action=download&version=1'
+    urls["right_folds"] = "https://osf.io/jy7bh/?action=download&version=1"
     # fundus_per_fold.vtk
-    urls['right_fundus_per_fold'] = \
-        'https://osf.io/7p3m8/?action=download&version=1'
+    urls["right_fundus_per_fold"] = "https://osf.io/7p3m8/?action=download&version=1"
     # fundus_per_sulcus.vtk
-    urls['right_fundi'] = \
-        'https://osf.io/2ajub/?action=download&version=1'
+    urls["right_fundi"] = "https://osf.io/2ajub/?action=download&version=1"
     # sulci.vtk
-    urls['right_sulci'] = \
-        'https://osf.io/sy6r8/?action=download&version=1'
+    urls["right_sulci"] = "https://osf.io/sy6r8/?action=download&version=1"
     # ------------------------------------------------------------------------
     # Mindboggle labels:
     # ------------------------------------------------------------------------
     # ants_labels_in_hybrid_graywhite.nii.gz
-    urls['ants_labels'] = \
-        'https://osf.io/9jqg4/?action=download&version=1'
+    urls["ants_labels"] = "https://osf.io/9jqg4/?action=download&version=1"
     # freesurfer_wmparc_labels_in_hybrid_graywhite.nii.gz
-    urls['freesurfer_labels'] = \
-        'https://osf.io/j478b/?action=download&version=1'
+    urls["freesurfer_labels"] = "https://osf.io/j478b/?action=download&version=1"
     # freesurfer_cortex_labels.vtk
-    urls['left_freesurfer_labels'] = \
-        'https://osf.io/fj47k/?action=download&version=1'
+    urls["left_freesurfer_labels"] = "https://osf.io/fj47k/?action=download&version=1"
     # freesurfer_cortex_labels.vtk
-    urls['right_freesurfer_labels'] = \
-        'https://osf.io/ktcdg/?action=download&version=1'
+    urls["right_freesurfer_labels"] = "https://osf.io/ktcdg/?action=download&version=1"
     # ------------------------------------------------------------------------
     # Mindboggle shapes:
     # ------------------------------------------------------------------------
     # area.vtk
-    urls['left_area'] = \
-        'https://osf.io/e56rg/?action=download&version=1'
+    urls["left_area"] = "https://osf.io/e56rg/?action=download&version=1"
     # freesurfer_curvature.vtk
-    urls['left_freesurfer_curvature'] = \
-        'https://osf.io/37dxj/?action=download&version=1'
+    urls["left_freesurfer_curvature"] = (
+        "https://osf.io/37dxj/?action=download&version=1"
+    )
     # freesurfer_sulc.vtk
-    urls['left_freesurfer_sulc'] = \
-        'https://osf.io/fhabt/?action=download&version=1'
+    urls["left_freesurfer_sulc"] = "https://osf.io/fhabt/?action=download&version=1"
     # freesurfer_thickness.vtk
-    urls['left_freesurfer_thickness'] = \
-        'https://osf.io/pwj9u/?action=download&version=1'
+    urls["left_freesurfer_thickness"] = (
+        "https://osf.io/pwj9u/?action=download&version=1"
+    )
     # geodesic_depth.vtk
-    urls['left_geodesic_depth'] = \
-        'https://osf.io/ru6hp/?action=download&version=1'
+    urls["left_geodesic_depth"] = "https://osf.io/ru6hp/?action=download&version=1"
     # mean_curvature.vtk
-    urls['left_mean_curvature'] = \
-        'https://osf.io/2q7hb/?action=download&version=1'
+    urls["left_mean_curvature"] = "https://osf.io/2q7hb/?action=download&version=1"
     # travel_depth.vtk
-    urls['left_travel_depth'] = \
-        'https://osf.io/uzghr/?action=download&version=1'
+    urls["left_travel_depth"] = "https://osf.io/uzghr/?action=download&version=1"
     # area.vtk
-    urls['right_area'] = \
-        'https://osf.io/tpxj8/?action=download&version=1'
+    urls["right_area"] = "https://osf.io/tpxj8/?action=download&version=1"
     # freesurfer_curvature.vtk
-    urls['right_freesurfer_curvature'] = \
-        'https://osf.io/2g95u/?action=download&version=1'
+    urls["right_freesurfer_curvature"] = (
+        "https://osf.io/2g95u/?action=download&version=1"
+    )
     # freesurfer_sulc.vtk
-    urls['right_freesurfer_sulc'] = \
-        'https://osf.io/vn9em/?action=download&version=1'
+    urls["right_freesurfer_sulc"] = "https://osf.io/vn9em/?action=download&version=1"
     # freesurfer_thickness.vtk
-    urls['right_freesurfer_thickness'] = \
-        'https://osf.io/4me2n/?action=download&version=1'
+    urls["right_freesurfer_thickness"] = (
+        "https://osf.io/4me2n/?action=download&version=1"
+    )
     # geodesic_depth.vtk
-    urls['right_geodesic_depth'] = \
-        'https://osf.io/4vc3d/?action=download&version=1'
+    urls["right_geodesic_depth"] = "https://osf.io/4vc3d/?action=download&version=1"
     # mean_curvature.vtk
-    urls['right_mean_curvature'] = \
-        'https://osf.io/haqj3/?action=download&version=1'
+    urls["right_mean_curvature"] = "https://osf.io/haqj3/?action=download&version=1"
     # travel_depth.vtk
-    urls['right_travel_depth'] = \
-        'https://osf.io/da5e2/?action=download&version=1'
+    urls["right_travel_depth"] = "https://osf.io/da5e2/?action=download&version=1"
     # ------------------------------------------------------------------------
     # Mindboggle tables:
     # ------------------------------------------------------------------------
     # thickinthehead_per_ants_cortex_label.csv
-    urls['thickinthehead_ants_labels_table'] = \
-        'https://osf.io/ujvrd/?action=download&version=1'
+    urls["thickinthehead_ants_labels_table"] = (
+        "https://osf.io/ujvrd/?action=download&version=1"
+    )
     # thickinthehead_per_freesurfer_cortex_label.csv
-    urls['thickinthehead_freesurfer_labels_table'] = \
-        'https://osf.io/976ew/?action=download&version=1'
+    urls["thickinthehead_freesurfer_labels_table"] = (
+        "https://osf.io/976ew/?action=download&version=1"
+    )
     # volume_per_ants_label.csv
-    urls['volume_ants_labels_table'] = \
-        'https://osf.io/y6d2c/?action=download&version=1'
+    urls["volume_ants_labels_table"] = "https://osf.io/y6d2c/?action=download&version=1"
     # volume_per_freesurfer_label.csv
-    urls['volume_freesurfer_labels_table'] = \
-        'https://osf.io/ukqdy/?action=download&version=1'
+    urls["volume_freesurfer_labels_table"] = (
+        "https://osf.io/ukqdy/?action=download&version=1"
+    )
     # fundus_shapes.csv
-    urls['left_fundus_shapes_table'] = \
-        'https://osf.io/23rqv/?action=download&version=1'
+    urls["left_fundus_shapes_table"] = "https://osf.io/23rqv/?action=download&version=1"
     # label_shapes.csv
-    urls['left_label_shapes_table'] = \
-        'https://osf.io/jecq3/?action=download&version=1'
+    urls["left_label_shapes_table"] = "https://osf.io/jecq3/?action=download&version=1"
     # sulcus_shapes.csv
-    urls['left_sulcus_shapes_table'] = \
-        'https://osf.io/tmhrp/?action=download&version=1'
+    urls["left_sulcus_shapes_table"] = "https://osf.io/tmhrp/?action=download&version=1"
     # vertices.csv
-    urls['left_vertices_table'] = \
-        'https://osf.io/6dcx7/?action=download&version=1'
+    urls["left_vertices_table"] = "https://osf.io/6dcx7/?action=download&version=1"
     # fundus_shapes.csv
-    urls['right_fundus_shapes_table'] = \
-        'https://osf.io/4trm9/?action=download&version=1'
+    urls["right_fundus_shapes_table"] = (
+        "https://osf.io/4trm9/?action=download&version=1"
+    )
     # label_shapes.csv
-    urls['right_label_shapes_table'] = \
-        'https://osf.io/5sgn7/?action=download&version=1'
+    urls["right_label_shapes_table"] = "https://osf.io/5sgn7/?action=download&version=1"
     # sulcus_shapes.csv
-    urls['right_sulcus_shapes_table'] = \
-        'https://osf.io/mndya/?action=download&version=1'
+    urls["right_sulcus_shapes_table"] = (
+        "https://osf.io/mndya/?action=download&version=1"
+    )
     # vertices.csv
-    urls['right_vertices_table'] = \
-        'https://osf.io/f6h72/?action=download&version=1'
+    urls["right_vertices_table"] = "https://osf.io/f6h72/?action=download&version=1"
 
     return urls
 
@@ -356,12 +335,12 @@ def fetch_hash(data_file):
     import hashlib
 
     # Compute the file's hash:
-    hash = hashlib.md5(builtins.open(data_file, 'rb').read()).hexdigest()
+    hash = hashlib.md5(builtins.open(data_file, "rb").read()).hexdigest()
 
     return hash
 
 
-def fetch_data(url, output_file='', append=''):
+def fetch_data(url, output_file="", append=""):
     """
     Download file from a URL to a specified or a temporary file.
 
@@ -406,8 +385,9 @@ def fetch_data(url, output_file='', append=''):
     return output_file
 
 
-def fetch_check_data(data_file, url, hashes, cache_directory='', append='',
-                     verbose=False):
+def fetch_check_data(
+    data_file, url, hashes, cache_directory="", append="", verbose=False
+):
     """
     Get data file through a URL call and check its hash:
 
@@ -460,7 +440,7 @@ def fetch_check_data(data_file, url, hashes, cache_directory='', append='',
     # Set temporary cache directory if not specified:
     # ------------------------------------------------------------------------
     if not cache_directory:
-        cache_directory = os.path.join(os.environ['HOME'], 'hash_temp')
+        cache_directory = os.path.join(os.environ["HOME"], "hash_temp")
 
     # ------------------------------------------------------------------------
     # Check hash table for file name, and store corresponding hash:
@@ -569,24 +549,29 @@ def fetch_ants_data(segmented_file, use_ants_transforms=True):
     """
     import os
 
-    prefix = segmented_file.split('BrainSegmentation.nii.gz', 1)[0]
+    prefix = segmented_file.split("BrainSegmentation.nii.gz", 1)[0]
 
-    mask = prefix + 'BrainExtractionMask.nii.gz'
+    mask = prefix + "BrainExtractionMask.nii.gz"
     segments = segmented_file
 
     if use_ants_transforms:
-        affine_subject2template = prefix + 'SubjectToTemplate0GenericAffine.mat'
-        warp_subject2template = prefix + 'SubjectToTemplate1Warp.nii.gz'
-        affine_template2subject = prefix + 'TemplateToSubject1GenericAffine.mat'
-        warp_template2subject = prefix + 'TemplateToSubject0Warp.nii.gz'
-        files = [mask, segments,
-                 affine_subject2template, warp_subject2template,
-                 affine_template2subject, warp_template2subject]
+        affine_subject2template = prefix + "SubjectToTemplate0GenericAffine.mat"
+        warp_subject2template = prefix + "SubjectToTemplate1Warp.nii.gz"
+        affine_template2subject = prefix + "TemplateToSubject1GenericAffine.mat"
+        warp_template2subject = prefix + "TemplateToSubject0Warp.nii.gz"
+        files = [
+            mask,
+            segments,
+            affine_subject2template,
+            warp_subject2template,
+            affine_template2subject,
+            warp_template2subject,
+        ]
     else:
-        affine_subject2template = ''
-        warp_subject2template = ''
-        affine_template2subject = ''
-        warp_template2subject = ''
+        affine_subject2template = ""
+        warp_subject2template = ""
+        affine_template2subject = ""
+        warp_template2subject = ""
         files = [mask, segments]
 
     # The existence of the transform files are checked only if
@@ -594,11 +579,18 @@ def fetch_ants_data(segmented_file, use_ants_transforms=True):
     # antsCorticalThickness.sh when the -k argument is used.
     for ants_file in files:
         if not os.path.exists(ants_file):
-            raise OSError('antsCorticalThickness.sh output ' + ants_file +
-                          ' does not exist.')
+            raise OSError(
+                "antsCorticalThickness.sh output " + ants_file + " does not exist."
+            )
 
-    return mask, segments, affine_subject2template, warp_subject2template, \
-                           affine_template2subject, warp_template2subject
+    return (
+        mask,
+        segments,
+        affine_subject2template,
+        warp_subject2template,
+        affine_template2subject,
+        warp_template2subject,
+    )
 
 
 # ============================================================================
@@ -606,4 +598,5 @@ def fetch_ants_data(segmented_file, use_ants_transforms=True):
 # ============================================================================
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod(verbose=True)  # py.test --doctest-modules

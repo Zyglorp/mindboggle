@@ -2,10 +2,10 @@ import os
 
 from .version import __version__
 
-#from .info import (LONG_DESCRIPTION as __doc__,
+# from .info import (LONG_DESCRIPTION as __doc__,
 #                  __version__)
-#__doc__ += """
-#"""
+# __doc__ += """
+# """
 
 # Set up package information function
 try:
@@ -13,22 +13,22 @@ try:
 except:
     get_info = lambda: ""
 else:
-    get_info = lambda : _get_pkg_info(os.path.dirname(__file__))
+    get_info = lambda: _get_pkg_info(os.path.dirname(__file__))
 
 # module imports
-#from . import blah as blah
+# from . import blah as blah
 # object imports
-#from .blah import blah, blah
+# from .blah import blah, blah
 
 INIT_MSG = "Running {packname} version {version} (latest: {latest})".format
-latest = {"version": 'Unknown'}
+latest = {"version": "Unknown"}
 try:
     import etelemetry
+
     latest = etelemetry.get_project("nipy/mindboggle")
 except Exception as e:
     print("Could not check for version updates: ", e)
 finally:
-    print(INIT_MSG(packname='mindboggle',
-                   version=__version__,
-                   latest=latest["version"]))
-
+    print(
+        INIT_MSG(packname="mindboggle", version=__version__, latest=latest["version"])
+    )

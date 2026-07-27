@@ -60,8 +60,9 @@ class Bounds:
     # ------------------------------------------------------------------------
     ##########################################################################
 
-    def initialize_seed_labels(self, init='lines', fraction=.05,
-                               output_filename='', verbose=False):
+    def initialize_seed_labels(
+        self, init="lines", fraction=0.05, output_filename="", verbose=False
+    ):
         """
         Initialize a set of seed labels for relabeling or label propagation.
 
@@ -78,50 +79,48 @@ class Bounds:
         # To initialize with vertices flanking polylines,
         # find all vertices that are part of a triangle that includes
         # at least one polyline vertex, and store a 1 in the array self.seed_labels
-        if init in ['flanks','lines_flanks']:
+        if init in ["flanks", "lines_flanks"]:
             if verbose:
-                print('Initializing seed labels with polyline-flanking '
-                      'vertices...')
+                print("Initializing seed labels with polyline-flanking vertices...")
             self.seed_labels[self.find_polylines_flanks()] = 1
 
         # To initialize with polylines, find all vertices that are part of a
         # polyline, and store a 1 in the array self.seed_labels
-        if init in ['lines','lines_flanks']:
+        if init in ["lines", "lines_flanks"]:
             if verbose:
-                print('Initializing seed labels with polyline vertices...')
+                print("Initializing seed labels with polyline vertices...")
             self.seed_labels[self.polyline_elements] = 1
 
         # To initialize with label boundaries, call find_label_boundary()
-        if init == 'label_boundary':
+        if init == "label_boundary":
             if verbose:
-                print('Initializing seed labels with vertices of the label '
-                      'boundaries')
+                print("Initializing seed labels with vertices of the label boundaries")
             self.find_label_boundary(output_filename=output_filename)
             self.seed_labels[self.label_boundary] = 1
 
         # To initialize with a fraction of random vertices,
         # init every 1/fraction label
-        if init == 'random':
+        if init == "random":
             if verbose:
-                print('Initializing seed labels with random vertices...')
+                print("Initializing seed labels with random vertices...")
             if fraction > 1:
                 if verbose:
-                    print('Please enter a fractional number less than or '
-                          'equal to 1.')
+                    print("Please enter a fractional number less than or equal to 1.")
                 return
-            randoms = np.array([np.mod(i, int(1.0/fraction))
-                                for i in range(self.num_points)])
-            self.seed_labels[randoms==0] = 1
+            randoms = np.array(
+                [np.mod(i, int(1.0 / fraction)) for i in range(self.num_points)]
+            )
+            self.seed_labels[randoms == 0] = 1
 
         # Replace the 1s in self.seed_labels with the seed label values
-        self.seed_labels[self.seed_labels==1] = self.Labels[self.seed_labels==1]
+        self.seed_labels[self.seed_labels == 1] = self.Labels[self.seed_labels == 1]
 
         # Provide some statistics for what was done
-        self.num_seed_labels = len(self.seed_labels[self.seed_labels>0])
-        self.percent_seed_labels = (self.num_seed_labels+0.0) / self.num_points * 100
+        self.num_seed_labels = len(self.seed_labels[self.seed_labels > 0])
+        self.percent_seed_labels = (self.num_seed_labels + 0.0) / self.num_points * 100
 
         if verbose:
-            print(f'Percentage of seed labels: {self.percent_seed_labels}')
+            print(f"Percentage of seed labels: {self.percent_seed_labels}")
 
         return self.seed_labels
 
@@ -159,17 +158,26 @@ class Bounds:
         for i in range(n):
             if self.seed_labels[i] >= self.min_label:
                 self.label_matrix[i, :] = -1
-                unique_label_index = np.where(self.unique_labels == self.seed_labels[i])[0]
+                unique_label_index = np.where(
+                    self.unique_labels == self.seed_labels[i]
+                )[0]
                 self.label_matrix[i, unique_label_index] = 1
 
         self.num_labels = C
 
         return self.label_matrix
 
-    def graph_based_learning(self, method='propagate_labels', realign=False,
-                             kernel=kernels.rbf_kernel,
-                             sigma=10, max_iters=200, tol=.001, vis=False,
-                             verbose=False):
+    def graph_based_learning(
+        self,
+        method="propagate_labels",
+        realign=False,
+        kernel=kernels.rbf_kernel,
+        sigma=10,
+        max_iters=200,
+        tol=0.001,
+        vis=False,
+        verbose=False,
+    ):
         """
         Main function to perform graph-based learning, such as label propagation.
 
@@ -194,9 +202,15 @@ class Bounds:
 
         # Step 1. Construct affinity matrix - compute edge weights
         if self.Points.shape and self.Indices.shape and self.Faces.shape:
-            self.affinity_matrix = go.weight_graph(self.Points, self.Indices,
-                self.Faces, kernel=kernel, sigma=sigma, add_to_graph=False,
-                verbose=False)
+            self.affinity_matrix = go.weight_graph(
+                self.Points,
+                self.Indices,
+                self.Faces,
+                kernel=kernel,
+                sigma=sigma,
+                add_to_graph=False,
+                verbose=False,
+            )
         else:
             if verbose:
                 raise OSError("  Missing data!")
@@ -210,12 +224,12 @@ class Bounds:
         # Step 3. Propagate Labels!
         if method == "propagate_labels":
             if verbose:
-                print(f'Perform weighted average algorithm (max_iters={max_iters})')
+                print(f"Perform weighted average algorithm (max_iters={max_iters})")
             # Construct self.learned_matrix matrix within method
             self.propagate_labels(realign, max_iters, tol, vis=vis)
         else:
             if verbose:
-                print('That algorithm is not available.')
+                print("That algorithm is not available.")
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # ------------------------------------------------------------------------
@@ -245,7 +259,7 @@ class Bounds:
             max_col = np.argmax(self.learned_matrix, axis=1)
         except:
             if verbose:
-                print('First call graph_based_learning().')
+                print("First call graph_based_learning().")
             return
 
         # Define an array called max_prob_label to store the final values
@@ -264,8 +278,7 @@ class Bounds:
     # ------------------------------------------------------------------------
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    def propagate_labels(self, realign, max_iters, tol, vis=True,
-                         verbose=False):
+    def propagate_labels(self, realign, max_iters, tol, vis=True, verbose=False):
         """
         Run iterative weighted average algorithm to propagate labels to unlabeled vertices.
 
@@ -303,10 +316,12 @@ class Bounds:
         and is called self.seed_labels.
         We will just check to make sure this has been accomplished."""
 
-        if isinstance(self.seed_labels,int):
+        if isinstance(self.seed_labels, int):
             if verbose:
-                print('Please initialize the labels by calling '
-                      'self.initialize_seed_labels()')
+                print(
+                    "Please initialize the labels by calling "
+                    "self.initialize_seed_labels()"
+                )
             return
 
         """ Now, we can actually proceed to perform the iterative algorithm.
@@ -351,19 +366,22 @@ class Bounds:
         If a label gets vertex, keep the fractional value, do not simply round
         to 1 to assign membership."""
 
-        i = 0 # record of label number
+        i = 0  # record of label number
         for column in self.learned_matrix.T:
-
             t0 = time()
             if verbose:
-                print(f'Number of initial members for label {i}: {np.nonzero(column==1)[0].size}')
+                print(
+                    f"Number of initial members for label {i}: {np.nonzero(column == 1)[0].size}"
+                )
 
             # Set up indices and values to be clamped during propagation
             if not realign:
                 restore_indices = self.seed_labels >= self.min_label
                 restore_values = column[restore_indices]
             else:
-                restore_indices = np.hstack((self.label_boundary,self.polyline_elements))
+                restore_indices = np.hstack(
+                    (self.label_boundary, self.polyline_elements)
+                )
                 restore_values = column[restore_indices]
 
             Y_hat_now = csr_matrix(column).transpose()
@@ -385,7 +403,7 @@ class Bounds:
                     creating the vtk."""
                     label = self.unique_labels[i]
 
-                    if not counter: # No need to do this more than once :-)
+                    if not counter:  # No need to do this more than once :-)
                         self.highlight(label)
 
                     """ Next, we'll construct vtk files, assuming that the
@@ -404,20 +422,27 @@ class Bounds:
                     We have the vertices and faces, and we have the labels
                     which are found in column.todense().flatten()."""
 
-                    filename = str(label)+'_'+str(counter)+'.vtk'
+                    filename = str(label) + "_" + str(counter) + ".vtk"
 
-                    if not np.mod(counter,1000):
+                    if not np.mod(counter, 1000):
                         LABELS = np.zeros(self.num_points)
                         LABELS[:] = Y_hat_now.todense().T.flatten()
-                        write_vtk(filename, self.Points, self.Vertices,
-                                  [], self.Faces, [LABELS], scalar_type='int')
+                        write_vtk(
+                            filename,
+                            self.Points,
+                            self.Vertices,
+                            [],
+                            self.Faces,
+                            [LABELS],
+                            scalar_type="int",
+                        )
 
                 # column matrix
                 Y_hat_next = (self.DDM * self.affinity_matrix * Y_hat_now).todense()
                 # reset
                 Y_hat_next[restore_indices, 0] = restore_values
                 # check convergence
-                converged = (np.sum(np.abs(Y_hat_now.todense() - Y_hat_next)) < tol)
+                converged = np.sum(np.abs(Y_hat_now.todense() - Y_hat_next)) < tol
                 # if verbose:
                 # print('Iteration number {0}, convergence = {1}'.
                 # format(counter,np.sum(np.abs(column.todense() - tmp)))
@@ -429,22 +454,24 @@ class Bounds:
 
             if verbose:
                 if counter == max_iters:
-                    print(f'Done in {time()-t0:.2f} seconds (the algorithm did not '
-                          'converge)')
+                    print(
+                        f"Done in {time() - t0:.2f} seconds (the algorithm did not "
+                        "converge)"
+                    )
                 else:
-                    print(f'Done in {time()-t0:.2f} seconds ({counter} iterations)')
+                    print(f"Done in {time() - t0:.2f} seconds ({counter} iterations)")
 
-            self.learned_matrix[:,i] = Y_hat_now.todense().flatten()
+            self.learned_matrix[:, i] = Y_hat_now.todense().flatten()
 
-            #if verbose:
-            #print('There were {0} initial seed vertices for this label'.
-            #format(self.count_assigned_members(i))
-            #print('The file actually had {0} vertices for this label'.
-            #format(self.count_real_members(self.label_mapping[i]))
-            #print('Using only those vertices which crossed the threshold,
+            # if verbose:
+            # print('There were {0} initial seed vertices for this label'.
+            # format(self.count_assigned_members(i))
+            # print('The file actually had {0} vertices for this label'.
+            # format(self.count_real_members(self.label_mapping[i]))
+            # print('Using only those vertices which crossed the threshold,
             # there are now: '.format(self.count_real_members(i))
-            #pylab.plot(self.learned_matrix[:,i])
-            #pylab.show()
+            # pylab.plot(self.learned_matrix[:,i])
+            # pylab.show()
 
             i += 1
 
@@ -468,8 +495,9 @@ class Bounds:
     # ------------------------------------------------------------------------
     ##########################################################################
 
-    def find_label_boundary(self, output_filename, realigned_labels=False,
-                            verbose=False):
+    def find_label_boundary(
+        self, output_filename, realigned_labels=False, verbose=False
+    ):
         """
         Find the vertices for all boundaries between different labels in a mesh.
 
@@ -502,13 +530,17 @@ class Bounds:
             v0, v1, v2 = triangle[0], triangle[1], triangle[2]
             # If they are not all the same...
             if not realigned_labels:
-                same_labels = [self.Labels[v1]==self.Labels[v2],
-                               self.Labels[v0]==self.Labels[v2],
-                               self.Labels[v0]==self.Labels[v1]]
+                same_labels = [
+                    self.Labels[v1] == self.Labels[v2],
+                    self.Labels[v0] == self.Labels[v2],
+                    self.Labels[v0] == self.Labels[v1],
+                ]
             else:
-                same_labels = [self.RLabels[v1]==self.RLabels[v2],
-                               self.RLabels[v0]==self.RLabels[v2],
-                               self.RLabels[v0]==self.RLabels[v1]]
+                same_labels = [
+                    self.RLabels[v1] == self.RLabels[v2],
+                    self.RLabels[v0] == self.RLabels[v2],
+                    self.RLabels[v0] == self.RLabels[v1],
+                ]
 
             # Did it this way for option to modify it later. Perhaps reconsider 'not all' statement.
             if not all(same_labels):
@@ -520,22 +552,35 @@ class Bounds:
 
         # We can now output a file to show the boundary.
         if not realigned_labels:
-            write_vtk(output_filename, self.Points, self.Vertices,
-                               self.Faces, [self.label_boundary], scalar_type='int')
+            write_vtk(
+                output_filename,
+                self.Points,
+                self.Vertices,
+                self.Faces,
+                [self.label_boundary],
+                scalar_type="int",
+            )
             self.label_boundary_file = output_filename
         else:
-            write_vtk(output_filename, self.Points, self.Vertices,
-                      [], self.Faces, [self.Rlabel_boundary], scalar_type='int')
+            write_vtk(
+                output_filename,
+                self.Points,
+                self.Vertices,
+                [],
+                self.Faces,
+                [self.Rlabel_boundary],
+                scalar_type="int",
+            )
             self.Rlabel_boundary_file = output_filename
 
         # Reformat to include only indices of those vertices on the boundaries.
         if not realigned_labels:
-            self.label_boundary = np.nonzero(self.label_boundary==1)[0]
+            self.label_boundary = np.nonzero(self.label_boundary == 1)[0]
         else:
-            self.Rlabel_boundary = np.nonzero(self.Rlabel_boundary==1)[0]
+            self.Rlabel_boundary = np.nonzero(self.Rlabel_boundary == 1)[0]
 
         if verbose:
-            print(f'The label boundary array is: {self.label_boundary}')
+            print(f"The label boundary array is: {self.label_boundary}")
 
         if not realigned_labels:
             return self.label_boundary, self.label_boundary_file
@@ -560,13 +605,13 @@ class Bounds:
         try:
             self.label_boundary
         except AttributeError:
-            self.find_label_boundary() # get the boundaries between all labels
+            self.find_label_boundary()  # get the boundaries between all labels
 
         self.label_boundary_per_label = {}
         setA = set(self.label_boundary)
 
         for Class in self.set_manual_labels:
-            setB = set(np.nonzero(self.Labels==Class)[0])
+            setB = set(np.nonzero(self.Labels == Class)[0])
             setC = setA.intersection(setB)
 
             self.label_boundary_per_label[Class] = list(setC)
@@ -600,7 +645,7 @@ class Bounds:
         self.label_boundary_segments = {}
         for a in self.set_manual_labels:
             for b in self.set_manual_labels:
-                self.label_boundary_segments[(a,b)]=[]
+                self.label_boundary_segments[(a, b)] = []
 
         # Populate the dictionary with vertices
         for Class in self.set_manual_labels:
@@ -610,9 +655,9 @@ class Bounds:
                 neighbors = self.neighbors(vertex)
                 A = set(self.Labels[neighbors])
                 B = set(list([self.Labels[vertex]]))
-                neighbor_labels = set.difference(A,B)
+                neighbor_labels = set.difference(A, B)
                 for c in neighbor_labels:
-                    self.label_boundary_segments[(Class,c)] += [vertex]
+                    self.label_boundary_segments[(Class, c)] += [vertex]
 
         # Trim results - delete any dict entry which has no vertices
         for key, value in list(self.label_boundary_segments.items()):
@@ -621,19 +666,25 @@ class Bounds:
 
         # Print results
         if verbose:
-            for key in list(self.label_boundary_segments): #.keys():
-                print(f'For labels: {key} {self.label_boundary_segments[key]}')
+            for key in list(self.label_boundary_segments):  # .keys():
+                print(f"For labels: {key} {self.label_boundary_segments[key]}")
 
         # Output the results to a VTK file
-        self.highlighted_segment_file = 'highlighted_segments.vtk'
+        self.highlighted_segment_file = "highlighted_segments.vtk"
         color = 1
         colored_segments = np.zeros(self.Labels.shape)
         for value in list(self.label_boundary_segments.values()):
             colored_segments[value] = color
             color += 1
-        write_vtk(self.highlighted_segment_file, self.Points,
-                  self.Vertices, [], self.Faces, [colored_segments],
-                  scalar_type='int')
+        write_vtk(
+            self.highlighted_segment_file,
+            self.Points,
+            self.Vertices,
+            [],
+            self.Faces,
+            [colored_segments],
+            scalar_type="int",
+        )
 
         return self.label_boundary_segments, self.highlighted_segment_file
 
@@ -657,22 +708,22 @@ class Bounds:
         """
 
         if verbose:
-            print('Finding intersection of segment with polylines...')
-        intersection = [0,0]
+            print("Finding intersection of segment with polylines...")
+        intersection = [0, 0]
 
         for i in range(2):
             pointer = endpoint[i]
             used_vertices = [pointer]
             neighbors = []
             while pointer not in self.polyline_elements:
-                tmp0 = np.intersect1d(self.neighbors(pointer),segment)
-                tmp1 = np.setdiff1d(tmp0,used_vertices)
+                tmp0 = np.intersect1d(self.neighbors(pointer), segment)
+                tmp1 = np.setdiff1d(tmp0, used_vertices)
                 neighbors = neighbors + list(tmp1)
 
                 if not neighbors:
                     pointer = -1
                     if verbose:
-                        print('No neighbors left to explore.')
+                        print("No neighbors left to explore.")
                     break
 
                 pointer = neighbors.pop()
@@ -681,7 +732,7 @@ class Bounds:
             intersection[i] = pointer
 
         if verbose:
-            print(f'The intersection points are: {intersection}')
+            print(f"The intersection points are: {intersection}")
 
         if np.product(intersection) < 0:
             if verbose:
@@ -689,9 +740,15 @@ class Bounds:
             labels = np.zeros(self.Labels.shape)
             labels[segment] = 100
             labels[endpoint] = 200
-            write_vtk('debug_intersections.vtk',self.Points,
-                      self.Vertices, [], self.Faces, [labels],
-                      scalar_type='int')
+            write_vtk(
+                "debug_intersections.vtk",
+                self.Points,
+                self.Vertices,
+                [],
+                self.Faces,
+                [labels],
+                scalar_type="int",
+            )
 
         return intersection
 
@@ -734,18 +791,18 @@ class Bounds:
 
         # Step 1. Construct n x self.num_segments matrix of labels,
         # and produce label mapping dictionary
-        self.label_segment_matrix = np.zeros((self.num_points,self.num_segments))
+        self.label_segment_matrix = np.zeros((self.num_points, self.num_segments))
 
         self.realignment_mapping = {}
         label = 0
         for key, value in list(self.label_boundary_segments.items()):
             self.realignment_mapping[label] = key
-            self.label_segment_matrix[value,:] = -1
-            self.label_segment_matrix[value,label] = 1
+            self.label_segment_matrix[value, :] = -1
+            self.label_segment_matrix[value, label] = 1
             label += 1
 
         if verbose:
-            print(f'Mapping is: {self.realignment_mapping}')
+            print(f"Mapping is: {self.realignment_mapping}")
 
         self.determine_appropriate_segments()
 
@@ -772,10 +829,16 @@ class Bounds:
 
         return same
 
-    def determine_appropriate_segments(self, proportion = 1, dist_threshold = 8,
-                                       lb_fundus_threshold = 16,
-                                       num_good_vertices = 5, eps=1E-7,
-                                       spread_tol = 6, verbose=False):
+    def determine_appropriate_segments(
+        self,
+        proportion=1,
+        dist_threshold=8,
+        lb_fundus_threshold=16,
+        num_good_vertices=5,
+        eps=1e-7,
+        spread_tol=6,
+        verbose=False,
+    ):
         """
         Determine which label boundary segments should propagate their labels.
 
@@ -805,94 +868,139 @@ class Bounds:
 
         # Step 0. Construct num_polylines_vertices x num_label_boundary_vertices np array of distances:
         if verbose:
-            print('Beginning determine_appropriate_segments()...')
+            print("Beginning determine_appropriate_segments()...")
         t0 = time()
 
         if verbose:
             print(self.polyline_elements.shape)
             print(self.label_boundary.shape)
 
-        distance_matrix = np.asarray([np.linalg.norm(self.Points[x1] -
-                                                     self.Points[x2])
-            for x1 in self.polyline_elements
-            for x2 in self.label_boundary]).\
-            reshape((self.polyline_elements.size, -1))
+        distance_matrix = np.asarray(
+            [
+                np.linalg.norm(self.Points[x1] - self.Points[x2])
+                for x1 in self.polyline_elements
+                for x2 in self.label_boundary
+            ]
+        ).reshape((self.polyline_elements.size, -1))
 
         if verbose:
-            print(f'Distance Matrix has been constructed in {time() - t0}. '
-                  f'Bounds is {distance_matrix.shape}.')
+            print(
+                f"Distance Matrix has been constructed in {time() - t0}. "
+                f"Bounds is {distance_matrix.shape}."
+            )
 
         # Step 1. For each fundus vertex, find the closest and
         # second closest label boundary vertices,
 
         sorted_distances = np.argsort(distance_matrix)
         if verbose:
-            print(f'Got sorted distances. Bounds is {sorted_distances.shape}')
+            print(f"Got sorted distances. Bounds is {sorted_distances.shape}")
 
-        closest_label_boundary = sorted_distances[:,0]
+        closest_label_boundary = sorted_distances[:, 0]
         if verbose:
-            print(f'Got closest label boundary. Bounds is {closest_label_boundary.shape}. '
-                  f'First few values are {closest_label_boundary[:10]}')
+            print(
+                f"Got closest label boundary. Bounds is {closest_label_boundary.shape}. "
+                f"First few values are {closest_label_boundary[:10]}"
+            )
 
         dir = os.getcwd()
-        self.highlight_vtk_vertices(self.label_boundary[closest_label_boundary],
-                                    dir + '/close_vertices.vtk')
+        self.highlight_vtk_vertices(
+            self.label_boundary[closest_label_boundary], dir + "/close_vertices.vtk"
+        )
 
-        closest_polylines = np.argsort(distance_matrix, 0)[0,:]
+        closest_polylines = np.argsort(distance_matrix, 0)[0, :]
 
         closest_distances = np.amin(distance_matrix, 1)
         if verbose:
-            print(f'Got closest_distances. Bounds is {closest_distances.shape}. '
-                  f'First few values are {closest_distances[:10]}')
+            print(
+                f"Got closest_distances. Bounds is {closest_distances.shape}. "
+                f"First few values are {closest_distances[:10]}"
+            )
 
-        second_closest_distances = np.asarray([distance_matrix[i,sorted_distances[i,1]]
-                                               for i in range(self.polyline_elements.size)])
+        second_closest_distances = np.asarray(
+            [
+                distance_matrix[i, sorted_distances[i, 1]]
+                for i in range(self.polyline_elements.size)
+            ]
+        )
         if verbose:
-            print(f'Got second closest distances. Bounds is {second_closest_distances.shape}. '
-                  f'First few values are {second_closest_distances[:10]}')
+            print(
+                f"Got second closest distances. Bounds is {second_closest_distances.shape}. "
+                f"First few values are {second_closest_distances[:10]}"
+            )
 
         # Let's try using a dictionary to express the mapping relationship.
         # We will have one which maps polylines vertices to nearest label boundary vertices.
         # And we'll have one which maps lb vertices to nearest polylines vertices.
 
-        polylines_lb = dict((self.polyline_elements[i],
-                             (self.label_boundary[closest_label_boundary[i]],
-                              distance_matrix[i,closest_label_boundary[i]]))
-                                              for i in range(self.polyline_elements.size))
-        lb_polylines = dict((self.label_boundary[i],
-                             (self.polyline_elements[closest_polylines[i]],
-                              distance_matrix[closest_polylines[i],i])) for i in range(self.label_boundary.size))
+        polylines_lb = dict(
+            (
+                self.polyline_elements[i],
+                (
+                    self.label_boundary[closest_label_boundary[i]],
+                    distance_matrix[i, closest_label_boundary[i]],
+                ),
+            )
+            for i in range(self.polyline_elements.size)
+        )
+        lb_polylines = dict(
+            (
+                self.label_boundary[i],
+                (
+                    self.polyline_elements[closest_polylines[i]],
+                    distance_matrix[closest_polylines[i], i],
+                ),
+            )
+            for i in range(self.label_boundary.size)
+        )
 
         if verbose:
-            print(f'The polylines to label boundary mapping is: {polylines_lb}')
-            print(f'The label boundary to polylines mapping is: {lb_polylines}')
+            print(f"The polylines to label boundary mapping is: {polylines_lb}")
+            print(f"The label boundary to polylines mapping is: {lb_polylines}")
 
         # Step 2. Determine which obey proper proportions and distances, using parameters
-        within_distance = (closest_distances < dist_threshold)
+        within_distance = closest_distances < dist_threshold
         if verbose:
-            print(f'Got within distance. Num satisfy is {within_distance.nonzero()[0].size}. First few are {within_distance[:10]}')
+            print(
+                f"Got within distance. Num satisfy is {within_distance.nonzero()[0].size}. First few are {within_distance[:10]}"
+            )
 
-        self.highlight_vtk_vertices(self.label_boundary[closest_label_boundary[within_distance==1]],
-                                dir + '/close_distance.vtk')
+        self.highlight_vtk_vertices(
+            self.label_boundary[closest_label_boundary[within_distance == 1]],
+            dir + "/close_distance.vtk",
+        )
 
-        within_proportion = np.bitwise_or((closest_distances / second_closest_distances > proportion),
-                                          (second_closest_distances / (closest_distances+eps) > proportion))
+        within_proportion = np.bitwise_or(
+            (closest_distances / second_closest_distances > proportion),
+            (second_closest_distances / (closest_distances + eps) > proportion),
+        )
         if verbose:
-            print(f'Got within proportion. Num satisfy is {within_proportion.nonzero()[0].size}. First few are {within_proportion[:10]}')
+            print(
+                f"Got within proportion. Num satisfy is {within_proportion.nonzero()[0].size}. First few are {within_proportion[:10]}"
+            )
 
-        self.highlight_vtk_vertices([self.label_boundary[closest_label_boundary[within_proportion==1]]],
-                                dir + '/good_proportion.vtk')
+        self.highlight_vtk_vertices(
+            [self.label_boundary[closest_label_boundary[within_proportion == 1]]],
+            dir + "/good_proportion.vtk",
+        )
 
         # The following array stores the indices of the label boundary vertices which satisfy the above properties.
-        satisfy_distances = self.label_boundary[closest_label_boundary[np.nonzero(np.bitwise_and(within_distance,
-                                                                                                 within_proportion))]]
+        satisfy_distances = self.label_boundary[
+            closest_label_boundary[
+                np.nonzero(np.bitwise_and(within_distance, within_proportion))
+            ]
+        ]
         if verbose:
-            print(f'Got satisfy distances. Bounds is {satisfy_distances.shape}. They are {satisfy_distances}')
+            print(
+                f"Got satisfy distances. Bounds is {satisfy_distances.shape}. They are {satisfy_distances}"
+            )
 
-        self.highlight_vtk_vertices(satisfy_distances, dir + '/satisfy_distance.vtk')
+        self.highlight_vtk_vertices(satisfy_distances, dir + "/satisfy_distance.vtk")
 
         if verbose:
-            print(f'Currently, {satisfy_distances.size} vertices satisfy the distance requirement')
+            print(
+                f"Currently, {satisfy_distances.size} vertices satisfy the distance requirement"
+            )
 
         # Ok, now here comes the critical step.
         # We have the array satisfy_distances. It stores the indices of the elite vertices, those which satisfy the first two properties.
@@ -904,47 +1012,65 @@ class Bounds:
         for lbvertex in satisfy_distances:
             fundus_vertex = lb_polylines[lbvertex][0]
             fundus_index = np.nonzero(self.polyline_elements == fundus_vertex)[0]
-            top_five_indices = sorted_distances[fundus_index,:5].flatten()
+            top_five_indices = sorted_distances[fundus_index, :5].flatten()
             top_five_lbvertices = self.label_boundary[top_five_indices]
-            spread_matrix = np.zeros((top_five_lbvertices.size,top_five_lbvertices.size))
+            spread_matrix = np.zeros(
+                (top_five_lbvertices.size, top_five_lbvertices.size)
+            )
             for i in range(top_five_lbvertices.size):
                 for j in range(top_five_lbvertices.size):
                     v1 = top_five_lbvertices[i]
                     v2 = top_five_lbvertices[j]
-                    spread_matrix[i,j] = np.linalg.norm(self.Points[v1] - self.Points[v2])
+                    spread_matrix[i, j] = np.linalg.norm(
+                        self.Points[v1] - self.Points[v2]
+                    )
 
             spread = np.max(spread_matrix)
             if spread > spread_tol:
-                satisfy_distances = np.delete(satisfy_distances,np.nonzero(satisfy_distances == lbvertex))
+                satisfy_distances = np.delete(
+                    satisfy_distances, np.nonzero(satisfy_distances == lbvertex)
+                )
                 if verbose:
-                    print(f'deleted vertex: {lbvertex}')
+                    print(f"deleted vertex: {lbvertex}")
 
                 #### AH! I'm changing that over which I'm iterating! Fix.
 
-        self.highlight_vtk_vertices(satisfy_distances, dir + '/satisfy_distance_pruned.vtk')
+        self.highlight_vtk_vertices(
+            satisfy_distances, dir + "/satisfy_distance_pruned.vtk"
+        )
 
         if verbose:
-            print(f'After pruning, {satisfy_distances.size} vertices satisfy the distance requirement')
+            print(
+                f"After pruning, {satisfy_distances.size} vertices satisfy the distance requirement"
+            )
 
         # Augmenting...
         for lbvertex in self.label_boundary:
             fundus_vertex, distance = lb_polylines[lbvertex]
             if distance < lb_fundus_threshold:
                 mapped_lbvertex = polylines_lb[fundus_vertex][0]
-                if mapped_lbvertex in satisfy_distances and self.same_boundary(mapped_lbvertex,lbvertex):
-                    satisfy_distances = np.append(satisfy_distances,lbvertex)
+                if mapped_lbvertex in satisfy_distances and self.same_boundary(
+                    mapped_lbvertex, lbvertex
+                ):
+                    satisfy_distances = np.append(satisfy_distances, lbvertex)
                     if verbose:
-                        print(f'added vertex: {lbvertex}')
+                        print(f"added vertex: {lbvertex}")
 
-        self.highlight_vtk_vertices(satisfy_distances, dir + '/satisfy_distance_pruned_augmented.vtk')
+        self.highlight_vtk_vertices(
+            satisfy_distances, dir + "/satisfy_distance_pruned_augmented.vtk"
+        )
         if verbose:
-            print(f'After augmenting, {satisfy_distances.size} vertices satisfy the distance '
-                  'requirement')
+            print(
+                f"After augmenting, {satisfy_distances.size} vertices satisfy the distance "
+                "requirement"
+            )
 
         # Now we will see how many vertices from each label boundary segment satisfy the properties.
         # If a segment only contains a few vertices, then we won't bother propagating labels from it.
 
-        reverse_mapping = dict((v,k) for k, v in list(self.realignment_mapping.items()))
+        reverse_mapping = dict(
+            (v, k) for k, v in list(self.realignment_mapping.items())
+        )
 
         # Let's include some information as to which label boundaries will propagate their labels...
         vertices_to_highlight = np.zeros(self.Labels.shape)
@@ -953,18 +1079,25 @@ class Bounds:
             # num_intersections = np.intersect1d(satisfy_distances, value).size + np.intersect1d(satisfy_distances, self.label_boundary_segments[key[::-1]]).size
             num_intersections = np.intersect1d(satisfy_distances, value).size
             if verbose:
-                print(f'Number of intersections is: {num_intersections}')
-            if (num_intersections < num_good_vertices):
-                self.label_segment_matrix[:,reverse_mapping[key]] = 0
+                print(f"Number of intersections is: {num_intersections}")
+            if num_intersections < num_good_vertices:
+                self.label_segment_matrix[:, reverse_mapping[key]] = 0
             else:
                 vertices_to_highlight[value] = 1
                 if verbose:
-                    print('______________Preserving Label '
-                          'Boundary Segment_____________')
+                    print(
+                        "______________Preserving Label Boundary Segment_____________"
+                    )
 
-        write_vtk(dir + '/propagating_regions.vtk',self.Points,
-                  self.Vertices, [], self.Faces, [vertices_to_highlight],
-                  scalar_type='int')
+        write_vtk(
+            dir + "/propagating_regions.vtk",
+            self.Points,
+            self.Vertices,
+            [],
+            self.Faces,
+            [vertices_to_highlight],
+            scalar_type="int",
+        )
 
         return self.label_segment_matrix
 
@@ -1001,21 +1134,25 @@ class Bounds:
                     # It found 2 different intersections. We must therefore now assess whether these two intersections are
                     # part of the same fundus.
 
-                    pointer = intersection[0] # This is the first intersection point.
+                    pointer = intersection[0]  # This is the first intersection point.
                     if verbose:
-                        print(f'First pointer is: {pointer}')
-                    row_avoid = [] # This will be an array of rows in self.Polylines to avoid
-                    vertex_avoid = [pointer] # This will be an array of vertices to avoid
+                        print(f"First pointer is: {pointer}")
+                    row_avoid = []  # This will be an array of rows in self.Polylines to avoid
+                    vertex_avoid = [
+                        pointer
+                    ]  # This will be an array of vertices to avoid
 
-                    rows = list(np.nonzero([pointer in row for row in self.Polylines])[0]) # This is a list of rows to explore
+                    rows = list(
+                        np.nonzero([pointer in row for row in self.Polylines])[0]
+                    )  # This is a list of rows to explore
                     if verbose:
-                        print(f'And the list of rows to explore is: {rows}')
+                        print(f"And the list of rows to explore is: {rows}")
 
                     while rows:
                         path_to_follow = rows.pop(0)
 
                         if verbose:
-                            print(f'Following path: {path_to_follow}')
+                            print(f"Following path: {path_to_follow}")
 
                         row_avoid.append(path_to_follow)
 
@@ -1023,21 +1160,34 @@ class Bounds:
                         pointer = set.difference(set(tmp), set(vertex_avoid)).pop()
                         vertex_avoid.append(pointer)
                         if verbose:
-                            print(f'pointer is now: {pointer}')
+                            print(f"pointer is now: {pointer}")
 
                         if pointer == intersection[1]:
                             # Bingo!
                             if verbose:
-                                print('Bingo! Both intersections are part '
-                                      'of the same fundus!')
+                                print(
+                                    "Bingo! Both intersections are part "
+                                    "of the same fundus!"
+                                )
                             self.same_fundus = True
                             break
 
-                        rows = rows + list(set.difference(set(np.nonzero([pointer in row for row in self.Polylines])[0]),set(row_avoid)))
+                        rows = rows + list(
+                            set.difference(
+                                set(
+                                    np.nonzero(
+                                        [pointer in row for row in self.Polylines]
+                                    )[0]
+                                ),
+                                set(row_avoid),
+                            )
+                        )
                         if verbose:
-                            print(f'Rows is now: {rows}')
+                            print(f"Rows is now: {rows}")
 
-                self.label_boundary_segments[key] = np.append(segment,int(self.same_fundus))
+                self.label_boundary_segments[key] = np.append(
+                    segment, int(self.same_fundus)
+                )
 
         return self.label_boundary_segments
 
@@ -1048,9 +1198,8 @@ class Bounds:
         """
         # First check to see if the neighbors matrix was constructed.
         if not self.found_neighbors:
-
             if verbose:
-                print('Constructing neighborhood function.')
+                print("Constructing neighborhood function.")
 
             self.Neighbors = lil_matrix((self.num_points, self.num_points))
 
@@ -1070,10 +1219,16 @@ class Bounds:
     # ------------------------------------------------------------------------
     ##########################################################################
 
-    def realign_label_boundary(self, surface_file, polylines_file,
-                               label_boundary_filename, output_file_regions,
-                               output_file_boundaries, max_iters,
-                               verbose=False):
+    def realign_label_boundary(
+        self,
+        surface_file,
+        polylines_file,
+        label_boundary_filename,
+        output_file_regions,
+        output_file_boundaries,
+        max_iters,
+        verbose=False,
+    ):
         """
         Complete method to realign the label boundaries.
         Calls all necessary subroutines.
@@ -1098,15 +1253,17 @@ class Bounds:
         self.load_vtk_surface(surface_file)
         self.load_vtk_polylines(polylines_file)
         if verbose:
-            print(f'Imported Data in: {time() - t0}')
+            print(f"Imported Data in: {time() - t0}")
 
-        self.initialize_seed_labels(init='label_boundary',
-                                    output_filename = label_boundary_filename)
+        self.initialize_seed_labels(
+            init="label_boundary", output_filename=label_boundary_filename
+        )
         self.find_label_boundary_segments()
         self.graph_based_learning(realign=True, max_iters=max_iters)
-        self.assign_realigned_labels(filename = output_file_regions)
-        self.find_label_boundary(realigned_labels=True,
-                                   output_filename = output_file_boundaries)
+        self.assign_realigned_labels(filename=output_file_regions)
+        self.find_label_boundary(
+            realigned_labels=True, output_filename=output_file_boundaries
+        )
 
         return output_file_regions, output_file_boundaries
 
@@ -1144,7 +1301,7 @@ class Bounds:
             a = self.learned_matrix[0]
         except:
             if verbose:
-                print('First call graph_based_learning().')
+                print("First call graph_based_learning().")
             return
 
         self.RLabels = self.Labels.copy()
@@ -1159,21 +1316,23 @@ class Bounds:
         vertices_to_change = {}
         for column in self.learned_matrix.T:
             vertices_to_change[counter] = list(np.nonzero(column > threshold)[0])
-            #if set.intersection(set(vertices_to_change[counter]), set(self.consensus_labels)):
-            #	if verbose:
-                  # print('You are trying to cross consensus labels!'
-            #	vertices_to_change[counter] = []
+            # if set.intersection(set(vertices_to_change[counter]), set(self.consensus_labels)):
+            # 	if verbose:
+            # print('You are trying to cross consensus labels!'
+            # 	vertices_to_change[counter] = []
             # self.RLabels[vertices_to_change] = self.realignment_mapping[counter][1]
             counter += 1
 
         if verbose:
-            print(f'There are {len(vertices_to_change)} regions to be relabeled.')
+            print(f"There are {len(vertices_to_change)} regions to be relabeled.")
 
         # Run check_for_polylines
         vertices_to_change = self.check_for_polylines(vertices_to_change)
 
         if verbose:
-            print(f'After further checks, {len(vertices_to_change)} regions are going to be relabeled.')
+            print(
+                f"After further checks, {len(vertices_to_change)} regions are going to be relabeled."
+            )
 
         # Resolve label ambiguities
         # vertices_to_change = self.resolve_label_ambiguity(vertices_to_change)
@@ -1191,7 +1350,9 @@ class Bounds:
 
         for key, value in list(vertices_to_change.items()):
             if verbose:
-                print(f'For key {self.realignment_mapping[key]}, the following vertices will be changed: {value}')
+                print(
+                    f"For key {self.realignment_mapping[key]}, the following vertices will be changed: {value}"
+                )
 
         # For vertices that have passed all checks and are to be relabeled,
         # select the second (relabel) entry in the corresponding dictionary tuple
@@ -1200,13 +1361,19 @@ class Bounds:
 
         # Write VTK file with the new labels
         self.RLabels_file = filename
-        write_vtk(self.RLabels_file, self.Points, self.Vertices,
-                  [], self.Faces, [self.RLabels], scalar_type='int')
+        write_vtk(
+            self.RLabels_file,
+            self.Points,
+            self.Vertices,
+            [],
+            self.Faces,
+            [self.RLabels],
+            scalar_type="int",
+        )
 
         return self.RLabels, self.RLabels_file
 
-    def check_for_polylines(self, dict_of_vertices, threshold=15,
-                            verbose=False):
+    def check_for_polylines(self, dict_of_vertices, threshold=15, verbose=False):
         """
         Check which groups of vertices contain a sufficient number that
         border polylines.
@@ -1246,7 +1413,7 @@ class Bounds:
             print(self.polylines_flanks_indices)
 
         for key, value in list(dict_of_vertices.items()):
-            if len(np.intersect1d(value,self.polylines_flanks_indices)) < threshold:
+            if len(np.intersect1d(value, self.polylines_flanks_indices)) < threshold:
                 dict_of_vertices.pop(key)
 
         return dict_of_vertices
@@ -1265,8 +1432,11 @@ class Bounds:
 
         for triangles in self.Faces:
             vertex0, vertex1, vertex2 = triangles[0], triangles[1], triangles[2]
-            num_points_in_polylines = (vertex0 in self.polyline_elements) + \
-                                        (vertex1 in self.polyline_elements) + (vertex2 in self.polyline_elements)
+            num_points_in_polylines = (
+                (vertex0 in self.polyline_elements)
+                + (vertex1 in self.polyline_elements)
+                + (vertex2 in self.polyline_elements)
+            )
             if num_points_in_polylines > 0:
                 self.polylines_flanks_indices[triangles] = 1
         self.polylines_flanks_indices[self.polyline_elements] = 0
@@ -1315,22 +1485,25 @@ class Bounds:
         # As a proxy for whether a fundus runs along a label boundary,
         # we could simply see which label boundary segment relabels more vertices
         if verbose:
-            print('We made it here! So far so good.')
+            print("We made it here! So far so good.")
 
         num_keys = len(dict_of_vertices)
         overlap = np.zeros((num_keys, num_keys))
 
         for key1, value1 in list(dict_of_vertices.items()):
-            for key2, value2, in list(dict_of_vertices.items()):
+            for (
+                key2,
+                value2,
+            ) in list(dict_of_vertices.items()):
                 if key1 != key2:
-                    overlap_problem = np.intersect1d(value1,value2).any()
+                    overlap_problem = np.intersect1d(value1, value2).any()
                     if overlap_problem:
                         if verbose:
-                            print(f'The keys are: {key1} {key2}')
+                            print(f"The keys are: {key1} {key2}")
                         # 1 indicates value1 is larger, 2 if value2 is larger.
-                        overlap[key1,key2] = (len(value2) > len(value1)) + 1
+                        overlap[key1, key2] = (len(value2) > len(value1)) + 1
                         if verbose:
-                            print(f'The value of overlap is: {overlap[key1,key2]}')
+                            print(f"The value of overlap is: {overlap[key1, key2]}")
 
                         # For NOW, let us disregard the matrix overlap and simply resolve the issue right here.
                         # In the future, this matrix may be desirable.
@@ -1397,12 +1570,24 @@ class Bounds:
             for key2, value2 in list(dict_of_vertices.items()):
                 if key1 != key2:
                     # If thay are co-segments...
-                    if len(np.intersect1d(self.realignment_mapping[key1], self.realignment_mapping[key2])) == 2:
+                    if (
+                        len(
+                            np.intersect1d(
+                                self.realignment_mapping[key1],
+                                self.realignment_mapping[key2],
+                            )
+                        )
+                        == 2
+                    ):
                         if verbose:
-                            print('Found co-segments.')
+                            print("Found co-segments.")
                         # Find which array contains more polylines border vertices...
-                        border1 = len(np.intersect1d(value1,self.polylines_flanks_indices))
-                        border2 = len(np.intersect1d(value2,self.polylines_flanks_indices))
+                        border1 = len(
+                            np.intersect1d(value1, self.polylines_flanks_indices)
+                        )
+                        border2 = len(
+                            np.intersect1d(value2, self.polylines_flanks_indices)
+                        )
                         if border1 > border2:
                             try:
                                 dict_of_vertices.pop(key2)
@@ -1422,4 +1607,5 @@ class Bounds:
 # ============================================================================
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod(verbose=True)  # py.test --doctest-modules

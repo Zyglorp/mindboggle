@@ -11,6 +11,7 @@ Authors:
 Copyright 2016,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 
 """
+
 import builtins
 
 
@@ -103,15 +104,16 @@ def read_lines(filename):
     Data = Reader.GetOutput()
     Lns = Data.GetLines()
 
-    lines  = [[Lns.GetData().GetValue(j) for j in range(i*3+1, i*3+3) ]
-              for i in range(Data.GetNumberOfLines())]
+    lines = [
+        [Lns.GetData().GetValue(j) for j in range(i * 3 + 1, i * 3 + 3)]
+        for i in range(Data.GetNumberOfLines())
+    ]
 
     PointData = Data.GetPointData()
     print(f"There are {Reader.GetNumberOfscalarsInFile()} scalars in file {filename}")
     print(f"Loading the scalar {Reader.GetScalarsNameInFile(0)}")
     ScalarsArray = PointData.GetArray(Reader.GetScalarsNameInFile(0))
-    scalars = [ScalarsArray.GetValue(i)
-               for i in range(0, ScalarsArray.GetDataSize())]
+    scalars = [ScalarsArray.GetValue(i) for i in range(0, ScalarsArray.GetDataSize())]
 
     return lines, scalars
 
@@ -157,8 +159,9 @@ def read_points(filename):
     Reader.Update()
 
     Data = Reader.GetOutput()
-    points = [list(Data.GetPoint(point_id))
-              for point_id in range(Data.GetNumberOfPoints())]
+    points = [
+        list(Data.GetPoint(point_id)) for point_id in range(Data.GetNumberOfPoints())
+    ]
 
     return points
 
@@ -211,14 +214,19 @@ def read_faces_points(filename):
     Reader.Update()
 
     Data = Reader.GetOutput()
-    points = [list(Data.GetPoint(point_id))
-              for point_id in range(Data.GetNumberOfPoints())]
+    points = [
+        list(Data.GetPoint(point_id)) for point_id in range(Data.GetNumberOfPoints())
+    ]
     npoints = len(points)
 
     if Data.GetNumberOfPolys() > 0:
-        faces = [[int(Data.GetPolys().GetData().GetValue(j))
-                  for j in range(i*4 + 1, i*4 + 4)]
-                  for i in range(Data.GetPolys().GetNumberOfCells())]
+        faces = [
+            [
+                int(Data.GetPolys().GetData().GetValue(j))
+                for j in range(i * 4 + 1, i * 4 + 4)
+            ]
+            for i in range(Data.GetPolys().GetNumberOfCells())
+        ]
     else:
         faces = []
 
@@ -259,8 +267,9 @@ def read_scalars(filename, return_first=True, return_array=False):
     [0.02026, 0.06009, 0.12859, 0.04564, 0.00774]
 
     """
-    #import os
+    # import os
     import vtk
+
     if return_first and return_array:
         import numpy as np
 
@@ -277,18 +286,19 @@ def read_scalars(filename, return_first=True, return_array=False):
         for scalar_index in range(Reader.GetNumberOfScalarsInFile()):
             scalar_name = Reader.GetScalarsNameInFile(scalar_index)
 
-            #n_scalars = scalar_index + 1
-            #if n_scalars == 1:
+            # n_scalars = scalar_index + 1
+            # if n_scalars == 1:
             #    print("Load \"{0}\" scalars from {1}".
             #          format(scalar_name, os.path.basename(filename)))
-            #else:
+            # else:
             #    print("Load \"{0}\" (of {1} scalars) from {2}".
             #          format(scalar_name, n_scalars,
             #                 os.path.basename(filename)))
 
             scalar_array = PointData.GetArray(scalar_name)
-            scalar = [scalar_array.GetValue(i)
-                      for i in range(scalar_array.GetDataSize())]
+            scalar = [
+                scalar_array.GetValue(i) for i in range(scalar_array.GetDataSize())
+            ]
             scalars.append(scalar)
             scalar_names.append(scalar_name)
 
@@ -300,7 +310,7 @@ def read_scalars(filename, return_first=True, return_array=False):
         if scalar_names:
             scalar_names = scalar_names[0]
         else:
-            scalar_names = ''
+            scalar_names = ""
 
     return scalars, scalar_names
 
@@ -370,8 +380,9 @@ def read_vtk(input_vtk, return_first=True, return_array=False):
     [[0, 1, 4], [5, 4, 1], [0, 48, 49], [0, 49, 1], [0, 4, 48]]
 
     """
-    #import os
+    # import os
     import vtk
+
     if return_first and return_array:
         import numpy as np
 
@@ -382,29 +393,37 @@ def read_vtk(input_vtk, return_first=True, return_array=False):
 
     Data = Reader.GetOutput()
     PointData = Data.GetPointData()
-    points = [list(Data.GetPoint(point_id))
-              for point_id in range(0, Data.GetNumberOfPoints())]
+    points = [
+        list(Data.GetPoint(point_id)) for point_id in range(0, Data.GetNumberOfPoints())
+    ]
     npoints = len(points)
 
     if Data.GetNumberOfPolys() > 0:
-        faces = [[int(Data.GetPolys().GetData().GetValue(j))
-                  for j in range(i*4 + 1, i*4 + 4)]
-                  for i in range(Data.GetPolys().GetNumberOfCells())]
+        faces = [
+            [
+                int(Data.GetPolys().GetData().GetValue(j))
+                for j in range(i * 4 + 1, i * 4 + 4)
+            ]
+            for i in range(Data.GetPolys().GetNumberOfCells())
+        ]
     else:
         faces = []
 
     if Data.GetNumberOfLines() > 0:
-        lines  = [[Data.GetLines().GetData().GetValue(j)
-                   for j in range(i*3+1, i*3+3) ]
-                   for i in range(Data.GetNumberOfLines())]
+        lines = [
+            [Data.GetLines().GetData().GetValue(j) for j in range(i * 3 + 1, i * 3 + 3)]
+            for i in range(Data.GetNumberOfLines())
+        ]
     else:
         lines = []
 
     if Data.GetNumberOfVerts() > 0:
-       indices = [Data.GetVerts().GetData().GetValue(i)
-                  for i in range(1, Data.GetVerts().GetSize() )]
+        indices = [
+            Data.GetVerts().GetData().GetValue(i)
+            for i in range(1, Data.GetVerts().GetSize())
+        ]
     else:
-       indices = []
+        indices = []
 
     scalars = []
     scalar_names = []
@@ -413,19 +432,20 @@ def read_vtk(input_vtk, return_first=True, return_array=False):
         for scalar_index in range(Reader.GetNumberOfScalarsInFile()):
             scalar_name = Reader.GetScalarsNameInFile(scalar_index)
 
-            #n_scalars = scalar_index + 1
-            #if n_scalars == 1:
+            # n_scalars = scalar_index + 1
+            # if n_scalars == 1:
             #    print("Load \"{0}\" scalars from {1}".
             #          format(scalar_name, os.path.basename(input_vtk)))
-            #else:
+            # else:
             #    print("Load \"{0}\" (of {1} scalars) from {2}".
             #          format(scalar_name, n_scalars,
             #                 os.path.basename(input_vtk)))
 
             scalar_array = PointData.GetArray(scalar_name)
             if scalar_array:
-                scalar = [scalar_array.GetValue(i)
-                          for i in range(scalar_array.GetDataSize())]
+                scalar = [
+                    scalar_array.GetValue(i) for i in range(scalar_array.GetDataSize())
+                ]
                 scalars.append(scalar)
                 scalar_names.append(scalar_name)
 
@@ -437,15 +457,18 @@ def read_vtk(input_vtk, return_first=True, return_array=False):
         if scalar_names:
             scalar_names = scalar_names[0]
         else:
-            scalar_names = ''
+            scalar_names = ""
 
-    return points, indices, lines, faces, scalars, scalar_names, \
-           npoints, input_vtk
+    return points, indices, lines, faces, scalars, scalar_names, npoints, input_vtk
 
 
-def write_header(Fp, Header='# vtk DataFile Version 2.0',
-                     Title='Generated by Mindboggle (www.mindboggle.info)',
-                     fileType='ASCII', dataType='POLYDATA'):
+def write_header(
+    Fp,
+    Header="# vtk DataFile Version 2.0",
+    Title="Generated by Mindboggle (www.mindboggle.info)",
+    fileType="ASCII",
+    dataType="POLYDATA",
+):
     """
     Write header information for a VTK-format file::
 
@@ -468,7 +491,7 @@ def write_header(Fp, Header='# vtk DataFile Version 2.0',
 
     """
 
-    Fp.write(f'{Header}\n{Title}\n{fileType}\nDATASET {dataType}\n')
+    Fp.write(f"{Header}\n{Title}\n{fileType}\nDATASET {dataType}\n")
 
 
 def write_points(Fp, points, dataType="float"):
@@ -489,18 +512,18 @@ def write_points(Fp, points, dataType="float"):
     """
     import numpy as np
 
-    Fp.write(f'POINTS {len(points)} {dataType}\n')
+    Fp.write(f"POINTS {len(points)} {dataType}\n")
 
     n = np.shape(points)[1]
     for point in points:
         if n == 3:
             [R, A, S] = point
-            Fp.write(f'{R} {A} {S}\n')
+            Fp.write(f"{R} {A} {S}\n")
         elif n == 2:
             [R, A] = point
-            Fp.write(f'{R} {A}\n')
+            Fp.write(f"{R} {A}\n")
         else:
-            raise OSError('Unrecognized number of coordinates per point')
+            raise OSError("Unrecognized number of coordinates per point")
 
 
 def write_faces(Fp, faces):
@@ -517,21 +540,21 @@ def write_faces(Fp, faces):
 
     n = np.shape(faces)[1]
     if n == 3:
-        face_name = 'POLYGONS '
-        Fp.write(f'{face_name} {len(faces)} {len(faces) * (n + 1)}\n')
+        face_name = "POLYGONS "
+        Fp.write(f"{face_name} {len(faces)} {len(faces) * (n + 1)}\n")
     elif n == 2:
-        face_name = 'LINES '
-        Fp.write(f'{face_name} {len(faces)} {len(faces) * (n + 1)}\n')
+        face_name = "LINES "
+        Fp.write(f"{face_name} {len(faces)} {len(faces) * (n + 1)}\n")
     else:
-        raise OSError('Unrecognized number of vertices per face')
+        raise OSError("Unrecognized number of vertices per face")
 
     for face in faces:
         if n == 3:
             [V0, V1, V2] = face
-            Fp.write(f'{n} {V0} {V1} {V2}\n')
+            Fp.write(f"{n} {V0} {V1} {V2}\n")
         elif n == 2:
             [V0, V1] = face
-            Fp.write(f'{n} {V0} {V1}\n')
+            Fp.write(f"{n} {V0} {V1}\n")
 
 
 def write_lines(Fp, lines):
@@ -572,23 +595,22 @@ def write_vertices(Fp, indices):
 
     """
 
-    Fp.write(f'VERTICES {1} {len(indices) + 1}\n{len(indices)} ')
-    [Fp.write(f'{i} ') for i in indices]
-    Fp.write('\n')
+    Fp.write(f"VERTICES {1} {len(indices) + 1}\n{len(indices)} ")
+    [Fp.write(f"{i} ") for i in indices]
+    Fp.write("\n")
 
 
-def write_scalars(Fp, scalars, scalar_name, begin_scalars=True,
-                  scalar_type='float'):
+def write_scalars(Fp, scalars, scalar_name, begin_scalars=True, scalar_type="float"):
     """
     Write per-VERTEX values as a scalar lookup table into a VTK file::
 
         POINT_DATA 150991
-        SCALARS Max_(majority_labels) int 
+        SCALARS Max_(majority_labels) int
         LOOKUP_TABLE default
-        11 
-        11 
-        11 
-        11 
+        11
+        11
+        11
+        11
         .
         .
         .
@@ -609,16 +631,24 @@ def write_scalars(Fp, scalars, scalar_name, begin_scalars=True,
     """
 
     if begin_scalars:
-        Fp.write(f'POINT_DATA {len(scalars)}\n')
-    Fp.write(f'SCALARS {scalar_name} {scalar_type}\n')
-    Fp.write(f'LOOKUP_TABLE {scalar_name}\n')
+        Fp.write(f"POINT_DATA {len(scalars)}\n")
+    Fp.write(f"SCALARS {scalar_name} {scalar_type}\n")
+    Fp.write(f"LOOKUP_TABLE {scalar_name}\n")
     for Value in scalars:
-        Fp.write(f'{Value}\n')
-    Fp.write('\n')
+        Fp.write(f"{Value}\n")
+    Fp.write("\n")
 
 
-def write_vtk(output_vtk, points, indices=[], lines=[], faces=[],
-              scalars=[], scalar_names=['scalars'], scalar_type='float'):
+def write_vtk(
+    output_vtk,
+    points,
+    indices=[],
+    lines=[],
+    faces=[],
+    scalars=[],
+    scalar_names=["scalars"],
+    scalar_type="float",
+):
     """
     Save lists of scalars into the lookup table of a VTK-format file.
 
@@ -709,41 +739,55 @@ def write_vtk(output_vtk, points, indices=[], lines=[], faces=[],
 
     output_vtk = os.path.join(os.getcwd(), output_vtk)
 
-    Fp = builtins.open(output_vtk,'w', encoding="utf-8")
+    Fp = builtins.open(output_vtk, "w", encoding="utf-8")
     write_header(Fp)
     write_points(Fp, points)
     if indices:
         write_vertices(Fp, indices)
     if lines:
-        for i in range(0,len(lines)):
+        for i in range(0, len(lines)):
             lines[i] = [lines[i][0], lines[i][1]]
-        write_faces(Fp, lines) # write_faces can write either lines or faces
+        write_faces(Fp, lines)  # write_faces can write either lines or faces
     if faces:
         write_faces(Fp, faces)
     scalars, scalar_names = scalars_checker(scalars, scalar_names)
     if len(scalars):
-
         for i, scalar_list in enumerate(scalars):
             if i == 0:
                 scalar_name = scalar_names[i]
-                write_scalars(Fp, scalar_list, scalar_name,
-                              begin_scalars=True, scalar_type=scalar_type)
+                write_scalars(
+                    Fp,
+                    scalar_list,
+                    scalar_name,
+                    begin_scalars=True,
+                    scalar_type=scalar_type,
+                )
             else:
                 if len(scalar_names) < i + 1:
                     scalar_name = scalar_names[0]
                 else:
                     scalar_name = scalar_names[i]
-                write_scalars(Fp, scalar_list, scalar_name,
-                              begin_scalars=False, scalar_type=scalar_type)
+                write_scalars(
+                    Fp,
+                    scalar_list,
+                    scalar_name,
+                    begin_scalars=False,
+                    scalar_type=scalar_type,
+                )
     Fp.close()
 
     if not os.path.exists(output_vtk):
         raise OSError(output_vtk + " not found")
 
 
-def rewrite_scalars(input_vtk, output_vtk, new_scalars,
-                    new_scalar_names=['scalars'], filter_scalars=[],
-                    background_value=-1):
+def rewrite_scalars(
+    input_vtk,
+    output_vtk,
+    new_scalars,
+    new_scalar_names=["scalars"],
+    filter_scalars=[],
+    background_value=-1,
+):
     """
     Load VTK format file and save a subset of scalars into a new file.
 
@@ -812,21 +856,23 @@ def rewrite_scalars(input_vtk, output_vtk, new_scalars,
     output_vtk = os.path.join(os.getcwd(), output_vtk)
 
     # Load VTK file
-    points, indices, lines, faces, scalars, scalar_names, npoints, \
-        input_vtk = read_vtk(input_vtk)
+    points, indices, lines, faces, scalars, scalar_names, npoints, input_vtk = read_vtk(
+        input_vtk
+    )
 
     # Find indices to foreground values
     if filter_scalars:
-        indices_keep = [i for i,x in enumerate(filter_scalars)
-                        if x != background_value]
-        #indices_remove = [i for i,x in enumerate(filter_scalars)
+        indices_keep = [
+            i for i, x in enumerate(filter_scalars) if x != background_value
+        ]
+        # indices_remove = [i for i,x in enumerate(filter_scalars)
         #                  if x == background_value]
         # Remove surface faces whose three vertices are not all in indices
         faces = keep_faces(faces, indices_keep)
         faces, points, original_indices = reindex_faces_points(faces, points)
 
     # Write VTK file
-    Fp = builtins.open(output_vtk,'w', encoding="utf-8")
+    Fp = builtins.open(output_vtk, "w", encoding="utf-8")
     write_header(Fp)
     if points:
         write_points(Fp, points)
@@ -835,14 +881,12 @@ def rewrite_scalars(input_vtk, output_vtk, new_scalars,
     if faces:
         write_faces(Fp, faces)
     if new_scalars:
-        new_scalars, new_scalar_names = scalars_checker(new_scalars,
-                                                        new_scalar_names)
+        new_scalars, new_scalar_names = scalars_checker(new_scalars, new_scalar_names)
 
         # scalars_checker() returns a list of lists for scalars:
         for i, new_scalar_list in enumerate(new_scalars):
             if filter_scalars:
-                new_scalar_list = np.array(new_scalar_list)[original_indices].\
-                    tolist()
+                new_scalar_list = np.array(new_scalar_list)[original_indices].tolist()
             #    for iremove in indices_remove:
             #        new_scalar_list[iremove] = background_value
             if np.ndim(new_scalar_list) == 1:
@@ -853,19 +897,27 @@ def rewrite_scalars(input_vtk, output_vtk, new_scalars,
                 raise OSError("Undefined scalar type!")
             if i == 0:
                 new_scalar_name = new_scalar_names[0]
-                write_scalars(Fp, new_scalar_list, new_scalar_name,
-                              begin_scalars=True,
-                              scalar_type=scalar_type)
+                write_scalars(
+                    Fp,
+                    new_scalar_list,
+                    new_scalar_name,
+                    begin_scalars=True,
+                    scalar_type=scalar_type,
+                )
             else:
                 if len(new_scalar_names) < i + 1:
                     new_scalar_name = new_scalar_names[0]
                 else:
                     new_scalar_name = new_scalar_names[i]
-                write_scalars(Fp, new_scalar_list, new_scalar_name,
-                              begin_scalars=False,
-                              scalar_type=scalar_type)
+                write_scalars(
+                    Fp,
+                    new_scalar_list,
+                    new_scalar_name,
+                    begin_scalars=False,
+                    scalar_type=scalar_type,
+                )
     else:
-        raise OSError('new_scalars is empty')
+        raise OSError("new_scalars is empty")
 
     Fp.close()
 
@@ -873,11 +925,17 @@ def rewrite_scalars(input_vtk, output_vtk, new_scalars,
         raise OSError(output_vtk + " not found")
 
 
-def explode_scalars(input_indices_vtk, input_values_vtk='', output_stem='',
-                    exclude_values=[-1], background_value=-1,
-                    output_scalar_name='scalars',
-                    remove_background_faces=True,
-                    reindex=True, verbose=False):
+def explode_scalars(
+    input_indices_vtk,
+    input_values_vtk="",
+    output_stem="",
+    exclude_values=[-1],
+    background_value=-1,
+    output_scalar_name="scalars",
+    remove_background_faces=True,
+    reindex=True,
+    verbose=False,
+):
     """
     Write out a separate VTK file for each integer (not in exclude_values)
     in (the first) scalar list of an input VTK file.
@@ -942,7 +1000,7 @@ def explode_scalars(input_indices_vtk, input_values_vtk='', output_stem='',
     >>> input_values_vtk = ''
     >>> output_stem = 'explode_scalars_label'
     >>> output_scalar_name = 'labels'
-    >>> output_files = explode_scalars(input_indices_vtk, input_values_vtk, 
+    >>> output_files = explode_scalars(input_indices_vtk, input_values_vtk,
     ...     output_stem, exclude_values, background_value, output_scalar_name,
     ...     remove_background_faces, reindex, verbose)
     >>> os.path.basename(output_files[0])
@@ -965,41 +1023,40 @@ def explode_scalars(input_indices_vtk, input_values_vtk='', output_stem='',
         input_values_vtk = input_indices_vtk
 
     # Load VTK file:
-    points, indices, lines, faces, scalars, scalar_names, npoints, \
-        input_vtk = read_vtk(input_indices_vtk, True, True)
+    points, indices, lines, faces, scalars, scalar_names, npoints, input_vtk = read_vtk(
+        input_indices_vtk, True, True
+    )
     if verbose:
         print(f"Explode the scalar list in {os.path.basename(input_indices_vtk)}")
     if input_values_vtk != input_indices_vtk:
         values, name = read_scalars(input_values_vtk, True, True)
         if verbose:
-            print(f"Explode the scalar list of values in {os.path.basename(input_values_vtk)} "
-                  f"with the scalar list of indices in {os.path.basename(input_indices_vtk)}")
+            print(
+                f"Explode the scalar list of values in {os.path.basename(input_values_vtk)} "
+                f"with the scalar list of indices in {os.path.basename(input_indices_vtk)}"
+            )
     else:
         values = np.copy(scalars)
 
     # Loop through unique (non-excluded) scalar values:
     unique_scalars = np.unique(scalars)
-    if all(unique_scalars==np.round(unique_scalars)):
-        unique_scalars = [int(x) for x in unique_scalars
-                          if x not in exclude_values]
+    if all(unique_scalars == np.round(unique_scalars)):
+        unique_scalars = [int(x) for x in unique_scalars if x not in exclude_values]
     else:
-        unique_scalars = [x for x in unique_scalars
-                          if x not in exclude_values]
+        unique_scalars = [x for x in unique_scalars if x not in exclude_values]
 
-    output_files =[]
+    output_files = []
     for scalar in unique_scalars:
-
         # Remove background (keep only faces with the scalar):
         if remove_background_faces:
-            scalar_indices = [i for i,x in enumerate(scalars) if x == scalar]
+            scalar_indices = [i for i, x in enumerate(scalars) if x == scalar]
             scalar_faces = keep_faces(faces, scalar_indices)
         else:
             scalar_faces = faces
 
         # Reindex:
         if reindex:
-            scalar_faces, select_points, \
-            o1 = reindex_faces_points(scalar_faces, points)
+            scalar_faces, select_points, o1 = reindex_faces_points(scalar_faces, points)
         else:
             select_points = points
 
@@ -1019,20 +1076,26 @@ def explode_scalars(input_indices_vtk, input_values_vtk='', output_stem='',
             else:
                 if verbose:
                     raise OSError("Undefined scalar type!")
-            output_vtk = os.path.join(os.getcwd(),
-                                      output_stem + str(scalar) + '.vtk')
-            write_vtk(output_vtk, select_points, indices, lines, scalar_faces,
-                      select_values.tolist(), output_scalar_name,
-                      scalar_type=scalar_type)
+            output_vtk = os.path.join(os.getcwd(), output_stem + str(scalar) + ".vtk")
+            write_vtk(
+                output_vtk,
+                select_points,
+                indices,
+                lines,
+                scalar_faces,
+                select_values.tolist(),
+                output_scalar_name,
+                scalar_type=scalar_type,
+            )
 
             output_files.append(output_vtk)
 
     return output_files
 
 
-def explode_scalars_mindboggle(subject_path, output_path='',
-                               pieces='labels', background_value=-1,
-                               verbose=False):
+def explode_scalars_mindboggle(
+    subject_path, output_path="", pieces="labels", background_value=-1, verbose=False
+):
     """
     Given the path to a subject's Mindboggle output data,
     break up each shape surface VTK file into separate VTK files,
@@ -1077,55 +1140,64 @@ def explode_scalars_mindboggle(subject_path, output_path='',
     if not os.path.exists(output_path):
         raise OSError(f"{output_path} does not exist")
     else:
-
-        for side in ['left', 'right']:
-
-            output_dir = os.path.join(output_path,
-                                      side + '_exploded_' + pieces + '_vtks')
+        for side in ["left", "right"]:
+            output_dir = os.path.join(
+                output_path, side + "_exploded_" + pieces + "_vtks"
+            )
             if not os.path.exists(output_dir):
                 if verbose:
                     print(f"Create missing output directory: {output_dir}")
                 os.mkdir(output_dir)
             if os.path.exists(output_dir):
-
-                if pieces == 'labels':
-                    File = os.path.join('labels',
-                                        side + '_cortical_surface',
-                                        'freesurfer_cortex_labels.vtk')
-                elif pieces in ['sulci', 'fundus_per_sulcus', 'folds']:
-                    File = os.path.join('features',
-                                          side + '_cortical_surface',
-                                          pieces + '.vtk')
+                if pieces == "labels":
+                    File = os.path.join(
+                        "labels",
+                        side + "_cortical_surface",
+                        "freesurfer_cortex_labels.vtk",
+                    )
+                elif pieces in ["sulci", "fundus_per_sulcus", "folds"]:
+                    File = os.path.join(
+                        "features", side + "_cortical_surface", pieces + ".vtk"
+                    )
                 else:
                     raise OSError("Choose from: {'labels', 'sulci'}")
-                                  #'fundus_per_sulcus', 'folds'}")
+                    #'fundus_per_sulcus', 'folds'}")
 
                 labels_vtk = os.path.join(subject_path, File)
-                shapes_path = os.path.join(subject_path, 'shapes',
-                                           side + '_cortical_surface')
-                shape_names = ['travel_depth',
-                               'geodesic_depth',
-                               'freesurfer_sulc',
-                               'mean_curvature',
-                               'freesurfer_curvature',
-                               'freesurfer_thickness']
+                shapes_path = os.path.join(
+                    subject_path, "shapes", side + "_cortical_surface"
+                )
+                shape_names = [
+                    "travel_depth",
+                    "geodesic_depth",
+                    "freesurfer_sulc",
+                    "mean_curvature",
+                    "freesurfer_curvature",
+                    "freesurfer_thickness",
+                ]
 
                 for shape_name in shape_names:
-
-                    shape_vtk = os.path.join(shapes_path, shape_name + '.vtk')
+                    shape_vtk = os.path.join(shapes_path, shape_name + ".vtk")
 
                     if verbose:
-                        print("Explode {0} by {1} values from {2}").\
-                            format(shape_vtk, pieces, labels_vtk)
+                        print("Explode {0} by {1} values from {2}").format(
+                            shape_vtk, pieces, labels_vtk
+                        )
 
-                    output_files = explode_scalars(labels_vtk, shape_vtk,
-                                    os.path.join(output_dir,
-                                                 shape_name + '_'),
-                                    [background_value], background_value,
-                                    'scalars', True, True, False)
+                    output_files = explode_scalars(
+                        labels_vtk,
+                        shape_vtk,
+                        os.path.join(output_dir, shape_name + "_"),
+                        [background_value],
+                        background_value,
+                        "scalars",
+                        True,
+                        True,
+                        False,
+                    )
 
             else:
-                raise OSError(f'Unable to make directory {output_dir}')
+                raise OSError(f"Unable to make directory {output_dir}")
 
 
 def scalars_checker(scalars, scalar_names):
@@ -1181,9 +1253,9 @@ def scalars_checker(scalars, scalar_names):
     # If not a list, convert to a list.
     if not isinstance(scalars, list):
         if isinstance(scalars, np.ndarray):
-            if len(scalars.shape) < 2: # this is at most a 1-D array
+            if len(scalars.shape) < 2:  # this is at most a 1-D array
                 scalars = [scalars.tolist()]
-            elif len(scalars.shape) == 2: # 2-D numpy array
+            elif len(scalars.shape) == 2:  # 2-D numpy array
                 scalars = scalars.tolist()
             else:
                 raise OSError("Error: Dimension of new_scalars is too high.")
@@ -1191,7 +1263,6 @@ def scalars_checker(scalars, scalar_names):
             raise OSError("Error: scalars is neither a list nor a numpy array.")
 
     if scalars:
-
         # If the list contains integers or floats, put in a list.
         if isinstance(scalars[0], int) or isinstance(scalars[0], float):
             scalars = [scalars]
@@ -1199,8 +1270,7 @@ def scalars_checker(scalars, scalar_names):
         elif all([isinstance(x, list) for x in scalars]):
             pass
         # If the list contains arrays (optionally lists), convert arrays to lists.
-        elif all([isinstance(x, list) or isinstance(x, np.ndarray)
-                  for x in scalars]):
+        elif all([isinstance(x, list) or isinstance(x, np.ndarray) for x in scalars]):
             scalars2 = []
             for x in scalars:
                 if isinstance(x, list):
@@ -1209,10 +1279,12 @@ def scalars_checker(scalars, scalar_names):
                     scalars2.append(x.tolist())
             scalars = scalars2
         else:
-            raise OSError("Error: scalars is a 1-D list containing unacceptable elements.")
-            #print("scalars type is: {0}".format(type(scalars)))
-            #print("scalars length is: {0}".format(len(scalars)))
-            #print("scalars[0] type is: {0}".format(type(scalars[0])))
+            raise OSError(
+                "Error: scalars is a 1-D list containing unacceptable elements."
+            )
+            # print("scalars type is: {0}".format(type(scalars)))
+            # print("scalars length is: {0}".format(len(scalars)))
+            # print("scalars[0] type is: {0}".format(type(scalars[0])))
 
         # If scalar_names is a string, create a list containing
         # as many of this string as there are scalar lists.
@@ -1225,8 +1297,8 @@ def scalars_checker(scalars, scalar_names):
                 pass
         else:
             raise OSError("Error: scalar_names is neither a list nor a string")
-    #else:
-        #print("Warning: scalars is empty")
+    # else:
+    # print("Warning: scalars is empty")
 
     return scalars, scalar_names
 
@@ -1375,9 +1447,13 @@ def scalars_checker(scalars, scalar_names):
 #     return transform
 
 
-def apply_affine_transforms(transform_files, inverse_booleans,
-                            transform_format='itk', vtk_or_points=[],
-                            vtk_file_stem='affine_'):
+def apply_affine_transforms(
+    transform_files,
+    inverse_booleans,
+    transform_format="itk",
+    vtk_or_points=[],
+    vtk_file_stem="affine_",
+):
     """
     Transform coordinates using an affine matrix.
 
@@ -1444,10 +1520,11 @@ def apply_affine_transforms(transform_files, inverse_booleans,
 
     from mindboggle.mio.vtks import read_vtk, write_vtk
 
-    #from scipy.io import loadmat
+    # from scipy.io import loadmat
     from mindboggle.thirdparty.ants import antsApplyTransformsToPoints
-                                        #read_itk_transform
-    transform_format = 'itk'
+
+    # read_itk_transform
+    transform_format = "itk"
 
     ## Read affine transform file:
     # if transform_format == 'itk':
@@ -1462,24 +1539,26 @@ def apply_affine_transforms(transform_files, inverse_booleans,
 
     # Read VTK file:
     if isinstance(vtk_or_points, str):
-        points, indices, lines, faces, scalars, scalar_names, npoints, \
-            input_vtk = read_vtk(vtk_or_points)
+        points, indices, lines, faces, scalars, scalar_names, npoints, input_vtk = (
+            read_vtk(vtk_or_points)
+        )
         points = np.array(points)
     elif isinstance(vtk_or_points, list):
         points = np.array(vtk_or_points)
-        vtk_file_stem = ''
+        vtk_file_stem = ""
     elif isinstance(vtk_or_points, np.ndarray):
         points = vtk_or_points.copy()
-        vtk_file_stem = ''
+        vtk_file_stem = ""
 
     # Transform points:
     # For use with ANTs, x and y columns are multiplied by -1 before and after
     # applying the inverse affine transform because ITK uses a different
     # coordinate system than the NIfTI coordinate system.
-    if transform_format == 'itk' and len(points):
+    if transform_format == "itk" and len(points):
         points[:, :2] = points[:, :2] * np.array((-1, -1))
-        affine_points = antsApplyTransformsToPoints(points,
-                            transform_files, inverse_booleans)
+        affine_points = antsApplyTransformsToPoints(
+            points, transform_files, inverse_booleans
+        )
         affine_points = np.array(affine_points)
         affine_points[:, :2] = affine_points[:, :2] * np.array((-1, -1))
         ## fix alternative to ANTs: compose transforms and take inverse(s)
@@ -1491,8 +1570,9 @@ def apply_affine_transforms(transform_files, inverse_booleans,
 
     # Write transformed VTK file:
     if vtk_file_stem and isinstance(vtk_or_points, str):
-        output_file = os.path.join(os.getcwd(), vtk_file_stem +
-                                   os.path.basename(vtk_or_points))
+        output_file = os.path.join(
+            os.getcwd(), vtk_file_stem + os.path.basename(vtk_or_points)
+        )
         if np.size(scalars):
             if np.ndim(scalars) == 1:
                 scalar_type = type(scalars[0]).__name__
@@ -1502,17 +1582,25 @@ def apply_affine_transforms(transform_files, inverse_booleans,
                 raise OSError("Undefined scalar type!")
         else:
             scalars = []
-            scalar_type = 'int'
+            scalar_type = "int"
 
-        write_vtk(output_file, affine_points,
-                  indices, lines, faces, scalars, scalar_names, scalar_type)
+        write_vtk(
+            output_file,
+            affine_points,
+            indices,
+            lines,
+            faces,
+            scalars,
+            scalar_names,
+            scalar_type,
+        )
     else:
         output_file = None
 
     return affine_points, output_file
 
 
-def freesurfer_surface_to_vtk(surface_file, orig_file='', output_vtk=''):
+def freesurfer_surface_to_vtk(surface_file, orig_file="", output_vtk=""):
     """
     Convert FreeSurfer surface file to VTK format.
 
@@ -1574,29 +1662,34 @@ def freesurfer_surface_to_vtk(surface_file, orig_file='', output_vtk=''):
     # https://surfer.nmr.mgh.harvard.edu/fswiki/CoordinateSystems
 
     if not orig_file:
-        orig_file = os.path.join(os.path.dirname(surface_file),
-                                 "..", "mri", "orig.mgz")
+        orig_file = os.path.join(os.path.dirname(surface_file), "..", "mri", "orig.mgz")
 
     if os.path.exists(orig_file):
         import numpy as np
+
         Norig = nb.load(orig_file).get_affine()
-        Torig = np.array([[-1, 0, 0, 128],
-                          [0, 0, 1, -128],
-                          [0, -1, 0, 128],
-                          [0, 0, 0, 1]], dtype=float)
+        Torig = np.array(
+            [[-1, 0, 0, 128], [0, 0, 1, -128], [0, -1, 0, 128], [0, 0, 0, 1]],
+            dtype=float,
+        )
         xfm = np.dot(Norig, np.linalg.inv(Torig))
-        points = np.transpose(np.dot(xfm, np.transpose(
-            np.concatenate((points, np.ones((np.shape(points)[0],1))),
-                           axis=1))))[:,0:3]
+        points = np.transpose(
+            np.dot(
+                xfm,
+                np.transpose(
+                    np.concatenate((points, np.ones((np.shape(points)[0], 1))), axis=1)
+                ),
+            )
+        )[:, 0:3]
     else:
-        raise OSError(orig_file + " does not exist in the FreeSurfer "
-                      "subjects directory.")
+        raise OSError(
+            orig_file + " does not exist in the FreeSurfer subjects directory."
+        )
 
     if not output_vtk:
-        output_vtk = os.path.join(os.getcwd(),
-                                  os.path.basename(surface_file + '.vtk'))
-    Fp = builtins.open(output_vtk, 'w')
-    write_header(Fp, Title='vtk output from ' + surface_file)
+        output_vtk = os.path.join(os.getcwd(), os.path.basename(surface_file + ".vtk"))
+    Fp = builtins.open(output_vtk, "w")
+    write_header(Fp, Title="vtk output from " + surface_file)
     write_points(Fp, points)
     write_faces(Fp, faces)
     Fp.close()
@@ -1607,8 +1700,9 @@ def freesurfer_surface_to_vtk(surface_file, orig_file='', output_vtk=''):
     return output_vtk
 
 
-def freesurfer_curvature_to_vtk(surface_file, vtk_file, output_vtk='',
-                                background_value=-1):
+def freesurfer_curvature_to_vtk(
+    surface_file, vtk_file, output_vtk="", background_value=-1
+):
     """
     Convert FreeSurfer curvature, thickness, or convexity file to VTK format.
 
@@ -1657,18 +1751,17 @@ def freesurfer_curvature_to_vtk(surface_file, vtk_file, output_vtk='',
     scalar_names = os.path.basename(surface_file)
 
     if not output_vtk:
-        output_vtk = os.path.join(os.getcwd(),
-                                  os.path.basename(surface_file)+'.vtk')
-    rewrite_scalars(vtk_file, output_vtk, curvature_values, scalar_names,
-                    [], background_value)
+        output_vtk = os.path.join(os.getcwd(), os.path.basename(surface_file) + ".vtk")
+    rewrite_scalars(
+        vtk_file, output_vtk, curvature_values, scalar_names, [], background_value
+    )
     if not os.path.exists(output_vtk):
         raise OSError("Output VTK file " + output_vtk + " not created.")
 
     return output_vtk
 
 
-def freesurfer_annot_to_vtk(annot_file, vtk_file, output_vtk='',
-                            background_value=-1):
+def freesurfer_annot_to_vtk(annot_file, vtk_file, output_vtk="", background_value=-1):
     """
     Load a FreeSurfer .annot file and save as a VTK format file.
 
@@ -1733,18 +1826,18 @@ def freesurfer_annot_to_vtk(annot_file, vtk_file, output_vtk='',
     # -1 to all vertices with label 0 in the original ('True') labels.
     #
     # Resolution:
-    #labels_orig, ctab, names = nb.freesurfer.read_annot(annot_file, True)
-    #labels[np.where(labels_orig == 0)[0]] = background_value
+    # labels_orig, ctab, names = nb.freesurfer.read_annot(annot_file, True)
+    # labels[np.where(labels_orig == 0)[0]] = background_value
     #
     # Test removal of unlabeled cortex from label 3:
-    #labels[np.where(labels==3)[0]]=1000
+    # labels[np.where(labels==3)[0]]=1000
 
     if not output_vtk:
-        output_vtk = os.path.join(os.getcwd(),
-            os.path.basename(annot_file).split('.annot', 1)[0] + '.vtk')
+        output_vtk = os.path.join(
+            os.getcwd(), os.path.basename(annot_file).split(".annot", 1)[0] + ".vtk"
+        )
 
-    rewrite_scalars(vtk_file, output_vtk, labels, 'Labels', [],
-                    background_value)
+    rewrite_scalars(vtk_file, output_vtk, labels, "Labels", [], background_value)
 
     if not os.path.exists(output_vtk):
         raise OSError("Output VTK file " + output_vtk + " not created.")
@@ -1846,4 +1939,5 @@ def freesurfer_annot_to_vtk(annot_file, vtk_file, output_vtk='',
 # ============================================================================
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod(verbose=True)  # py.test --doctest-modules

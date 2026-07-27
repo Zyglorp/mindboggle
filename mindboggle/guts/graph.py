@@ -13,6 +13,7 @@ Authors:
 Copyright 2016,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 
 """
+
 import networkx as nx
 
 from mindboggle.guts.kernels import rbf_kernel
@@ -55,7 +56,7 @@ def diagonal_degree_matrix(W, inverse=False, square_root=False):
         if not square_root:
             ddm.setdiag(1 / (W.sum(axis=1) + stability_term))
         else:
-            #ddm.setdiag(math.sqrt(1 / (W.sum(axis=1) + stability_term)))
+            # ddm.setdiag(math.sqrt(1 / (W.sum(axis=1) + stability_term)))
             ddm.setdiag(np.sqrt(1 / (W.sum(axis=1) + stability_term)))
 
     else:
@@ -64,8 +65,16 @@ def diagonal_degree_matrix(W, inverse=False, square_root=False):
     return ddm.tocsr()
 
 
-def weight_graph(Nodes, Indices, Meshes, kernel=rbf_kernel, add_to_graph=True,
-                 G=nx.Graph(), sigma=20, verbose=False):
+def weight_graph(
+    Nodes,
+    Indices,
+    Meshes,
+    kernel=rbf_kernel,
+    add_to_graph=True,
+    G=nx.Graph(),
+    sigma=20,
+    verbose=False,
+):
     """
     Construct weighted edges of a graph and compute an affinity matrix.
 
@@ -117,15 +126,14 @@ def weight_graph(Nodes, Indices, Meshes, kernel=rbf_kernel, add_to_graph=True,
     from scipy.sparse import lil_matrix
 
     from mindboggle.guts.kernels import inverse_distance, rbf_kernel
-                                        #cotangent_kernel
+    # cotangent_kernel
 
     if kernel is rbf_kernel or kernel is inverse_distance:
         if verbose:
             if kernel is rbf_kernel:
-                print(f'Compute weights using rbf kernel (sigma={sigma})')
+                print(f"Compute weights using rbf kernel (sigma={sigma})")
             else:
-                print('Compute weights using inverse distance kernel '
-                      f'(sigma={sigma})')
+                print(f"Compute weights using inverse distance kernel (sigma={sigma})")
 
         # Construct matrix of edge lines by breaking triangle into three edges.
         if Meshes.shape[1] == 3:
@@ -133,20 +141,30 @@ def weight_graph(Nodes, Indices, Meshes, kernel=rbf_kernel, add_to_graph=True,
         elif Meshes.shape[1] == 2:
             edge_mat = Meshes
         # Augment matrix to contain edge weight in the third column
-        weighted_edges = np.asarray([[Indices[np.int(i)], Indices[np.int(j)],
-            kernel(Nodes[np.int(Indices[np.int(i)])],
-                   Nodes[np.int(Indices[np.int(j)])], sigma)]
-                   for [i, j] in edge_mat])
+        weighted_edges = np.asarray(
+            [
+                [
+                    Indices[np.int(i)],
+                    Indices[np.int(j)],
+                    kernel(
+                        Nodes[np.int(Indices[np.int(i)])],
+                        Nodes[np.int(Indices[np.int(j)])],
+                        sigma,
+                    ),
+                ]
+                for [i, j] in edge_mat
+            ]
+        )
 
         # Add weights to graph
         if add_to_graph:
             if verbose:
-                print('Add weighted edges to the graph')
+                print("Add weighted edges to the graph")
             G.add_weighted_edges_from(weighted_edges)
 
         # Construct affinity matrix
         if verbose:
-            print(f'Construct sparse affinity matrix of size {Nodes.shape[0]}')
+            print(f"Construct sparse affinity matrix of size {Nodes.shape[0]}")
         affinity_matrix = lil_matrix((Nodes.shape[0], Nodes.shape[0]))
         for [i, j, edge_weight] in weighted_edges:
             affinity_matrix[i, j] = affinity_matrix[j, i] = edge_weight
@@ -177,7 +195,7 @@ def weight_graph(Nodes, Indices, Meshes, kernel=rbf_kernel, add_to_graph=True,
         return affinity_matrix.tocsr()
 
 
-def graph_laplacian(W, type_of_laplacian='norm1', verbose=False):
+def graph_laplacian(W, type_of_laplacian="norm1", verbose=False):
     """
     Compute normalized and unnormalized graph Laplacians.
 
@@ -224,30 +242,36 @@ def graph_laplacian(W, type_of_laplacian='norm1', verbose=False):
 
     """
 
-    if type_of_laplacian == 'basic':
+    if type_of_laplacian == "basic":
         if verbose:
             print("Calculate unnormalized Laplacian")
         Laplacian = diagonal_degree_matrix(W) - W
 
-    elif type_of_laplacian == 'norm1':
+    elif type_of_laplacian == "norm1":
         if verbose:
             print("Normalize the Laplacian")
         ddmi_sq = diagonal_degree_matrix(W, inverse=True, square_root=True)
-        Laplacian = ddmi_sq * (diagonal_degree_matrix(W, inverse=False, square_root=False) - W) * ddmi_sq
+        Laplacian = (
+            ddmi_sq
+            * (diagonal_degree_matrix(W, inverse=False, square_root=False) - W)
+            * ddmi_sq
+        )
 
-    elif type_of_laplacian == 'norm2':
+    elif type_of_laplacian == "norm2":
         if verbose:
             print("Normalize the Laplacian")
         ddmi_sq = diagonal_degree_matrix(W, inverse=True, square_root=True)
         Laplacian = ddmi_sq * W * ddmi_sq
 
-    elif type_of_laplacian == 'norm3':
+    elif type_of_laplacian == "norm3":
         if verbose:
             print("Normalize the Laplacian")
         ddmi = diagonal_degree_matrix(W, inverse=True, square_root=False)
-        Laplacian = ddmi * (diagonal_degree_matrix(W, inverse=False, square_root=False) - W)
+        Laplacian = ddmi * (
+            diagonal_degree_matrix(W, inverse=False, square_root=False) - W
+        )
 
-    elif type_of_laplacian == 'random_walk':
+    elif type_of_laplacian == "random_walk":
         if verbose:
             print("Compute Random Walk Laplacian")
         ddmi = diagonal_degree_matrix(W, inverse=True, square_root=False)
@@ -255,7 +279,7 @@ def graph_laplacian(W, type_of_laplacian='norm1', verbose=False):
 
     else:
         if verbose:
-            print('Option is not available')
+            print("Option is not available")
         Laplacian = 0
 
     return Laplacian
@@ -266,4 +290,5 @@ def graph_laplacian(W, type_of_laplacian='norm1', verbose=False):
 # ============================================================================
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod(verbose=True)  # py.test --doctest-modules
