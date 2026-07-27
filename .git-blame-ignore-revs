@@ -1,0 +1,7 @@
+# Revisions listed here are skipped by `git blame` (GitHub uses this file
+# automatically). Enable locally with:
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+# Only add commits that are pure, behavior-preserving reformatting.
+
+# Apply ruff format (one-shot repo-wide reformat), 2026 migration
+53bf105aca835e2077cc3e76528abd0909f3a95c
