@@ -89,7 +89,7 @@ docker run --rm ${image} generate docker \
         conda activate mb && \
         git clone https://github.com/nipy/mindboggle.git && \
         cd /opt/mindboggle && \
-        python setup.py install && \
+        python -m pip install . && \
         mkdir /opt/vtk_cpp_tools && \
         cd /opt/vtk_cpp_tools && \
         cmake /opt/mindboggle/vtk_cpp_tools && \
@@ -101,7 +101,7 @@ docker run --rm ${image} generate docker \
         git clone https://github.com/akeshavan/roygbiv && \
         cd /opt/roygbiv && \
         git checkout fbbf31c29952d0ea22ed05d98e0a5a7e7d0827f9 && \
-        python setup.py install && \
+        python -m pip install . && \
         cd /opt && \
         rm -rf /opt/roygbiv' \
   --run 'mkdir -p /.jupyter && echo c.NotebookApp.ip = \"0.0.0.0\" > /.jupyter/jupyter_notebook_config.py' \
@@ -148,7 +148,7 @@ docker run --rm ${image} generate singularity \
         conda activate mb && \
         git clone https://github.com/nipy/mindboggle.git && \
         cd /opt/mindboggle && \
-        python setup.py install && \
+        python -m pip install . && \
         mkdir /opt/vtk_cpp_tools && \
         cd /opt/vtk_cpp_tools && \
         cmake /opt/mindboggle/vtk_cpp_tools && \
@@ -160,7 +160,7 @@ docker run --rm ${image} generate singularity \
         git clone https://github.com/akeshavan/roygbiv && \
         cd /opt/roygbiv && \
         git checkout fbbf31c29952d0ea22ed05d98e0a5a7e7d0827f9 && \
-        python setup.py install && \
+        python -m pip install . && \
         cd /opt && \
         rm -rf /opt/roygbiv' \
   --run 'mkdir -p /.jupyter && echo c.NotebookApp.ip = \"0.0.0.0\" > /.jupyter/jupyter_notebook_config.py' \
