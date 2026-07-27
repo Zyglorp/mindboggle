@@ -1,0 +1,98 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mindboggle"
+description = "Automated human brain image feature extraction, labeling, and shape analysis"
+readme = "README.rst"
+requires-python = ">=3.12"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Arno Klein", email = "arno@childmind.org" }]
+maintainers = [{ name = "Child Mind Institute" }]
+keywords = ["neuroimaging", "brain", "morphometry", "MRI", "labeling"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+]
+# Runtime dependencies. This is the full set actually imported by the package;
+# the old setup.py REQUIRES was incomplete because conda supplied numpy/scipy/etc.
+# silently. Deliberate version pinning is tracked separately (backlog: P1-3);
+# slimming (colormath/bokeh/nilearn -> extras or removal) is P2-4;
+# nipype is transitional and removed by the niwrap migration (Phase 3).
+dependencies = [
+    "numpy",
+    "scipy",
+    "pandas",
+    "matplotlib",
+    "networkx",
+    "nibabel",
+    "nilearn",
+    "vtk",
+    "colormath",
+    "etelemetry",
+    "nipype",
+    "bokeh",
+]
+# Single-sourced from mindboggle/version.py (read statically, no package import).
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://mindboggle.info/"
+Repository = "https://github.com/childmindresearch/mindboggle"
+Documentation = "https://mindboggle.readthedocs.io/"
+
+[tool.setuptools]
+# Explicit package list (mirrors the old setup.py) so the scratch `mindboggle/x`
+# tree is not shipped.
+packages = [
+    "mindboggle",
+    "mindboggle.data",
+    "mindboggle.evaluate",
+    "mindboggle.features",
+    "mindboggle.guts",
+    "mindboggle.mio",
+    "mindboggle.shapes",
+    "mindboggle.shapes.zernike",
+    "mindboggle.thirdparty",
+]
+# The two pipeline entry points are extension-less scripts whose logic runs at
+# module top level (no `main()`), so they stay as legacy installed scripts for
+# now. Converting them to `[project.scripts]` console entry points needs a
+# `main()` refactor that belongs with the Phase 3 pipeline rewrite.
+script-files = [
+    "mindboggle/mindboggle",
+    "mindboggle/mindboggle123",
+    "colors_script/calc_colormap.py",
+    "colors_script/convert_to_mipav_lut.py",
+]
+
+[tool.setuptools.package-data]
+mindboggle = ["data/*.nii.gz", "data/*.txt"]
+
+[tool.setuptools.dynamic]
+version = { attr = "mindboggle.version.__version__" }
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+# Scratch/dead code (Python 2 remnants live here); triaged separately (P2-4).
+extend-exclude = ["mindboggle/x"]
+
+[tool.ruff.lint]
+# Starting ruleset. Enforcement is rolled out via a ratchet (backlog: P0-2) —
+# the bulk of current violations are auto-fixable modernizations, with a small
+# tail of genuine bug-smells (F821/F632/F521) worth fixing by hand first.
+select = ["E", "F", "I", "UP", "B", "SIM", "C4", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+# Entry scripts are not imported as modules.
+"mindboggle/mindboggle" = ["E402"]
+"mindboggle/mindboggle123" = ["E402"]
