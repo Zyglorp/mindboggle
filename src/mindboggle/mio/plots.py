@@ -13,7 +13,7 @@ Copyright 2013,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 """
 
 
-def plot_surfaces(vtk_files, use_colormap=False, colormap_file=""):
+def plot_surfaces(vtk_files, use_colormap=False, colormap_file="")->tuple[str|list[str],bool,str]:
     """
     Use vtkviewer to visualize one or more VTK surface files.
 
@@ -102,7 +102,7 @@ def plot_mask_surface(
     use_colormap=False,
     colormap_file="",
     background_value=-1,
-):
+)-> None:
     """
     Use vtkviewer or mayavi2 to visualize VTK surface mesh data.
 
@@ -235,7 +235,7 @@ def plot_mask_surface(
         execute(cmd, "os")
 
 
-def plot_volumes(volume_files, command="fslview"):
+def plot_volumes(volume_files, command="fslview")-> None:
     """
     Use fslview to visualize image volume data.
 
@@ -277,7 +277,7 @@ def plot_volumes(volume_files, command="fslview"):
     execute(command, "os")
 
 
-def histogram_of_vtk_scalars(vtk_file, nbins=100):
+def histogram_of_vtk_scalars(vtk_file, nbins=100)-> None:
     """
     Plot histogram of VTK surface mesh scalar values.
 
@@ -316,7 +316,7 @@ def histogram_of_vtk_scalars(vtk_file, nbins=100):
 
 def histograms_of_lists(
     columns, column_name="", ignore_columns=[], nbins=100, axis_limits=[], titles=[]
-):
+)-> None:
     """
     Construct a histogram for each table column.
 
@@ -380,7 +380,7 @@ def histograms_of_lists(
     plt.show()
 
 
-def boxplots_of_lists(columns, xlabel="", ylabel="", ylimit=None, title=""):
+def boxplots_of_lists(columns, xlabel="", ylabel="", ylimit=None, title="")-> None:
     """
     Construct a box plot for each table column.
 
@@ -436,7 +436,7 @@ def scatterplot_lists(
     y_label="",
     legend=True,
     legend_labels=[],
-):
+)-> None:
     """
     Scatter plot columns against the values of one of the columns.
 
@@ -597,7 +597,7 @@ def scatterplot_list_pairs(
     limit=None,
     legend=True,
     legend_labels=[],
-):
+)-> None:
     """
     Scatter plot pairs of columns.
 

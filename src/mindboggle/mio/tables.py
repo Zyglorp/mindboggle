@@ -9,7 +9,7 @@ Authors:
 Copyright 2016,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 
 """
-
+import panda as pd # for that one type hint down at the last function
 
 def write_shape_stats(
     labels_or_file=[],
@@ -36,7 +36,7 @@ def write_shape_stats(
     sulci_zernike_IDs=[],
     exclude_labels=[-1],
     verbose=False,
-):
+)->tuple[str,str,str]:
     """
     Make tables of shape statistics per label, sulcus, and/or fundus.
 
@@ -470,7 +470,8 @@ def write_vertex_measures(
     freesurfer_thickness_file="",
     freesurfer_curvature_file="",
     freesurfer_sulc_file="",
-):
+):#->str: 
+#FIX!!!! I DON'T KNOW WHAT EXACTLY IS RETURNED, THIS IS A PLACEHOLDER!!!!
     """
     Make a table of shape values per vertex.
 
@@ -675,7 +676,7 @@ def write_vertex_measures(
     return output_table
 
 
-def write_face_vertex_averages(input_file, output_table="", area_file=""):
+def write_face_vertex_averages(input_file, output_table="", area_file="")->str:
     """
     Make table of average vertex values per face
     (divided by face area if area_file provided).
@@ -755,7 +756,7 @@ def write_average_face_values_per_label(
     exclude_values=[-1],
     background_value=-1,
     verbose=False,
-):
+)->None:
     """
     Write out a separate csv table file for each integer
     in (the first) scalar list of an input VTK file.
@@ -861,7 +862,7 @@ def write_average_face_values_per_label(
             raise OSError(output_table + " not found")
 
 
-def select_column_from_tables(tables, index=0, write_table=True, output_table=""):
+def select_column_from_tables(tables, index=0, write_table=True, output_table="")->tuple[list[str],list[list[float|int]],str,list[str],str,list[any],list[any],str]:
     """
     Select column from list of tables, make a new table.
 
@@ -959,7 +960,7 @@ def select_column_from_mindboggle_tables(
     is_surface_table=True,
     write_table=True,
     output_table="",
-):
+)->tuple[list[str],list[list[float|int]],str]:
     """
     Select column from Mindboggle shape tables and make a new table.
 
@@ -1058,7 +1059,7 @@ def explode_table(
     output_stem="",
     break_column="label ID",
     verbose=False,
-):
+)->list[str]:
     """
     Break up a table into separate tables,
     one for each index value for a given column.
@@ -1137,7 +1138,7 @@ def explode_table(
 
 def explode_mindboggle_tables(
     subject_path="", output_path=".", break_column="label ID", verbose=False
-):
+)->None:
     """
     Given the path to a subject's Mindboggle output data,
     break up each surface's shape table into separate tables,
@@ -1205,7 +1206,7 @@ def explode_mindboggle_tables(
                 raise OSError(f"Directory {output_dir} does not exist.")
 
 
-def short_name(filepath):
+def short_name(filepath)->None:
     """
     Generate a short name for a given branch of the mindboggle output
 
@@ -1219,7 +1220,7 @@ def short_name(filepath):
     )
 
 
-def fname2df(fname):
+def fname2df(fname)->None:
     """
     Read a single csv into a single dataframe row
 
@@ -1243,7 +1244,7 @@ def fname2df(fname):
     return df_row
 
 
-def collate_participant_tables(subject_ids, base_dir):
+def collate_participant_tables(subject_ids, base_dir)->pd.DataFrame:
     """
     Generate a pandas dataframe across all subjects
 

@@ -10,8 +10,9 @@ Copyright 2016,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 """
 
 import os
-
-
+import numpy as np #Not sure if these imports for type hinting will replace the imports below, didn't delete just in case
+import pandas as pd
+type colormap = np.ndarray[np.dtype[np.float64]]
 def distinguishable_colors(
     ncolors,
     backgrounds=[[0, 0, 0], [1, 1, 1]],
@@ -19,7 +20,7 @@ def distinguishable_colors(
     plot_colormap=True,
     verbose=True,
     out_dir=".",
-):
+) -> colormap:
     """
     Create a colormap of perceptually distinguishable colors.
 
@@ -195,7 +196,7 @@ def label_adjacency_matrix(
     output_format="csv",
     verbose=True,
     out_dir=".",
-):
+)-> tuple[list, pd.DataFrame, str]:
     """
     Extract surface or volume label boundaries, find unique label pairs,
     and write adjacency matrix (useful for constructing a colormap).
@@ -355,7 +356,7 @@ def group_colors(
     plot_graphs=True,
     out_dir=".",
     verbose=True,
-):
+)-> colormap:
     """
     This greedy algoritm reorders a colormap so that labels assigned to
     the same group have more similar colors, but within a group (usually
@@ -882,7 +883,7 @@ def write_json_colormap(
     colormap_file="",
     colormap_name="",
     description="",
-):
+)-> None:
     """
     Write colormap to json format.
 
@@ -954,7 +955,7 @@ def write_json_colormap(
     f.close()
 
 
-def write_xml_colormap(colormap, label_numbers, colormap_file="", colormap_name=""):
+def write_xml_colormap(colormap, label_numbers, colormap_file="", colormap_name="") -> None:
     """
     Write colormap to xml format.
 
@@ -1008,7 +1009,7 @@ def write_xml_colormap(colormap, label_numbers, colormap_file="", colormap_name=
     f.close()
 
 
-def viridis_colormap():
+def viridis_colormap()-> list[list[float]]:
     """
     https://github.com/BIDS/colormap/blob/master/colormaps.py
 

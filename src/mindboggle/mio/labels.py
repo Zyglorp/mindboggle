@@ -30,7 +30,7 @@ Copyright 2015,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 import builtins
 
 
-def extract_numbers_names_colors(FreeSurferColorLUT=""):
+def extract_numbers_names_colors(FreeSurferColorLUT="")->tuple[list[int],list[int],list[int]]:
     """
     Extract lists of numbers, names, and colors representing anatomical brain
     regions from FreeSurfer's FreeSurferColorLUT.txt lookup table file.
@@ -60,7 +60,7 @@ def extract_numbers_names_colors(FreeSurferColorLUT=""):
 
     from mindboggle.thirdparty.FreeSurferColorLUT import lut_text
 
-    def is_number(s):
+    def is_number(s)->bool:
         try:
             int(s)
             return True
@@ -91,7 +91,7 @@ def extract_numbers_names_colors(FreeSurferColorLUT=""):
     return numbers, names, colors
 
 
-def return_numbers_names_colors():
+def return_numbers_names_colors()->tuple[list[int],list[int],list[int]]:
     """
     Return lists of numbers, names, and colors representing anatomical brain
     regions derived from FreeSurfer's FreeSurferColorLUT.txt lookup file.

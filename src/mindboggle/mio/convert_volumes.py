@@ -11,7 +11,7 @@ Copyright 2016,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 """
 
 
-def convert2nii(input_file, reference_file, output_file="", interp="continuous"):
+def convert2nii(input_file, reference_file, output_file="", interp="continuous")->str:
     """
     Convert volume from the input file format to the output file format.
 
@@ -116,7 +116,7 @@ def convert2nii(input_file, reference_file, output_file="", interp="continuous")
     return output_file
 
 
-def xyz2nii(input_xyz_file, output_nii_file="", origin=[], pad=10):
+def xyz2nii(input_xyz_file, output_nii_file="", origin=[], pad=10)->str:
     """
     Convert [x,y,z] coordinate file to nifti (nii.gz) volume file.
 

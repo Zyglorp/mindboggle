@@ -12,7 +12,7 @@ Copyright 2016,  Mindboggle team (http://mindboggle.info), Apache v2.0 License
 import builtins
 
 
-def cache_hashes():
+def cache_hashes()->dict:
     """
     Hashes to verify retrieved data cached by the Mindboggle software.
 
@@ -281,7 +281,7 @@ def test_urls():
     return urls
 
 
-def prep_tests():
+def prep_tests()->tuple[dict,function]:
     """
     Prepare to fetch data in docstring tests.
 
@@ -307,7 +307,7 @@ def prep_tests():
     return urls, fetch_data
 
 
-def fetch_hash(data_file):
+def fetch_hash(data_file)->str:
     """
     Get hash of data file.
 
@@ -340,7 +340,7 @@ def fetch_hash(data_file):
     return hash
 
 
-def fetch_data(url, output_file="", append=""):
+def fetch_data(url, output_file="", append="")->str:
     """
     Download file from a URL to a specified or a temporary file.
 
@@ -387,7 +387,7 @@ def fetch_data(url, output_file="", append=""):
 
 def fetch_check_data(
     data_file, url, hashes, cache_directory="", append="", verbose=False
-):
+)->str:
     """
     Get data file through a URL call and check its hash:
 
@@ -498,7 +498,7 @@ def fetch_check_data(
         raise OSError(f"Data file '{data_file}' not in hash table.")
 
 
-def fetch_ants_data(segmented_file, use_ants_transforms=True):
+def fetch_ants_data(segmented_file, use_ants_transforms=True)->tuple[str,bool]:
     """
     Fetch antsCorticalThickness.sh output.
 
