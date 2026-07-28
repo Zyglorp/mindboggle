@@ -33,7 +33,7 @@ Contents
 _`Links`
 ------------------------------------------------------------------------------
 - `FAQ <http://mindboggle.readthedocs.io/en/latest/faq.html>`_
-- `GitHub <http://github.com/nipy/mindboggle>`_ and `Circleci tests <https://circleci.com/gh/nipy/mindboggle>`_
+- `GitHub <https://github.com/childmindresearch/mindboggle>`_ and `Circleci tests <https://circleci.com/gh/nipy/mindboggle>`_
 - `Contributors <http://mindboggle.info/people.html>`_
 - `License <http://mindboggle.readthedocs.io/en/latest/license.html>`_
 
@@ -55,7 +55,7 @@ Please search for relevant mindboggle posts in
 or post your own message with the tag "mindboggle". 
 
 Found a bug, big or small?  Please
-`submit an issue <https://github.com/nipy/mindboggle/issues>`_ on GitHub.
+`submit an issue <https://github.com/childmindresearch/mindboggle/issues/>`_ on GitHub.
 
 ------------------------------------------------------------------------------
 _`Installation`
@@ -240,36 +240,36 @@ _`Appendix: processing`
 ------------------------------------------------------------------------------
 The following steps are performed by Mindboggle (with links to code on GitHub):
 
-1. Create hybrid gray/white segmentation from FreeSurfer and ANTs output (`combine_2labels_in_2volumes <https://github.com/nipy/mindboggle/blob/master/mindboggle/guts/segment.py#L1660>`_).
+1. Create hybrid gray/white segmentation from FreeSurfer and ANTs output (`combine_2labels_in_2volumes <https://github.com/childmindresearch/mindboggle/blob/main/src/mindboggle/guts/segment.py#L1821>`_).
 2. Fill hybrid segmentation with FreeSurfer- or ANTs-registered labels.
 3. Compute volume shape measures for each labeled region:
 
-    - volume (`volume_per_brain_region <https://github.com/nipy/mindboggle/blob/master/mindboggle/shapes/volume_shapes.py#L14>`_)
+    - volume (`volume_per_brain_region <https://github.com/childmindresearch/mindboggle/blob/main/src/mindboggle/shapes/volume_shapes.py#L16>`_)
 
 4. Compute surface shape measures for every cortical mesh vertex:
 
-    - `surface area <https://github.com/nipy/mindboggle/blob/master/vtk_cpp_tools/PointAreaComputer.cpp>`_
-    - `travel depth <https://github.com/nipy/mindboggle/blob/master/vtk_cpp_tools/TravelDepth.cpp>`_
-    - `geodesic depth <https://github.com/nipy/mindboggle/blob/master/vtk_cpp_tools/geodesic_depth/GeodesicDepthMain.cpp>`_
-    - `mean curvature <https://github.com/nipy/mindboggle/blob/master/vtk_cpp_tools/curvature/CurvatureMain.cpp>`_
+    - `surface area <https://github.com/childmindresearch/mindboggle/blob/main/vtk_cpp_tools/PointAreaComputer.cpp>`_
+    - `travel depth <https://github.com/childmindresearch/mindboggle/blob/main/vtk_cpp_tools/TravelDepth.cpp>`_
+    - `geodesic depth <https://github.com/childmindresearch/mindboggle/blob/main/vtk_cpp_tools/geodesic_depth/GeodesicDepthMain.cpp>`_
+    - `mean curvature <https://github.com/childmindresearch/mindboggle/blob/main/vtk_cpp_tools/curvature/CurvatureMain.cpp>`_
     - convexity (from FreeSurfer)
     - thickness (from FreeSurfer)
 
 5. Extract cortical surface features:
 
-    - `folds <https://github.com/nipy/mindboggle/blob/master/mindboggle/features/folds.py>`_
-    - `sulci <https://github.com/nipy/mindboggle/blob/master/mindboggle/features/sulci.py>`_
-    - `fundi <https://github.com/nipy/mindboggle/blob/master/mindboggle/features/fundi.py>`_
+    - `folds <https://github.com/childmindresearch/mindboggle/blob/main/src/mindboggle/features/folds.py>`_
+    - `sulci <https://github.com/childmindresearch/mindboggle/blob/main/src/mindboggle/features/sulci.py>`_
+    - `fundi <https://github.com/childmindresearch/mindboggle/blob/main/src/mindboggle/features/fundi.py>`_
 
 6. For each cortical surface label/sulcus, compute:
 
-    - `area <https://github.com/nipy/mindboggle/blob/master/vtk_cpp_tools/area/PointAreaMain.cpp>`_
-    - mean coordinates: `means_per_label <https://github.com/nipy/mindboggle/blob/master/mindboggle/guts/compute.py#L512>`_
+    - `area <https://github.com/childmindresearch/mindboggle/blob/main/vtk_cpp_tools/area/PointAreaMain.cpp>`_
+    - mean coordinates: `means_per_label <https://github.com/childmindresearch/mindboggle/blob/main/src/mindboggle/guts/compute.py#L528>`_
     - mean coordinates in MNI152 space
-    - `Laplace-Beltrami spectrum <https://github.com/nipy/mindboggle/blob/master/mindboggle/shapes/laplace_beltrami.py>`_
-    - `Zernike moments <https://github.com/nipy/mindboggle/blob/master/mindboggle/shapes/zernike/zernike.py>`_
+    - `Laplace-Beltrami spectrum <https://github.com/childmindresearch/mindboggle/blob/main/src/mindboggle/shapes/laplace_beltrami.py>`_
+    - `Zernike moments <https://github.com/childmindresearch/mindboggle/blob/main/src/mindboggle/shapes/zernike/zernike.py>`_
 
-7. Compute statistics (``stats_per_label`` in `compute.py <https://github.com/nipy/mindboggle/blob/master/mindboggle/guts/compute.py#L716>`_) for each shape measure in #4 for each label/feature:
+7. Compute statistics (``stats_per_label`` in `compute.py <https://github.com/childmindresearch/mindboggle/blob/main/src/mindboggle/guts/compute.py#L732>`_) for each shape measure in #4 for each label/feature:
 
     - median
     - median absolute deviation
